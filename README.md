@@ -1,4 +1,4 @@
-# Nexora Alimentos
+# Nexora Food
 
 MVP do cardapio digital multiempresa da Nexora.
 
