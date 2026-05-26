@@ -370,6 +370,29 @@ export default async function AdminPage({ searchParams }) {
             </button>
           </form>
 
+          <form action="/admin/users" method="post" className="admin-form company-user-form">
+            <input type="hidden" name="empresa_id" value={empresa.id} />
+
+            <label>
+              Nome do usuário
+              <input name="nome" placeholder="Nome do responsável" required />
+            </label>
+
+            <label>
+              Email de acesso
+              <input name="email" type="email" placeholder="cliente@email.com" required />
+            </label>
+
+            <label>
+              Senha temporária
+              <input name="senha" type="text" placeholder="Senha inicial do cliente" required />
+            </label>
+
+            <button className="primary-button" type="submit">
+              Criar acesso da empresa
+            </button>
+          </form> 
+
           <div className="admin-actions-row">
             {empresa.bloqueado ? (
               <form action="/admin/company-status" method="post">
