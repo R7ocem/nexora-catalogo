@@ -1,9 +1,18 @@
-import { cookies } from 'next/headers';
 import { query } from '../../lib/db';
 import { money } from '../../lib/format';
+import { getCurrentUser } from '../../lib/auth';
 
-async function getAdminData(slug) {
-  const empresas = await query(`SELECT id, nome, slug FROM food_empresas WHERE ativo = true ORDER BY nome`);
+async function getAdminData(user, slug) {
+  const empresas = user.papel === 'nexora_admin'
+    ? await query(`SELECT id, nome, slug FROM food_empresas WHERE ativo = true ORDER BY nome`)
+    : await query(
+      `SELECT id, nome, slug
+       FROM food_empresas
+       WHERE ativo = true AND id = $1
+       ORDER BY nome`,
+      [user.empresa_id]
+    );
+
   const empresa = empresas.rows.find((item) => item.slug === slug) || empresas.rows[0];
   if (!empresa) return { empresas: [], empresa: null, categorias: [], produtos: [] };
 
@@ -31,15 +40,15 @@ function Login() {
     <main className="shell admin">
       <section className="panel">
         <h1>Painel Nexora Food</h1>
-        <p className="muted">Entre para editar o cardapio da empresa.</p>
+        <p className="muted">Entre para editar o cardápio da sua empresa.</p>
         <form className="form-grid" method="post" action="/admin/login">
           <label>
-            Empresa
-            <input name="slug" defaultValue="savore" />
+            E-mail
+            <input name="email" type="email" placeholder="voce@empresa.com.br" required />
           </label>
           <label>
             Senha
-            <input name="password" type="password" />
+            <input name="password" type="password" required />
           </label>
           <div className="full">
             <button className="button" type="submit">Entrar</button>
@@ -50,11 +59,11 @@ function Login() {
   );
 }
 
-export default async function AdminPage() {
-  const slug = cookies().get('nexora_food_admin')?.value;
-  if (!slug) return <Login />;
+export default async function AdminPage({ searchParams }) {
+  const user = await getCurrentUser();
+  if (!user) return <Login />;
 
-  const data = await getAdminData(slug);
+  const data = await getAdminData(user, searchParams?.slug);
 
   return (
     <main className="shell admin">
@@ -62,7 +71,7 @@ export default async function AdminPage() {
         <div className="topbar-inner">
           <div>
             <h1>Painel {data.empresa?.nome || 'Nexora Food'}</h1>
-            <p className="muted">Gerencie produtos, fotos, precos e disponibilidade.</p>
+            <p className="muted">Gerencie produtos, fotos, preços e disponibilidade.</p>
           </div>
           <form method="post" action="/admin/logout">
             <button className="button secondary" type="submit">Sair</button>
@@ -72,11 +81,29 @@ export default async function AdminPage() {
 
       {data.empresa ? (
         <>
+          {user.papel === 'nexora_admin' && data.empresas.length > 1 ? (
+            <section className="panel">
+              <form className="form-grid" method="get" action="/admin">
+                <label>
+                  Empresa
+                  <select name="slug" defaultValue={data.empresa.slug}>
+                    {data.empresas.map((empresa) => (
+                      <option key={empresa.id} value={empresa.slug}>{empresa.nome}</option>
+                    ))}
+                  </select>
+                </label>
+                <div className="full">
+                  <button className="button secondary" type="submit">Trocar empresa</button>
+                </div>
+              </form>
+            </section>
+          ) : null}
+
           <section className="panel">
             <h2>Novo produto</h2>
             <form className="form-grid" method="post" action="/admin/products">
               <input type="hidden" name="empresa_id" value={data.empresa.id} />
-              <label>Codigo<input name="codigo" placeholder="coxinha" required /></label>
+              <label>Código<input name="codigo" placeholder="coxinha" required /></label>
               <label>Nome<input name="nome" placeholder="Coxinha" required /></label>
               <label>
                 Categoria
@@ -87,9 +114,9 @@ export default async function AdminPage() {
                   ))}
                 </select>
               </label>
-              <label>Preco<input name="preco" inputMode="decimal" placeholder="8.00" required /></label>
+              <label>Preço<input name="preco" inputMode="decimal" placeholder="8.00" required /></label>
               <label className="full">Imagem URL<input name="imagem_url" placeholder="https://..." /></label>
-              <label className="full">Descricao<textarea name="descricao" placeholder="Descricao curta do produto" /></label>
+              <label className="full">Descrição<textarea name="descricao" placeholder="Descrição curta do produto" /></label>
               <label className="full">Apelidos para o bot<input name="aliases" placeholder="coxinha, coxinhas, salgado" /></label>
               <label>Ativo<input name="ativo" type="checkbox" defaultChecked /></label>
               <div className="full"><button className="button" type="submit">Salvar produto</button></div>
@@ -100,7 +127,7 @@ export default async function AdminPage() {
             <h2>Produtos</h2>
             <table className="table">
               <thead>
-                <tr><th>Produto</th><th>Categoria</th><th>Preco</th><th>Status</th></tr>
+                <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Status</th></tr>
               </thead>
               <tbody>
                 {data.produtos.map((produto) => (
