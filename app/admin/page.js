@@ -1,3 +1,10 @@
+import { query } from '../../lib/db';
+import { money } from '../../lib/format';
+import { getCurrentUser } from '../../lib/auth';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getAdminData(user, selectedSlug) {
   const empresasResult = await query(
     `SELECT id, nome, slug, ativo, bloqueado, bloqueado_motivo
