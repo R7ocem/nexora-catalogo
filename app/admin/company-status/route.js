@@ -18,6 +18,20 @@ export async function POST(request) {
     redirect('/admin');
   }
 
+  const empresaAtual = await query(
+    `SELECT id, slug
+     FROM food_empresas
+     WHERE id = $1
+     LIMIT 1`,
+    [empresaId]
+  );
+
+  const empresa = empresaAtual.rows[0];
+
+  if (!empresa) {
+    redirect('/admin');
+  }
+
   if (acao === 'bloquear') {
     await query(
       `UPDATE food_empresas
@@ -26,7 +40,7 @@ export async function POST(request) {
          bloqueado_motivo = 'mensalidade_pendente',
          bloqueado_em = NOW()
        WHERE id = $1`,
-      [empresaId]
+      [empresa.id]
     );
   }
 
@@ -38,16 +52,9 @@ export async function POST(request) {
          bloqueado_motivo = NULL,
          bloqueado_em = NULL
        WHERE id = $1`,
-      [empresaId]
+      [empresa.id]
     );
   }
 
-  const empresas = await query(
-    `SELECT slug FROM food_empresas WHERE id = $1 LIMIT 1`,
-    [empresaId]
-  );
-
-  const slug = empresas.rows[0]?.slug;
-
-  redirect(slug ? `/admin?slug=${slug}` : '/admin');
+  redirect(`/admin?slug=${empresa.slug}`);
 }
