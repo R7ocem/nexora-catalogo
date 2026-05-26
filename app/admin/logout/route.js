@@ -1,7 +1,7 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { clearAdminSession } from '../../../lib/auth';
 
 export async function POST() {
-  cookies().delete('nexora_food_admin');
+  clearAdminSession();
   redirect('/admin');
 }
