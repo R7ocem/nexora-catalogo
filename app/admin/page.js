@@ -588,7 +588,7 @@ export default async function AdminPage({ searchParams }) {
                     Salvar alterações
                   </button>
 
-                  <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
+                <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
                     {produto.ativo ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
@@ -597,16 +597,6 @@ export default async function AdminPage({ searchParams }) {
           </div>
         )}
       </section>
-                </div>
-
-                <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
-                  {produto.ativo ? 'Ativo' : 'Inativo'}
-                </span>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
     </main>
   );
-}
+}    
