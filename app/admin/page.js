@@ -632,7 +632,7 @@ export default async function AdminPage({ searchParams }) {
                 </div>
               </form>
 
-              <form action="/admin/products/delete" method="post" className="delete-product-form">
+             <form action="/admin/products/delete" method="post" className="delete-product-form admin-actions-row">
                 <input type="hidden" name="produto_id" value={produto.id} />
                 <input type="hidden" name="empresa_id" value={empresa.id} />
                 <button className="danger-button" type="submit">
