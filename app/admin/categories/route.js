@@ -51,7 +51,7 @@ export async function POST(request) {
 
   if (acao === 'criar') {
     if (!nome) {
-      redirect(`/admin?slug=${empresa.slug}&erro=categoria`);
+      redirect(`/admin?slug=${empresa.slug}&erro=categoria#categorias`);
     }
 
     const ordem = await query(
@@ -67,12 +67,12 @@ export async function POST(request) {
       [empresaId, nome, ordem.rows[0].proxima_ordem]
     );
 
-    redirect(`/admin?slug=${empresa.slug}`);
+    redirect(`/admin?slug=${empresa.slug}#categorias`);
   }
 
   if (acao === 'renomear') {
     if (!categoriaId || !nome) {
-      redirect(`/admin?slug=${empresa.slug}&erro=categoria`);
+     redirect(`/admin?slug=${empresa.slug}&erro=categoria#categorias`);
     }
 
     await query(
@@ -83,12 +83,12 @@ export async function POST(request) {
       [categoriaId, empresaId, nome]
     );
 
-    redirect(`/admin?slug=${empresa.slug}`);
+    redirect(`/admin?slug=${empresa.slug}#categorias`);
   }
 
   if (acao === 'excluir') {
     if (!categoriaId) {
-      redirect(`/admin?slug=${empresa.slug}`);
+     redirect(`/admin?slug=${empresa.slug}#categorias`);
     }
 
     await query(
@@ -98,12 +98,12 @@ export async function POST(request) {
       [categoriaId, empresaId]
     );
 
-    redirect(`/admin?slug=${empresa.slug}`);
+    redirect(`/admin?slug=${empresa.slug}#categorias`);
   }
 
   if (acao === 'subir' || acao === 'descer') {
     if (!categoriaId) {
-      redirect(`/admin?slug=${empresa.slug}`);
+      redirect(`/admin?slug=${empresa.slug}#categorias`);
     }
 
     const categorias = await query(
@@ -133,7 +133,7 @@ export async function POST(request) {
       );
     }
 
-    redirect(`/admin?slug=${empresa.slug}`);
+    redirect(`/admin?slug=${empresa.slug}#categorias`);
   }
 
   await voltar(user, empresaId);
