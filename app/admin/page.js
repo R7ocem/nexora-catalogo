@@ -626,15 +626,17 @@ export default async function AdminPage({ searchParams }) {
                     Salvar alterações
                   </button>
 
-                <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
+                  <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
                     {produto.ativo ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>
               </form>
+
+              <form action="/admin/products/delete" method="post" className="delete-product-form">
+                <input type="hidden" name="produto_id" value={produto.id} />
+                <input type="hidden" name="empresa_id" value={empresa.id} />
+                <button className="danger-button" type="submit">
+                  Excluir item
+                </button>
+              </form>
             ))}
-          </div>
-        )}
-      </section>
-    </main>
-  );
-}    
