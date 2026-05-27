@@ -43,5 +43,5 @@ export async function POST(request) {
     [produtoId, empresaId]
   );
 
-  redirect(`/admin?slug=${empresaAtual.slug}`);
+  redirect(`/admin?slug=${empresaAtual.slug}#itens`);
 }
