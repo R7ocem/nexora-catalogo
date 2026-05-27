@@ -258,29 +258,7 @@ export default async function AdminPage({ searchParams }) {
           </button>
         </form>
       </section>
-        <div>
-          <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
-
-          <p className="muted">
-            {isNexoraAdmin
-              ? 'Gerencie os catálogos das empresas clientes.'
-              : 'Gerencie itens, fotos, preços e disponibilidade.'}
-          </p>
-
-          {empresa.bloqueado ? (
-            <p className="warning-text">
-              Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
-            </p>
-          ) : null}
-        </div>
-
-        <form action="/admin/logout" method="post">
-          <button className="secondary-button" type="submit">
-            Sair
-          </button>
-        </form>
-      </section>
-
+      
       {isNexoraAdmin ? (
         <section className="panel">
           <h2>Criar nova empresa</h2>
@@ -658,5 +636,7 @@ export default async function AdminPage({ searchParams }) {
         )}
       </section>
     </main>
+  );
+ }
   );
 }    
