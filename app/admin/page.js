@@ -194,6 +194,28 @@ export default async function AdminPage({ searchParams }) {
   return (
     <main className="shell admin-shell">
       <section className="panel admin-header-panel">
+  <div>
+    <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
+
+    <p className="muted">
+      {isNexoraAdmin
+        ? 'Gerencie os catálogos das empresas clientes.'
+        : 'Gerencie itens, fotos, preços e disponibilidade.'}
+    </p>
+
+    {empresa.bloqueado ? (
+      <p className="warning-text">
+        Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
+      </p>
+    ) : null}
+  </div>
+
+  <form action="/admin/logout" method="post">
+    <button className="secondary-button" type="submit">
+      Sair
+    </button>
+  </form>
+</section>
       <section className="panel">
         <h2>Minha senha</h2>
 
