@@ -460,6 +460,84 @@ export default async function AdminPage({ searchParams }) {
         </section>
       ) : null}
 
+        <section className="panel">
+  <h2>Categorias</h2>
+
+  {searchParams?.erro === 'categoria' ? (
+    <p className="error-text">
+      Informe o nome da categoria.
+    </p>
+  ) : null}
+
+  <form action="/admin/categories" method="post" className="admin-form compact-form">
+    <input type="hidden" name="empresa_id" value={empresa.id} />
+    <input type="hidden" name="acao" value="criar" />
+
+    <label>
+      Nova categoria
+      <input name="nome" placeholder="Ex: Salgados, Bebidas, Decoração" required />
+    </label>
+
+    <button className="primary-button" type="submit">
+      Criar categoria
+    </button>
+  </form>
+
+  {categorias.length === 0 ? (
+    <p className="muted">Nenhuma categoria criada ainda.</p>
+  ) : (
+    <div className="category-admin-list">
+      {categorias.map((categoria) => (
+        <div key={categoria.id} className="category-admin-item">
+          <form action="/admin/categories" method="post" className="category-admin-name">
+            <input type="hidden" name="empresa_id" value={empresa.id} />
+            <input type="hidden" name="categoria_id" value={categoria.id} />
+            <input type="hidden" name="acao" value="renomear" />
+
+            <input name="nome" defaultValue={categoria.nome} required />
+
+            <button className="secondary-button" type="submit">
+              Renomear
+            </button>
+          </form>
+
+          <div className="category-admin-actions">
+            <form action="/admin/categories" method="post">
+              <input type="hidden" name="empresa_id" value={empresa.id} />
+              <input type="hidden" name="categoria_id" value={categoria.id} />
+              <input type="hidden" name="acao" value="subir" />
+
+              <button className="secondary-button" type="submit">
+                Subir
+              </button>
+            </form>
+
+            <form action="/admin/categories" method="post">
+              <input type="hidden" name="empresa_id" value={empresa.id} />
+              <input type="hidden" name="categoria_id" value={categoria.id} />
+              <input type="hidden" name="acao" value="descer" />
+
+              <button className="secondary-button" type="submit">
+                Descer
+              </button>
+            </form>
+
+            <form action="/admin/categories" method="post">
+              <input type="hidden" name="empresa_id" value={empresa.id} />
+              <input type="hidden" name="categoria_id" value={categoria.id} />
+              <input type="hidden" name="acao" value="excluir" />
+
+              <button className="danger-button" type="submit">
+                Excluir
+              </button>
+            </form>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
       <section className="panel">
         <h2>Novo item</h2>
 
