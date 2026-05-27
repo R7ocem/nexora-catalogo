@@ -81,6 +81,8 @@ async function getAdminData(user, selectedSlug) {
        p.nome,
        p.descricao,
        p.preco,
+       p.tipo_item,
+       p.tipo_preco,
        p.imagem_url,
        p.ativo,
        p.apelidos,
@@ -491,6 +493,24 @@ export default async function AdminPage({ searchParams }) {
             <input name="preco" placeholder="8.00" required />
           </label>
 
+           <label>
+            Tipo do item
+            <select name="tipo_item" defaultValue="produto">
+              <option value="produto">Produto</option>
+              <option value="servico">Serviço</option>
+              <option value="pacote">Pacote/Combo</option>
+            </select>
+          </label>
+
+            <label>
+            Tipo de preço
+            <select name="tipo_preco" defaultValue="fixo">
+              <option value="fixo">Preço fixo</option>
+              <option value="a_partir_de">A partir de</option>
+              <option value="sob_consulta">Sob consulta</option>
+            </select>
+          </label>
+
           <label className="full-span">
             Imagem URL
             <input name="imagem_url" placeholder="https://..." />
@@ -506,7 +526,7 @@ export default async function AdminPage({ searchParams }) {
             <input name="apelidos" placeholder="coxinha, coxinhas, salgado" />
           </label>
 
-          <label>
+           <label>
             Ativo
             <input name="ativo" type="checkbox" defaultChecked />
           </label>
@@ -560,6 +580,24 @@ export default async function AdminPage({ searchParams }) {
                   <label>
                     Preço
                     <input name="preco" defaultValue={produto.preco || '0'} />
+                  </label>
+
+                   <label>
+                    Tipo do item
+                    <select name="tipo_item" defaultValue={produto.tipo_item || 'produto'}>
+                      <option value="produto">Produto</option>
+                      <option value="servico">Serviço</option>
+                      <option value="pacote">Pacote/Combo</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Tipo de preço
+                    <select name="tipo_preco" defaultValue={produto.tipo_preco || 'fixo'}>
+                      <option value="fixo">Preço fixo</option>
+                      <option value="a_partir_de">A partir de</option>
+                      <option value="sob_consulta">Sob consulta</option>
+                    </select>
                   </label>
 
                   <label className="full-span">
