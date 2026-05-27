@@ -50,9 +50,9 @@ export async function POST(request) {
   const nome = texto(formData.get('nome'));
   const categoriaIdRaw = texto(formData.get('categoria_id'));
   const categoriaId = categoriaIdRaw ? Number(categoriaIdRaw) : null;
-  const preco = numero(formData.get('preco'));
   const tipoItemRaw = texto(formData.get('tipo_item'));
   const tipoPrecoRaw = texto(formData.get('tipo_preco'));
+  const preco = tipoPrecoRaw === 'sob_consulta' ? 0 : numero(formData.get('preco'));
   const imagemUrl = texto(formData.get('imagem_url'));
   const descricao = texto(formData.get('descricao'));
   const apelidos = texto(formData.get('apelidos'));
