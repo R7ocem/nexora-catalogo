@@ -374,3 +374,27 @@ input[type="checkbox"] {
     grid-template-columns: 1fr;
   }
 }
+
+.admin-product-edit-wrap {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fffdfa;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-product-edit {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.delete-product-form {
+  margin-top: -4px;
+  justify-content: flex-end;
+}
+
+.delete-product-form .danger-button {
+  min-width: 130px;
+}
