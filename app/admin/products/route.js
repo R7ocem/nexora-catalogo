@@ -62,6 +62,11 @@ export async function POST(request) {
   : 'fixo';
 
   const preco = tipoPreco === 'sob_consulta' ? 0 : numero(formData.get('preco'));
+  
+  if (tipoPreco !== 'sob_consulta' && preco <= 0) {
+  redirect('/admin');
+  }
+  
   const imagemUrl = texto(formData.get('imagem_url'));
   const descricao = texto(formData.get('descricao'));
   const apelidos = texto(formData.get('apelidos'));
