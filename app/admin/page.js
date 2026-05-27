@@ -602,9 +602,10 @@ export default async function AdminPage({ searchParams }) {
           </label>
 
           <label className="full-span">
-            Imagem URL
-            <input name="imagem_url" placeholder="https://..." />
-          </label>
+          Foto do item
+          <input type="file" name="foto" accept="image/*" />
+          <input type="hidden" name="imagem_url" />
+        </label>
 
           <label className="full-span">
             Descrição
@@ -691,9 +692,13 @@ export default async function AdminPage({ searchParams }) {
                   </label>
 
                   <label className="full-span">
-                    Imagem URL
-                    <input name="imagem_url" defaultValue={produto.imagem_url || ''} />
-                  </label>
+                  Foto do item
+                  {produto.imagem_url ? (
+                    <img className="admin-image-preview" src={produto.imagem_url} alt={produto.nome} />
+                  ) : null}
+                  <input type="file" name="foto" accept="image/*" />
+                  <input type="hidden" name="imagem_url" defaultValue={produto.imagem_url || ''} />
+                </label>
 
                   <label className="full-span">
                     Descrição
@@ -770,10 +775,62 @@ export default async function AdminPage({ searchParams }) {
         });
 
         atualizarObrigatorio();
-      });
-    `
+
+              document.querySelectorAll('.product-form').forEach(function (form) {
+        form.addEventListener('submit', async function (event) {
+          var fileInput = form.querySelector('[name="foto"]');
+          var imageInput = form.querySelector('[name="imagem_url"]');
+          var empresaInput = form.querySelector('[name="empresa_id"]');
+
+          if (!fileInput || !imageInput || !fileInput.files || fileInput.files.length === 0) {
+            return;
+          }
+
+          event.preventDefault();
+
+          var submitButton = form.querySelector('button[type="submit"]');
+          var originalText = submitButton ? submitButton.textContent : '';
+
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando foto...';
+          }
+
+          var uploadData = new FormData();
+          uploadData.append('file', fileInput.files[0]);
+          uploadData.append('empresa_id', empresaInput ? empresaInput.value : '');
+
+          try {
+            var response = await fetch('/admin/upload', {
+              method: 'POST',
+              body: uploadData
+            });
+
+            var result = await response.json();
+
+            if (!response.ok || !result.url) {
+              alert('Não foi possível enviar a foto. Tente novamente.');
+              if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+              }
+              return;
+            }
+
+            imageInput.value = result.url;
+            fileInput.value = '';
+            form.submit();
+          } catch (error) {
+            alert('Erro ao enviar a foto. Tente novamente.');
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.textContent = originalText;
+            }
+          });
+       });
+     `
   }}
 />   
-    </main>
-  );
+   </main>
+ );
 }
