@@ -469,6 +469,12 @@ export default async function AdminPage({ searchParams }) {
          </p>
         ) : null}
 
+        {searchParams?.erro === 'apelidos' ? (
+          <p className="error-text">
+            Informe os apelidos para o bot encontrar este item.
+          </p>
+        ) : null}
+
           <form action="/admin/products" method="post" className="admin-form product-form">
           <input type="hidden" name="empresa_id" value={empresa.id} />
 
