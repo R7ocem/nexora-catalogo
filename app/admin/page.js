@@ -474,12 +474,12 @@ export default async function AdminPage({ searchParams }) {
 
           <label>
             Código
-            <input name="codigo" placeholder="coxinha" required />
+            <input name="codigo" placeholder="code prod" required />
           </label>
 
           <label>
             Nome
-            <input name="nome" placeholder="Coxinha" required />
+            <input name="nome" placeholder="Produto/serviço" required />
           </label>
 
           <label>
@@ -496,7 +496,7 @@ export default async function AdminPage({ searchParams }) {
 
           <label>
             Preço
-            <input name="preco" placeholder="8.00" />
+            <input name="preco" placeholder="50.00" />
           </label>
 
            <label>
@@ -529,7 +529,7 @@ export default async function AdminPage({ searchParams }) {
 
           <label className="full-span">
             Apelidos para o bot
-            <input name="apelidos" placeholder="coxinha, coxinhas, salgado" />
+            <input name="apelidos" placeholder="produtos ou serviços do bot" required />
           </label>
 
            <label>
@@ -618,7 +618,7 @@ export default async function AdminPage({ searchParams }) {
 
                   <label className="full-span">
                     Apelidos para o bot
-                    <input name="apelidos" defaultValue={produto.apelidos || ''} />
+                    <input name="apelidos" defaultValue={produto.apelidos || ''} required />
                   </label>
 
                   <label>
