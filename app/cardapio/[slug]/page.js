@@ -1,6 +1,24 @@
 import { query } from '../../../lib/db';
 import { money } from '../../../lib/format';
 
+function tipoItemTexto(tipo) {
+  if (tipo === 'servico') return 'Serviço';
+  if (tipo === 'pacote') return 'Pacote';
+  return 'Produto';
+}
+
+function precoTexto(produto) {
+  if (produto.tipo_preco === 'sob_consulta') {
+    return 'Consultar valor';
+  }
+
+  if (produto.tipo_preco === 'a_partir_de') {
+    return `A partir de ${money(produto.preco)}`;
+  }
+
+  return money(produto.preco);
+}
+
 async function getCardapio(slug) {
   const empresas = await query(
     `SELECT id, nome, slug, whatsapp, ativo, bloqueado, bloqueado_motivo
@@ -35,8 +53,11 @@ async function getCardapio(slug) {
        p.nome,
        p.descricao,
        p.preco,
+       p.tipo_item,
+       p.tipo_preco,
        p.imagem_url,
        p.ativo,
+       p.apelidos,
        c.nome AS categoria_nome
      FROM food_produtos p
      LEFT JOIN food_categorias c ON c.id = p.categoria_id
