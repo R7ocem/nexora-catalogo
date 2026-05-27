@@ -463,6 +463,12 @@ export default async function AdminPage({ searchParams }) {
       <section className="panel">
         <h2>Novo item</h2>
 
+        {searchParams?.erro === 'preco' ? (
+         <p className="error-text">
+           Informe o preço quando o tipo de preço for Preço fixo ou A partir de.
+         </p>
+        ) : null}
+
         <form action="/admin/products" method="post" className="admin-form">
           <input type="hidden" name="empresa_id" value={empresa.id} />
 
