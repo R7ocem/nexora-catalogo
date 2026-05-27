@@ -52,21 +52,22 @@ export async function POST(request) {
   const categoriaId = categoriaIdRaw ? Number(categoriaIdRaw) : null;
   const tipoItemRaw = texto(formData.get('tipo_item'));
   const tipoPrecoRaw = texto(formData.get('tipo_preco'));
-  const preco = tipoPrecoRaw === 'sob_consulta' ? 0 : numero(formData.get('preco'));
+
+  const tipoItem = ['produto', 'servico', 'pacote'].includes(tipoItemRaw)
+  ? tipoItemRaw
+  : 'produto';
+
+  const tipoPreco = ['fixo', 'a_partir_de', 'sob_consulta'].includes(tipoPrecoRaw)
+  ? tipoPrecoRaw
+  : 'fixo';
+
+  const preco = tipoPreco === 'sob_consulta' ? 0 : numero(formData.get('preco'));
   const imagemUrl = texto(formData.get('imagem_url'));
   const descricao = texto(formData.get('descricao'));
   const apelidos = texto(formData.get('apelidos'));
   const ativo = formData.get('ativo') === 'on';
 
-  const tipoItem = tiposItemPermitidos.includes(tipoItemRaw)
-    ? tipoItemRaw
-    : 'produto';
-
-  const tipoPreco = tiposPrecoPermitidos.includes(tipoPrecoRaw)
-    ? tipoPrecoRaw
-    : 'fixo';
-
-  if (!empresaId || !codigo || !nome) {
+   if (!empresaId || !codigo || !nome) {
     redirect('/admin');
   }
 
