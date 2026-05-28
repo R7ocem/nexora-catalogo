@@ -761,59 +761,62 @@ export default async function AdminPage({ searchParams }) {
           </div>
         )}
       </section>
-          <script
-      dangerouslySetInnerHTML={{
-        __html: `
-          document.querySelectorAll('.product-form').forEach(function (form) {
-            var tipoPreco = form.querySelector('[name="tipo_preco"]');
-            var preco = form.querySelector('[name="preco"]');
-    
-            if (!tipoPreco || !preco) return;
-    
-            function atualizarObrigatorio() {
-              if (tipoPreco.value === 'sob_consulta') {
-                preco.required = false;
+                <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            document.querySelectorAll('.product-form').forEach(function (form) {
+              var tipoPreco = form.querySelector('[name="tipo_preco"]');
+              var preco = form.querySelector('[name="preco"]');
+
+              if (!tipoPreco || !preco) return;
+
+              function atualizarObrigatorio() {
+                if (tipoPreco.value === 'sob_consulta') {
+                  preco.required = false;
+                  preco.setCustomValidity('');
+                } else {
+                  preco.required = true;
+                }
+              }
+
+              tipoPreco.addEventListener('change', atualizarObrigatorio);
+
+              form.addEventListener('submit', function (event) {
+                atualizarObrigatorio();
+
+                var valor = Number(String(preco.value || '').replace(',', '.'));
+
+                if (tipoPreco.value !== 'sob_consulta' && (!preco.value || valor <= 0)) {
+                  event.preventDefault();
+                  preco.setCustomValidity('Informe o preço para preço fixo ou a partir de.');
+                  preco.reportValidity();
+                  return;
+                }
+
                 preco.setCustomValidity('');
-              } else {
-                preco.required = true;
-              }
-            }
-    
-            tipoPreco.addEventListener('change', atualizarObrigatorio);
-    
-            form.addEventListener('submit', function (event) {
+              });
+
               atualizarObrigatorio();
-    
-              var valor = Number(String(preco.value || '').replace(',', '.'));
-    
-              if (tipoPreco.value !== 'sob_consulta' && (!preco.value || valor <= 0)) {
-                event.preventDefault();
-                preco.setCustomValidity('Informe o preço para preço fixo ou a partir de.');
-                preco.reportValidity();
-                return;
-              }
-    
-              preco.setCustomValidity('');
             });
-    
-            atualizarObrigatorio();
-          });
-    
-          document.querySelectorAll('.photo-auto-submit').forEach(function (input) {
-            input.addEventListener('change', function () {
-              if (!input.files || input.files.length === 0) return;
-    
-              var form = input.closest('form');
-              if (!form) return;
-    
-              var button = form.querySelector('.photo-button');
-              if (button) {
-                button.textContent = 'Enviando foto...';
-              }
-    
-              form.requestSubmit();
-           });
-        });
-      `
-   }}
-/>
+
+            document.querySelectorAll('.photo-auto-submit').forEach(function (input) {
+              input.addEventListener('change', function () {
+                if (!input.files || input.files.length === 0) return;
+
+                var form = input.closest('form');
+                if (!form) return;
+
+                var button = form.querySelector('.photo-button');
+                if (button) {
+                  button.textContent = 'Enviando foto...';
+                }
+
+                form.requestSubmit();
+              });
+            });
+          `
+        }}
+      />
+    </main>
+  );
+}
