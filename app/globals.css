@@ -434,3 +434,12 @@ input[type="checkbox"] {
     grid-template-columns: 1fr;
   }
 }
+.admin-image-preview {
+  width: 180px;
+  height: 135px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #eee;
+}
