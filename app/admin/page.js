@@ -812,8 +812,8 @@ export default async function AdminPage({ searchParams }) {
               }
     
               form.requestSubmit();
-            });
-          });
-        `
-      }}
-    />
+           });
+        });
+      `
+   }}
+/>
