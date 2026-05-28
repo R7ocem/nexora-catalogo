@@ -819,7 +819,7 @@ export default async function AdminPage({ searchParams }) {
 
             imageInput.value = result.url;
             fileInput.value = '';
-            HTMLFormElement.prototype.submit.call(form);
+            form.requestSubmit();
           } catch (error) {
             alert('Erro ao enviar a foto. Tente novamente.');
             if (submitButton) {
