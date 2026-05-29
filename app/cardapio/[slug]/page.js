@@ -61,71 +61,72 @@ async function getCardapio(slug) {
     [empresa.id]
   );
 
-  return { empresa, categorias: categorias.rows, produtos: produtos.rows };
-}
-
-export async function generateMetadata({ params }) {
-  const { empresa } = await getCardapio(params.slug);
-
-  return {
-    title: empresa?.nome || 'Catálogo',
-    description: empresa
-      ? `Catálogo digital ${empresa.nome}`
-      : 'Catálogo digital'
-  };
-}
-
-export default async function CardapioPage({ params }) {
-  const { empresa, bloqueado, categorias, produtos } = await getCardapio(params.slug);
-
-  if (!empresa) {
-    return (
-      <main className="shell">
-        <section className="panel">
-          <h1>Catálogo não encontrado</h1>
-          <p className="muted">Confira o link enviado pela empresa.</p>
-        </section>
-      </main>
-    );
-  }
-
-  if (bloqueado) {
-    return (
-      <main className="shell">
-        <section className="panel blocked-panel">
-          <h1>Catálogo temporariamente indisponível</h1>
-          <p className="muted">
-            Este catálogo está passando por uma atualização administrativa.
-          </p>
-        </section>
-      </main>
-    );
+    return { empresa, categorias: categorias.rows, produtos: produtos.rows };
   }
   
-  const produtosPorCategoria = categorias.map((categoria) => ({
-    ...categoria,
-    produtos: produtos.filter((produto) => produto.categoria_nome === categoria.nome)
-  }));
-
-  const semCategoria = produtos.filter((produto) => !produto.categoria_nome);
-
-  return (
-  <main>
-    <section className="shell product-list">
-      {produtos.length === 0 ? (
-        <div className="panel">
-          <h2>Catálogo em atualização</h2>
-          <p className="muted">
-            Em breve os itens estarão disponíveis por aqui.
-          </p>
-        </div>
-      ) : (
-        <CatalogoInterativo
-          empresa={empresa}
-          categorias={produtosPorCategoria}
-          semCategoria={semCategoria}
-        />
-      )}
-    </section>
-  </main>
-);   
+  export async function generateMetadata({ params }) {
+    const { empresa } = await getCardapio(params.slug);
+  
+    return {
+      title: empresa?.nome || 'Catálogo',
+      description: empresa
+        ? `Catálogo digital ${empresa.nome}`
+        : 'Catálogo digital'
+    };
+  }
+  
+  export default async function CardapioPage({ params }) {
+    const { empresa, bloqueado, categorias, produtos } = await getCardapio(params.slug);
+  
+    if (!empresa) {
+      return (
+        <main className="shell">
+          <section className="panel">
+            <h1>Catálogo não encontrado</h1>
+            <p className="muted">Confira o link enviado pela empresa.</p>
+          </section>
+        </main>
+      );
+    }
+  
+    if (bloqueado) {
+      return (
+        <main className="shell">
+          <section className="panel blocked-panel">
+            <h1>Catálogo temporariamente indisponível</h1>
+            <p className="muted">
+              Este catálogo está passando por uma atualização administrativa.
+            </p>
+          </section>
+        </main>
+      );
+    }
+    
+    const produtosPorCategoria = categorias.map((categoria) => ({
+      ...categoria,
+      produtos: produtos.filter((produto) => produto.categoria_nome === categoria.nome)
+    }));
+  
+    const semCategoria = produtos.filter((produto) => !produto.categoria_nome);
+  
+    return (
+    <main>
+      <section className="shell product-list">
+        {produtos.length === 0 ? (
+          <div className="panel">
+            <h2>Catálogo em atualização</h2>
+            <p className="muted">
+              Em breve os itens estarão disponíveis por aqui.
+            </p>
+          </div>
+        ) : (
+          <CatalogoInterativo
+            empresa={empresa}
+            categorias={produtosPorCategoria}
+            semCategoria={semCategoria}
+          />
+        )}
+      </section>
+    </main>
+  );   
+}
