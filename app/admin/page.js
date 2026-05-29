@@ -675,6 +675,10 @@ export default async function AdminPage({ searchParams }) {
                         {produto.imagem_url ? 'Trocar foto' : 'Adicionar foto'}
                         <input className="file-hidden photo-auto-submit" type="file" name="foto" accept="image/*" />
                       </label>
+
+                    <button className="file-hidden photo-submit-button" type="submit">
+                      Salvar foto
+                    </button>
       
                       {produto.imagem_url ? (
                         <button
@@ -826,15 +830,13 @@ export default async function AdminPage({ searchParams }) {
               input.addEventListener('change', function () {
                 if (!input.files || input.files.length === 0) return;
 
-                var form = input.closest('form');
+               var form = input.closest('form');
                 if (!form) return;
-
-                var button = form.querySelector('.photo-button');
-                if (button) {
-                  button.textContent = 'Enviando foto...';
+                
+                var submitButton = form.querySelector('.photo-submit-button');
+                if (submitButton) {
+                  submitButton.click();
                 }
-
-                form.requestSubmit();
               });
             });
           `
