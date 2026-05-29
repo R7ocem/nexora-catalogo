@@ -628,9 +628,9 @@ export default async function AdminPage({ searchParams }) {
         </form>
       </section>
 
-          <section className="panel" id="itens">
-            <h2>Itens cadastrados</h2>
-
+     <section className="panel" id="itens">
+        <h2>Itens cadastrados</h2>
+      
         {produtos.length === 0 ? (
           <p className="muted">Nenhum item cadastrado ainda.</p>
         ) : (
@@ -640,75 +640,37 @@ export default async function AdminPage({ searchParams }) {
                 <form
                   action="/admin/products"
                   method="post"
-                  className="admin-product-edit product-form"
+                  className="photo-form"
                   encType="multipart/form-data"
                 >
-                <input type="hidden" name="produto_id" value={produto.id} />
-                <input type="hidden" name="empresa_id" value={empresa.id} />
-
-                <div className="edit-grid">
-                  <label>
-                    Código
-                    <input name="codigo" defaultValue={produto.codigo || ''} required />
-                  </label>
-
-                  <label>
-                    Nome
-                    <input name="nome" defaultValue={produto.nome || ''} required />
-                  </label>
-
-                  <label>
-                    Categoria
-                    <select name="categoria_id" defaultValue={produto.categoria_id || ''}>
-                      <option value="">Sem categoria</option>
-                      {categorias.map((categoria) => (
-                        <option key={categoria.id} value={categoria.id}>
-                          {categoria.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
-                    Preço
-                    <input name="preco" defaultValue={produto.preco || '0'} />
-                  </label>
-
-                   <label>
-                    Tipo do item
-                    <select name="tipo_item" defaultValue={produto.tipo_item || 'produto'}>
-                      <option value="produto">Produto</option>
-                      <option value="servico">Serviço</option>
-                      <option value="pacote">Pacote/Combo</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Tipo de preço
-                    <select name="tipo_preco" defaultValue={produto.tipo_preco || 'fixo'}>
-                      <option value="fixo">Preço fixo</option>
-                      <option value="a_partir_de">A partir de</option>
-                      <option value="sob_consulta">Sob consulta</option>
-                    </select>
-                  </label>
-
-                  <div className="full-span photo-editor">
+                  <input type="hidden" name="produto_id" value={produto.id} />
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <input type="hidden" name="codigo" value={produto.codigo || ''} />
+                  <input type="hidden" name="nome" value={produto.nome || ''} />
+                  <input type="hidden" name="categoria_id" value={produto.categoria_id || ''} />
+                  <input type="hidden" name="preco" value={produto.preco || '0'} />
+                  <input type="hidden" name="tipo_item" value={produto.tipo_item || 'produto'} />
+                  <input type="hidden" name="tipo_preco" value={produto.tipo_preco || 'fixo'} />
+                  <input type="hidden" name="descricao" value={produto.descricao || ''} />
+                  <input type="hidden" name="apelidos" value={produto.apelidos || ''} />
+                  <input type="hidden" name="imagem_url" value={produto.imagem_url || ''} />
+                  {produto.ativo ? <input type="hidden" name="ativo" value="on" /> : null}
+      
+                  <div className="photo-editor">
                     <span className="field-title">Foto do item</span>
-                  
+      
                     {produto.imagem_url ? (
                       <img className="admin-image-preview" src={produto.imagem_url} alt={produto.nome} />
                     ) : (
                       <span className="muted">Nenhuma foto cadastrada.</span>
                     )}
-                  
-                    <input type="hidden" name="imagem_url" defaultValue={produto.imagem_url || ''} />
-                                      
+      
                     <div className="photo-actions">
-                     <label className="secondary-button photo-button">
-                      {produto.imagem_url ? 'Trocar foto' : 'Adicionar foto'}
-                      <input className="file-hidden photo-auto-submit" type="file" name="foto" accept="image/*" />
-                    </label>
-                  
+                      <label className="secondary-button photo-button">
+                        {produto.imagem_url ? 'Trocar foto' : 'Adicionar foto'}
+                        <input className="file-hidden photo-auto-submit" type="file" name="foto" accept="image/*" />
+                      </label>
+      
                       {produto.imagem_url ? (
                         <button
                           className="danger-button"
@@ -720,43 +682,99 @@ export default async function AdminPage({ searchParams }) {
                         </button>
                       ) : null}
                     </div>
-                  </div>                
-                  
-                  <label className="full-span">
-                    Descrição
-                    <textarea name="descricao" defaultValue={produto.descricao || ''} />
-                  </label>
-
-                  <label className="full-span">
-                    Apelidos para o bot
-                    <input name="apelidos" defaultValue={produto.apelidos || ''} required />
-                  </label>
-
-                  <label>
-                    Ativo
-                    <input name="ativo" type="checkbox" defaultChecked={produto.ativo} />
-                  </label>
-                </div>
-
-                <div className="admin-actions-row">
-                  <button className="primary-button" type="submit">
-                    Salvar alterações
+                  </div>
+                </form>
+      
+                <form
+                  action="/admin/products"
+                  method="post"
+                  className="admin-product-edit product-form"
+                >
+                  <input type="hidden" name="produto_id" value={produto.id} />
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <input type="hidden" name="imagem_url" value={produto.imagem_url || ''} />
+      
+                  <div className="edit-grid">
+                    <label>
+                      Código
+                      <input name="codigo" defaultValue={produto.codigo || ''} required />
+                    </label>
+      
+                    <label>
+                      Nome
+                      <input name="nome" defaultValue={produto.nome || ''} required />
+                    </label>
+      
+                    <label>
+                      Categoria
+                      <select name="categoria_id" defaultValue={produto.categoria_id || ''}>
+                        <option value="">Sem categoria</option>
+                        {categorias.map((categoria) => (
+                          <option key={categoria.id} value={categoria.id}>
+                            {categoria.nome}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+      
+                    <label>
+                      Preço
+                      <input name="preco" defaultValue={produto.preco || '0'} />
+                    </label>
+      
+                    <label>
+                      Tipo do item
+                      <select name="tipo_item" defaultValue={produto.tipo_item || 'produto'}>
+                        <option value="produto">Produto</option>
+                        <option value="servico">Serviço</option>
+                        <option value="pacote">Pacote/Combo</option>
+                      </select>
+                    </label>
+      
+                    <label>
+                      Tipo de preço
+                      <select name="tipo_preco" defaultValue={produto.tipo_preco || 'fixo'}>
+                        <option value="fixo">Preço fixo</option>
+                        <option value="a_partir_de">A partir de</option>
+                        <option value="sob_consulta">Sob consulta</option>
+                      </select>
+                    </label>
+      
+                    <label className="full-span">
+                      Descrição
+                      <textarea name="descricao" defaultValue={produto.descricao || ''} />
+                    </label>
+      
+                    <label className="full-span">
+                      Apelidos para o bot
+                      <input name="apelidos" defaultValue={produto.apelidos || ''} required />
+                    </label>
+      
+                    <label>
+                      Ativo
+                      <input name="ativo" type="checkbox" defaultChecked={produto.ativo} />
+                    </label>
+                  </div>
+      
+                  <div className="admin-actions-row">
+                    <button className="primary-button" type="submit">
+                      Salvar alterações
+                    </button>
+      
+                    <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
+                      {produto.ativo ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                </form>
+      
+                <form action="/admin/products/delete" method="post" className="delete-product-form admin-actions-row">
+                  <input type="hidden" name="produto_id" value={produto.id} />
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <button className="danger-button" type="submit">
+                    Excluir item
                   </button>
-
-                  <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
-                    {produto.ativo ? 'Ativo' : 'Inativo'}
-                  </span>
-                </div>
-              </form>
-
-             <form action="/admin/products/delete" method="post" className="delete-product-form admin-actions-row">
-                <input type="hidden" name="produto_id" value={produto.id} />
-                <input type="hidden" name="empresa_id" value={empresa.id} />
-                <button className="danger-button" type="submit">
-                  Excluir item
-                </button>
-              </form>
-            </div>
+                </form>
+              </div>
             ))}
           </div>
         )}
