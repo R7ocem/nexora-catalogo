@@ -1,23 +1,5 @@
+import CatalogoInterativo from './CatalogoInterativo';
 import { query } from '../../../lib/db';
-import { money } from '../../../lib/format';
-
-function tipoItemTexto(tipo) {
-  if (tipo === 'servico') return 'Serviço';
-  if (tipo === 'pacote') return 'Pacote';
-  return 'Produto';
-}
-
-function precoTexto(produto) {
-  if (produto.tipo_preco === 'sob_consulta') {
-    return 'Consultar valor';
-  }
-
-  if (produto.tipo_preco === 'a_partir_de') {
-    return `A partir de ${money(produto.preco)}`;
-  }
-
-  return money(produto.preco);
-}
 
 async function getCardapio(slug) {
   const empresas = await query(
@@ -74,10 +56,10 @@ export async function generateMetadata({ params }) {
   const { empresa } = await getCardapio(params.slug);
 
   return {
-    title: empresa?.nome || 'Cardápio',
+    title: empresa?.nome || 'Catálogo',
     description: empresa
-      ? `Cardápio digital ${empresa.nome}`
-      : 'Cardápio digital'
+      ? `Catálogo digital ${empresa.nome}`
+      : 'Catálogo digital'
   };
 }
 
@@ -88,7 +70,7 @@ export default async function CardapioPage({ params }) {
     return (
       <main className="shell">
         <section className="panel">
-          <h1>Cardápio não encontrado</h1>
+          <h1>Catálogo não encontrado</h1>
           <p className="muted">Confira o link enviado pela empresa.</p>
         </section>
       </main>
@@ -99,9 +81,9 @@ export default async function CardapioPage({ params }) {
     return (
       <main className="shell">
         <section className="panel blocked-panel">
-          <h1>Cardápio temporariamente indisponível</h1>
+          <h1>Catálogo temporariamente indisponível</h1>
           <p className="muted">
-            Este cardápio está passando por uma atualização administrativa.
+            Este catálogo está passando por uma atualização administrativa.
           </p>
         </section>
       </main>
@@ -110,7 +92,7 @@ export default async function CardapioPage({ params }) {
 
   const whatsapp = empresa.whatsapp || '';
   const whatsappText = encodeURIComponent(
-    `Olá! Vi o cardápio da ${empresa.nome} e quero fazer um pedido.`
+    `Olá! Vi o catálogo da ${empresa.nome} e quero fazer um pedido.`
   );
 
   const whatsappUrl = whatsapp
@@ -130,7 +112,7 @@ export default async function CardapioPage({ params }) {
         <div className="menu-header-inner">
           <div>
             <h1>{empresa.nome}</h1>
-            <p>Cardápio digital</p>
+            <p>Catálogo digital</p>
           </div>
 
           {whatsapp ? (
@@ -151,79 +133,17 @@ export default async function CardapioPage({ params }) {
       <section className="shell product-list">
         {produtos.length === 0 ? (
           <div className="panel">
-            <h2>Cardápio em atualização</h2>
+            <h2>Catálogo em atualização</h2>
             <p className="muted">
-              Em breve os produtos estarão disponíveis por aqui.
+              Em breve os itens estarão disponíveis por aqui.
             </p>
           </div>
         ) : (
-          <>
-            {produtosPorCategoria.map((categoria) =>
-              categoria.produtos.length > 0 ? (
-                <section key={categoria.id} className="category-block">
-                  <h2>{categoria.nome}</h2>
-
-                  <div className="product-grid">
-                    {categoria.produtos.map((produto) => (
-                      <article key={produto.id} className="product-card">
-                        {produto.imagem_url ? (
-                          <img src={produto.imagem_url} alt={produto.nome} />
-                        ) : (
-                          <div className="product-placeholder">Sem foto</div>
-                        )}
-
-                        <div className="product-info">
-                          <h3>{produto.nome}</h3>
-
-                          {produto.descricao ? (
-                            <p>{produto.descricao}</p>
-                          ) : null}
-
-                          <div className="product-meta">
-                            <span>{tipoItemTexto(produto.tipo_item)}</span>
-                          </div>
-
-                          <strong>{precoTexto(produto)}</strong>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ) : null
-            )}
-
-            {semCategoria.length > 0 ? (
-              <section className="category-block">
-                <h2>Produtos</h2>
-
-                <div className="product-grid">
-                  {semCategoria.map((produto) => (
-                    <article key={produto.id} className="product-card">
-                      {produto.imagem_url ? (
-                        <img src={produto.imagem_url} alt={produto.nome} />
-                      ) : (
-                        <div className="product-placeholder">Sem foto</div>
-                      )}
-
-                      <div className="product-info">
-                        <h3>{produto.nome}</h3>
-
-                        {produto.descricao ? (
-                          <p>{produto.descricao}</p>
-                        ) : null}
-
-                        <div className="product-meta">
-                          <span>{tipoItemTexto(produto.tipo_item)}</span>
-                        </div>
-
-                        <strong>{precoTexto(produto)}</strong>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-          </>
+          <CatalogoInterativo
+            empresa={empresa}
+            categorias={produtosPorCategoria}
+            semCategoria={semCategoria}
+          />
         )}
       </section>
     </main>
