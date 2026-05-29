@@ -487,3 +487,7 @@ input[type="checkbox"] {
 .photo-primary-button:hover {
   background: #1d4ed8;
 }
+
+.photo-file-name {
+  align-self: center;
+}
