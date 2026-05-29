@@ -843,7 +843,7 @@ export default async function AdminPage({ searchParams }) {
                 }
               });
             });
-          `
+          
           document.querySelectorAll('.photo-file-name-input').forEach(function (input) {
             input.addEventListener('change', function () {
               var label = input.closest('.photo-actions')?.querySelector('.photo-file-name');
@@ -856,8 +856,10 @@ export default async function AdminPage({ searchParams }) {
                 label.textContent = 'Nenhuma foto selecionada.';
               }
             });
-         }}
+          });
+         `
+       }}
       />
-    </main>
+   </main>
   );
 }
