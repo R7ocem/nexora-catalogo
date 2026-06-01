@@ -443,29 +443,37 @@ export default async function AdminPage({ searchParams }) {
             <span className="muted">Nenhuma logo cadastrada.</span>
           )}
       
-          <div className="photo-actions">
-            <label className="secondary-button photo-button">
-              {empresa.logo_url ? 'Trocar logo' : 'Adicionar logo'}
-              <input
-                className="file-hidden company-media-auto-submit"
-                type="file"
-                name="foto"
-                accept="image/*"
-                form={`company-logo-form-${empresa.id}`}
-              />
-            </label>
-      
-            {empresa.logo_url ? (
-              <button
-                className="danger-button"
-                type="submit"
-                form={`company-logo-delete-form-${empresa.id}`}
-              >
-                Excluir logo
-              </button>
-            ) : null}
-          </div>
+       <div className="photo-actions">
+          <label className="secondary-button photo-button">
+            {empresa.logo_url ? 'Escolher nova logo' : 'Escolher logo'}
+            <input
+              className="file-hidden"
+              type="file"
+              name="foto"
+              accept="image/*"
+              form={`company-logo-form-${empresa.id}`}
+            />
+          </label>
+        
+          <button
+            className="primary-button"
+            type="submit"
+            form={`company-logo-form-${empresa.id}`}
+          >
+            Salvar logo
+          </button>
+        
+          {empresa.logo_url ? (
+            <button
+              className="danger-button"
+              type="submit"
+              form={`company-logo-delete-form-${empresa.id}`}
+            >
+             Excluir logo
+            </button>
+          ) : null}
         </div>
+      </div>
       
         <div className="company-media-card">
           <span className="field-title">Banner do catálogo</span>
@@ -477,30 +485,38 @@ export default async function AdminPage({ searchParams }) {
             <span className="muted">Nenhum banner cadastrado.</span>
           )}
       
-          <div className="photo-actions">
-            <label className="secondary-button photo-button">
-              {empresa.banner_url ? 'Trocar banner' : 'Adicionar banner'}
-              <input
-                className="file-hidden company-media-auto-submit"
-                type="file"
-                name="foto"
-                accept="image/*"
-                form={`company-banner-form-${empresa.id}`}
-              />
-            </label>
-      
-            {empresa.banner_url ? (
-              <button
-                className="danger-button"
-                type="submit"
-                form={`company-banner-delete-form-${empresa.id}`}
-              >
-                Excluir banner
-              </button>
-            ) : null}
-          </div>
-        </div>
+        <div className="photo-actions">
+          <label className="secondary-button photo-button">
+            {empresa.banner_url ? 'Escolher novo banner' : 'Escolher banner'}
+            <input
+              className="file-hidden"
+              type="file"
+              name="foto"
+              accept="image/*"
+              form={`company-banner-form-${empresa.id}`}
+            />
+          </label>
+        
+          <button
+            className="primary-button"
+            type="submit"
+            form={`company-banner-form-${empresa.id}`}
+          >
+            Salvar banner
+          </button>
+        
+          {empresa.banner_url ? (
+            <button
+              className="danger-button"
+              type="submit"
+              form={`company-banner-delete-form-${empresa.id}`}
+            >
+              Excluir banner
+           </button>
+         ) : null}
       </div>
+   </div>
+ </div>
       
          <button className="primary-button" type="submit">
          Salvar dados da empresa
