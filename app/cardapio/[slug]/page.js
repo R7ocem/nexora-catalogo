@@ -15,7 +15,8 @@ async function getCardapio(slug) {
      subtitulo_publico,
      descricao_publica,
      tema_cor,
-     logo_url
+     logo_url,
+     banner_url
    FROM food_empresas
    WHERE slug = $1
    LIMIT 1`,
