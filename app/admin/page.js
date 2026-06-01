@@ -329,122 +329,123 @@ export default async function AdminPage({ searchParams }) {
         </section>
       ) : null}
 
+     <section className="panel">
+      <h2>Empresa</h2>
+    
       {isNexoraAdmin ? (
-        <section className="panel">
-          <h2>Empresa</h2>
-
-          <form method="get" action="/admin" className="admin-form compact-form">
-            <label>
-              Escolher empresa
-              <select name="slug" defaultValue={empresa.slug}>
-                {empresas.map((item) => (
-                  <option key={item.id} value={item.slug}>
-                    {item.nome}
-                    {item.bloqueado ? ' - bloqueada' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <button className="secondary-button" type="submit">
-              Abrir
-            </button>
-          </form>
-
-          <div className="company-summary">
-            <div>
-              <span>Segmento</span>
-              <strong>{segmentos[empresa.segmento] || empresa.segmento}</strong>
-            </div>
-
-            <div>
-              <span>Oferta</span>
-              <strong>{tiposOferta[empresa.tipo_oferta] || empresa.tipo_oferta}</strong>
-            </div>
-
-            <div>
-              <span>Link público</span>
-              <strong>/cardapio/{empresa.slug}</strong>
-            </div>
-          </div>
-
-            <form action="/admin/company" method="post" className="admin-form company-edit-form">
-            <input type="hidden" name="empresa_id" value={empresa.id} />
-
-            <label>
-              Nome da empresa
-              <input name="nome" defaultValue={empresa.nome || ''} required />
-            </label>
-
-            <label>
-              WhatsApp
-              <input name="whatsapp" defaultValue={empresa.whatsapp || ''} placeholder="DDD + número. Ex: 61999999999" />
-            </label>
-
-            <label>
-              Segmento
-              <select name="segmento" defaultValue={empresa.segmento || 'outros'}>
-                <option value="alimentacao">Alimentação</option>
-                <option value="festas_decoracao">Festas e decoração</option>
-                <option value="moda">Moda</option>
-                <option value="beleza">Beleza</option>
-                <option value="saude">Saúde</option>
-                <option value="educacao">Educação</option>
-                <option value="servicos_gerais">Serviços gerais</option>
-                <option value="automotivo">Automotivo</option>
-                <option value="casa_construcao">Casa e construção</option>
-                <option value="tecnologia">Tecnologia</option>
-                <option value="outros">Outros</option>
-              </select>
-            </label>
-
-            <label>
-              Tipo de oferta
-              <select name="tipo_oferta" defaultValue={empresa.tipo_oferta || 'produtos'}>
-                <option value="produtos">Produtos</option>
-                <option value="servicos">Serviços</option>
-                <option value="misto">Produtos e serviços</option>
-              </select>
-            </label>
-
-            <label>
-              Título público
-              <input name="titulo_publico" defaultValue={empresa.titulo_publico || empresa.nome || ''} />
-            </label>
-
-            <label>
-              Subtítulo público
-              <input name="subtitulo_publico" defaultValue={empresa.subtitulo_publico || ''} />
-            </label>
-
-             <label className="full-span">
-                Descrição da empresa
-                <textarea
-                  name="descricao_publica"
-                  defaultValue={empresa.descricao_publica || ''}
-                  placeholder="Conte um pouco sobre a empresa, história, diferenciais ou informações importantes para o cliente."
-                />
-             </label>
-
-            <label>
-              Cor principal
-              <input name="tema_cor" type="color" defaultValue={empresa.tema_cor || '#0f766e'} />
-            </label>
-
-            <label>
-              Logo URL
-              <input name="logo_url" defaultValue={empresa.logo_url || ''} placeholder="https://..." />
-            </label>
-
-            <label>
-              Banner URL
-              <input name="banner_url" defaultValue={empresa.banner_url || ''} placeholder="https://..." />
-            </label>
-
-            <button className="primary-button" type="submit">
-              Salvar dados da empresa
-            </button>
-          </form>
+        <form method="get" action="/admin" className="admin-form compact-form">
+          <label>
+            Escolher empresa
+            <select name="slug" defaultValue={empresa.slug}>
+              {empresas.map((item) => (
+                <option key={item.id} value={item.slug}>
+                  {item.nome}
+                  {item.bloqueado ? ' - bloqueada' : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+    
+          <button className="secondary-button" type="submit">
+            Abrir
+          </button>
+        </form>
+      ) : null}
+    
+      <div className="company-summary">
+        <div>
+          <span>Segmento</span>
+          <strong>{segmentos[empresa.segmento] || empresa.segmento}</strong>
+        </div>
+    
+        <div>
+          <span>Oferta</span>
+          <strong>{tiposOferta[empresa.tipo_oferta] || empresa.tipo_oferta}</strong>
+        </div>
+    
+        <div>
+          <span>Link público</span>
+          <strong>/cardapio/{empresa.slug}</strong>
+        </div>
+      </div>
+    
+      <form action="/admin/company" method="post" className="admin-form company-edit-form">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+    
+        <label>
+          Nome da empresa
+          <input name="nome" defaultValue={empresa.nome || ''} required />
+        </label>
+    
+        <label>
+          WhatsApp
+          <input name="whatsapp" defaultValue={empresa.whatsapp || ''} placeholder="DDD + número. Ex: 61999999999" />
+        </label>
+    
+        <label>
+          Segmento
+          <select name="segmento" defaultValue={empresa.segmento || 'outros'}>
+            <option value="alimentacao">Alimentação</option>
+            <option value="festas_decoracao">Festas e decoração</option>
+            <option value="moda">Moda</option>
+            <option value="beleza">Beleza</option>
+            <option value="saude">Saúde</option>
+            <option value="educacao">Educação</option>
+            <option value="servicos_gerais">Serviços gerais</option>
+            <option value="automotivo">Automotivo</option>
+            <option value="casa_construcao">Casa e construção</option>
+            <option value="tecnologia">Tecnologia</option>
+            <option value="outros">Outros</option>
+          </select>
+        </label>
+    
+        <label>
+          Tipo de oferta
+          <select name="tipo_oferta" defaultValue={empresa.tipo_oferta || 'produtos'}>
+            <option value="produtos">Produtos</option>
+            <option value="servicos">Serviços</option>
+            <option value="misto">Produtos e serviços</option>
+          </select>
+        </label>
+    
+        <label>
+          Título público
+          <input name="titulo_publico" defaultValue={empresa.titulo_publico || empresa.nome || ''} />
+        </label>
+    
+        <label>
+          Subtítulo público
+          <input name="subtitulo_publico" defaultValue={empresa.subtitulo_publico || ''} />
+        </label>
+    
+        <label className="full-span">
+          Descrição da empresa
+          <textarea
+            name="descricao_publica"
+            defaultValue={empresa.descricao_publica || ''}
+            placeholder="Conte um pouco sobre a empresa, história, diferenciais ou informações importantes para o cliente."
+          />
+        </label>
+    
+        <label>
+          Cor principal
+          <input name="tema_cor" type="color" defaultValue={empresa.tema_cor || '#0f766e'} />
+        </label>
+    
+        <label>
+          Logo URL
+          <input name="logo_url" defaultValue={empresa.logo_url || ''} placeholder="https://..." />
+        </label>
+    
+        <label>
+          Banner URL
+          <input name="banner_url" defaultValue={empresa.banner_url || ''} placeholder="https://..." />
+        </label>
+    
+        <button className="primary-button" type="submit">
+          Salvar dados da empresa
+        </button>
+      </form>
 
           {isNexoraAdmin ? (
             <div className="admin-actions-row">
