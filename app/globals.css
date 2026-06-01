@@ -986,3 +986,24 @@ input[type="checkbox"] {
     border-radius: 8px;
   }
 }
+
+.catalog-about {
+  margin-top: 42px;
+  padding-bottom: 18px;
+}
+
+.catalog-about h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.catalog-about p {
+  max-width: 820px;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid rgba(33, 31, 28, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+  line-height: 1.55;
+}
