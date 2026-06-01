@@ -435,6 +435,7 @@ export default async function AdminPage({ searchParams }) {
              <div className="full-span company-media-grid">
         <div className="company-media-card">
           <span className="field-title">Logo da empresa</span>
+          <small className="media-hint">Ideal: imagem quadrada, 600 x 600 px.</small>
       
           {empresa.logo_url ? (
             <img className="company-logo-preview" src={empresa.logo_url} alt={`Logo ${empresa.nome}`} />
@@ -468,6 +469,7 @@ export default async function AdminPage({ searchParams }) {
       
         <div className="company-media-card">
           <span className="field-title">Banner do catálogo</span>
+          <small className="media-hint">Ideal: imagem horizontal, 1600 x 600 px ou 1920 x 720 px.</small>
       
           {empresa.banner_url ? (
             <img className="company-banner-preview" src={empresa.banner_url} alt={`Banner ${empresa.nome}`} />
@@ -500,32 +502,33 @@ export default async function AdminPage({ searchParams }) {
         </div>
       </div>
       
-      <form id={`company-logo-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
-        <input type="hidden" name="empresa_id" value={empresa.id} />
-        <input type="hidden" name="tipo" value="logo" />
+         <button className="primary-button" type="submit">
+         Salvar dados da empresa
+         </button>
+      </form>
+
+       <form id={`company-logo-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
+       <input type="hidden" name="empresa_id" value={empresa.id} />
+       <input type="hidden" name="tipo" value="logo" />
       </form>
       
-      <form id={`company-logo-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
+       <form id={`company-logo-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="logo" />
         <input type="hidden" name="acao" value="excluir" />
       </form>
       
-      <form id={`company-banner-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
+       <form id={`company-banner-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="banner" />
       </form>
       
-      <form id={`company-banner-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
+       <form id={`company-banner-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="banner" />
         <input type="hidden" name="acao" value="excluir" />
       </form>
           
-        <button className="primary-button" type="submit">
-         Salvar dados da empresa
-         </button>
-      </form>
 
           {isNexoraAdmin ? (
             <div className="admin-actions-row">
