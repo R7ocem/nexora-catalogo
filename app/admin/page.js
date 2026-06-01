@@ -984,6 +984,34 @@ export default async function AdminPage({ searchParams }) {
               }
             });
           });
+          
+          document.querySelectorAll('.company-media-card input[type="file"]').forEach(function (input) {
+            input.addEventListener('change', function () {
+              if (!input.files || input.files.length === 0) return;
+          
+              var file = input.files[0];
+              var card = input.closest('.company-media-card');
+          
+              if (!card || !file.type.startsWith('image/')) return;
+          
+              var preview = card.querySelector('img');
+              var emptyText = card.querySelector('.muted');
+              var url = URL.createObjectURL(file);
+          
+              if (!preview) {
+                preview = document.createElement('img');
+                preview.className = card.textContent.includes('Banner') ? 'company-banner-preview' : 'company-logo-preview';
+                preview.alt = 'Prévia da imagem';
+                card.insertBefore(preview, card.querySelector('.photo-actions'));
+              }
+          
+              preview.src = url;
+          
+              if (emptyText) {
+                emptyText.style.display = 'none';
+              }
+            });
+          });                    
          `
        }}
       />
