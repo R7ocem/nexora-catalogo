@@ -421,6 +421,11 @@ export default async function AdminPage({ searchParams }) {
               <input name="logo_url" defaultValue={empresa.logo_url || ''} placeholder="https://..." />
             </label>
 
+            <label>
+              Banner URL
+              <input name="banner_url" defaultValue={empresa.banner_url || ''} placeholder="https://..." />
+            </label>
+
             <button className="primary-button" type="submit">
               Salvar dados da empresa
             </button>
