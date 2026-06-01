@@ -454,25 +454,27 @@ export default async function AdminPage({ searchParams }) {
             </button>
           </form> 
 
-          <div className="admin-actions-row">
-            {empresa.bloqueado ? (
-              <form action="/admin/company-status" method="post">
-                <input type="hidden" name="empresa_id" value={empresa.id} />
-                <input type="hidden" name="acao" value="desbloquear" />
-                <button className="primary-button" type="submit">
-                  Desbloquear empresa
-                </button>
-              </form>
-            ) : (
-              <form action="/admin/company-status" method="post">
-                <input type="hidden" name="empresa_id" value={empresa.id} />
-                <input type="hidden" name="acao" value="bloquear" />
-                <button className="danger-button" type="submit">
-                  Bloquear por mensalidade
-                </button>
-              </form>
-            )}
-          </div>
+          {isNexoraAdmin ? (
+            <div className="admin-actions-row">
+              {empresa.bloqueado ? (
+                <form action="/admin/company-status" method="post">
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <input type="hidden" name="acao" value="desbloquear" />
+                  <button className="primary-button" type="submit">
+                    Desbloquear empresa
+                  </button>
+                </form>
+              ) : (
+                <form action="/admin/company-status" method="post">
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <input type="hidden" name="acao" value="bloquear" />
+                  <button className="danger-button" type="submit">
+                    Bloquear por mensalidade
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
