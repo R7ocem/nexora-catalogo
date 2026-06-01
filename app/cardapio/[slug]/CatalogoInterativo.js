@@ -52,6 +52,8 @@ function montarMensagem(empresa, itens) {
 
 export default function CatalogoInterativo({ empresa, categorias, semCategoria }) {
   const [carrinho, setCarrinho] = useState([]);
+  const [pedidoAberto, setPedidoAberto] = useState(false);
+
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
   const subtitulo = empresa.subtitulo_publico || 'Catálogo digital';
   const corPrincipal = empresa.tema_cor || '#0f766e';
@@ -161,10 +163,17 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
           ))}
         </select>
 
-        <div className="catalog-bag">
-          <span>Sacola</span>
-          <strong>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'}</strong>
-          <strong>{total > 0 ? money(total) : 'R$ 0,00'}</strong>
+        <div className="catalog-order-summary">
+          <span className="bag-icon" aria-hidden="true" />
+
+          <div className="catalog-order-totals">
+            <strong>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'}</strong>
+            <span>{total > 0 ? money(total) : 'R$ 0,00'}</span>
+          </div>
+
+          <button type="button" onClick={() => setPedidoAberto(true)}>
+            Ver pedido
+          </button>
         </div>
       </nav>
 
@@ -212,40 +221,57 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
         </section>
       ))}
 
-      <section className="cart-panel catalog-cart-panel">
-        <h2>Pedido</h2>
+      {pedidoAberto ? (
+        <div className="order-overlay" onClick={() => setPedidoAberto(false)}>
+          <aside className="order-drawer" onClick={(event) => event.stopPropagation()}>
+            <div className="order-drawer-header">
+              <div>
+                <h2>Seu pedido</h2>
+                <p>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'} na sacola</p>
+              </div>
 
-        {carrinho.length === 0 ? (
-          <p className="muted">Nenhum item adicionado ainda.</p>
-        ) : (
-          <>
-            <div className="cart-items">
-              {carrinho.map((item) => (
-                <div key={item.id} className="cart-item">
-                  <div>
-                    <strong>{item.nome}</strong>
-                    <span>{precoTexto(item)}</span>
-                  </div>
-
-                  <div className="cart-quantity">
-                    <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}>
-                      -
-                    </button>
-                    <span>{item.quantidade}</span>
-                    <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}>
-                      +
-                    </button>
-                  </div>
-                </div>
-              ))}
+              <button type="button" onClick={() => setPedidoAberto(false)}>
+                Fechar
+              </button>
             </div>
 
-            {total > 0 ? (
-              <strong className="cart-total">Total aproximado: {money(total)}</strong>
-            ) : null}
-          </>
-        )}
-      </section>
+            {carrinho.length === 0 ? (
+              <p className="muted">Nenhum item adicionado ainda.</p>
+            ) : (
+              <>
+                <div className="cart-items order-cart-items">
+                  {carrinho.map((item) => (
+                    <div key={item.id} className="cart-item">
+                      <div>
+                        <strong>{item.nome}</strong>
+                        <span>{precoTexto(item)}</span>
+                      </div>
+
+                      <div className="cart-quantity">
+                        <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}>
+                          -
+                        </button>
+                        <span>{item.quantidade}</span>
+                        <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}>
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {total > 0 ? (
+                  <strong className="cart-total">Total aproximado: {money(total)}</strong>
+                ) : null}
+
+                <a className="primary-button order-whatsapp-button" href={whatsappUrl} target="_blank" rel="noreferrer">
+                  Enviar pelo WhatsApp
+                </a>
+              </>
+            )}
+          </aside>
+        </div>
+      ) : null}
 
       <a
         className={carrinho.length > 0 ? 'floating-whatsapp active' : 'floating-whatsapp'}
