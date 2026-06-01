@@ -51,6 +51,7 @@ export async function POST(request) {
   const descricaoPublica = texto(formData.get('descricao_publica'));
   const temaCor = texto(formData.get('tema_cor')) || '#0f766e';
   const logoUrl = texto(formData.get('logo_url'));
+  const bannerUrl = texto(formData.get('banner_url'));
 
   if (!empresaId || !nome) {
     redirect('/admin');
@@ -76,6 +77,7 @@ export async function POST(request) {
        descricao_publica = $8,
        tema_cor = $9,
        logo_url = $10
+       banner_url = $11
       WHERE id = $1`,
     [
       empresaId,
@@ -87,7 +89,8 @@ export async function POST(request) {
       subtituloPublico,
       descricaoPublica,
       temaCor,
-      logoUrl
+      logoUrl,
+      bannerUrl
     ]
   );
 
