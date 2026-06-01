@@ -48,6 +48,7 @@ export async function POST(request) {
   const tipoOferta = texto(formData.get('tipo_oferta'));
   const tituloPublico = texto(formData.get('titulo_publico'));
   const subtituloPublico = texto(formData.get('subtitulo_publico'));
+  const descricaoPublica = texto(formData.get('descricao_publica'));
   const temaCor = texto(formData.get('tema_cor')) || '#0f766e';
   const logoUrl = texto(formData.get('logo_url'));
 
@@ -72,9 +73,10 @@ export async function POST(request) {
        tipo_oferta = $5,
        titulo_publico = $6,
        subtitulo_publico = $7,
-       tema_cor = $8,
-       logo_url = $9
-     WHERE id = $1`,
+       descricao_publica = $8,
+       tema_cor = $9,
+       logo_url = $10
+      WHERE id = $1`,
     [
       empresaId,
       nome,
@@ -83,6 +85,7 @@ export async function POST(request) {
       tipoOfertaFinal,
       tituloPublico || nome,
       subtituloPublico,
+      descricaoPublica,
       temaCor,
       logoUrl
     ]
