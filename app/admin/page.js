@@ -432,19 +432,99 @@ export default async function AdminPage({ searchParams }) {
           <input name="tema_cor" type="color" defaultValue={empresa.tema_cor || '#0f766e'} />
         </label>
     
-        <label>
-          Logo URL
-          <input name="logo_url" defaultValue={empresa.logo_url || ''} placeholder="https://..." />
-        </label>
-    
-        <label>
-          Banner URL
-          <input name="banner_url" defaultValue={empresa.banner_url || ''} placeholder="https://..." />
-        </label>
-    
+             <div className="full-span company-media-grid">
+        <div className="company-media-card">
+          <span className="field-title">Logo da empresa</span>
+      
+          {empresa.logo_url ? (
+            <img className="company-logo-preview" src={empresa.logo_url} alt={`Logo ${empresa.nome}`} />
+          ) : (
+            <span className="muted">Nenhuma logo cadastrada.</span>
+          )}
+      
+          <div className="photo-actions">
+            <label className="secondary-button photo-button">
+              {empresa.logo_url ? 'Trocar logo' : 'Adicionar logo'}
+              <input
+                className="file-hidden company-media-auto-submit"
+                type="file"
+                name="foto"
+                accept="image/*"
+                form={`company-logo-form-${empresa.id}`}
+              />
+            </label>
+      
+            {empresa.logo_url ? (
+              <button
+                className="danger-button"
+                type="submit"
+                form={`company-logo-delete-form-${empresa.id}`}
+              >
+                Excluir logo
+              </button>
+            ) : null}
+          </div>
+        </div>
+      
+        <div className="company-media-card">
+          <span className="field-title">Banner do catálogo</span>
+      
+          {empresa.banner_url ? (
+            <img className="company-banner-preview" src={empresa.banner_url} alt={`Banner ${empresa.nome}`} />
+          ) : (
+            <span className="muted">Nenhum banner cadastrado.</span>
+          )}
+      
+          <div className="photo-actions">
+            <label className="secondary-button photo-button">
+              {empresa.banner_url ? 'Trocar banner' : 'Adicionar banner'}
+              <input
+                className="file-hidden company-media-auto-submit"
+                type="file"
+                name="foto"
+                accept="image/*"
+                form={`company-banner-form-${empresa.id}`}
+              />
+            </label>
+      
+            {empresa.banner_url ? (
+              <button
+                className="danger-button"
+                type="submit"
+                form={`company-banner-delete-form-${empresa.id}`}
+              >
+                Excluir banner
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      
+      <form id={`company-logo-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="logo" />
+      </form>
+      
+      <form id={`company-logo-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="logo" />
+        <input type="hidden" name="acao" value="excluir" />
+      </form>
+      
+      <form id={`company-banner-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="banner" />
+      </form>
+      
+      <form id={`company-banner-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="banner" />
+        <input type="hidden" name="acao" value="excluir" />
+      </form>
+          
         <button className="primary-button" type="submit">
-          Salvar dados da empresa
-        </button>
+         Salvar dados da empresa
+         </button>
       </form>
 
           {isNexoraAdmin ? (
@@ -854,16 +934,34 @@ export default async function AdminPage({ searchParams }) {
               });
             });
           
-          document.querySelectorAll('.photo-file-name-input').forEach(function (input) {
+                    document.querySelectorAll('.photo-file-name-input').forEach(function (input) {
+                      input.addEventListener('change', function () {
+                        var label = input.closest('.photo-actions')?.querySelector('.photo-file-name');
+              
+                        if (!label) return;
+              
+                        if (input.files && input.files.length > 0) {
+                          label.textContent = 'Foto selecionada: ' + input.files[0].name;
+                        } else {
+                          label.textContent = 'Nenhuma foto selecionada.';
+                        }
+                      });
+                    });
+          
+                    document.querySelectorAll('.company-media-auto-submit').forEach(function (input) {
             input.addEventListener('change', function () {
-              var label = input.closest('.photo-actions')?.querySelector('.photo-file-name');
-    
-              if (!label) return;
-    
-              if (input.files && input.files.length > 0) {
-                label.textContent = 'Foto selecionada: ' + input.files[0].name;
-              } else {
-                label.textContent = 'Nenhuma foto selecionada.';
+              if (!input.files || input.files.length === 0) return;
+          
+              var formId = input.getAttribute('form');
+              var form = formId ? document.getElementById(formId) : null;
+              var button = input.closest('.photo-button');
+          
+              if (button) {
+                button.textContent = 'Enviando imagem...';
+              }
+          
+              if (form) {
+                form.requestSubmit();
               }
             });
           });
