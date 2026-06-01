@@ -1007,3 +1007,44 @@ input[type="checkbox"] {
   color: var(--muted);
   line-height: 1.55;
 }
+
+.company-media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.company-media-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.company-logo-preview {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: white;
+}
+
+.company-banner-preview {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  max-height: 190px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: white;
+}
+
+@media (max-width: 720px) {
+  .company-media-grid {
+    grid-template-columns: 1fr;
+  }
+}
