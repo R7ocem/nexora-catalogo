@@ -40,7 +40,8 @@ async function getAdminData(user, selectedSlug) {
        tema_cor,
        logo_url,
        titulo_publico,
-       subtitulo_publico
+       subtitulo_publico,
+       descricao_publica
      FROM food_empresas
      WHERE ativo = true
      ORDER BY nome`
@@ -399,6 +400,15 @@ export default async function AdminPage({ searchParams }) {
               Subtítulo público
               <input name="subtitulo_publico" defaultValue={empresa.subtitulo_publico || ''} />
             </label>
+
+             <label className="full-span">
+                Descrição da empresa
+                <textarea
+                  name="descricao_publica"
+                  defaultValue={empresa.descricao_publica || ''}
+                  placeholder="Conte um pouco sobre a empresa, história, diferenciais ou informações importantes para o cliente."
+                />
+             </label>
 
             <label>
               Cor principal
