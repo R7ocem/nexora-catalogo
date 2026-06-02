@@ -1615,3 +1615,49 @@ input[type="checkbox"] {
     padding-bottom: 120px;
   }
 }
+
+.highlights-scroll {
+  grid-auto-columns: 190px;
+  gap: 12px;
+  align-items: stretch;
+  padding-bottom: 18px;
+}
+
+.highlight-card {
+  min-height: 292px;
+}
+
+.highlight-image {
+  aspect-ratio: 1 / 0.72;
+}
+
+.highlight-info {
+  min-height: 136px;
+  padding: 10px;
+}
+
+.highlight-info h3 {
+  min-height: 34px;
+  font-size: 15px;
+}
+
+.highlight-bottom strong {
+  font-size: 17px;
+}
+
+.highlight-bottom button {
+  min-height: 36px;
+  font-size: 14px;
+}
+
+@media (max-width: 720px) {
+  .floating-whatsapp {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+  }
+
+  .highlights-scroll {
+    grid-auto-columns: 44vw;
+  }
+}
