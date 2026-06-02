@@ -1336,3 +1336,20 @@ input[type="checkbox"] {
     min-height: 50px;
   }
 }
+
+@media (max-width: 720px) {
+  .catalog-brand-card {
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .catalog-brand-card h1 {
+    font-size: 24px;
+    line-height: 1.08;
+  }
+
+  .catalog-logo {
+    width: 58px;
+    height: 58px;
+  }
+}
