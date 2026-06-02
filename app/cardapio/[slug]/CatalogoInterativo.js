@@ -259,8 +259,8 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
       </section>
 
       <section className="catalog-intro shell catalog-intro-modern">
-        <h2>Escolha seu pedido</h2>
-        <p>Veja os itens disponíveis, adicione à sacola e envie seu pedido pelo WhatsApp.</p>
+        <h2>Escolha. Envie. Aproveite.</h2>
+        
       </section>
 
       {produtosDestaque.length > 0 ? (
