@@ -53,6 +53,7 @@ function montarMensagem(empresa, itens) {
 export default function CatalogoInterativo({ empresa, categorias, semCategoria }) {
   const [carrinho, setCarrinho] = useState([]);
   const [pedidoAberto, setPedidoAberto] = useState(false);
+  const [categoriasAberto, setCategoriasAberto] = useState(false);
 
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
   const subtitulo = empresa.subtitulo_publico || 'Catálogo digital';
@@ -139,48 +140,66 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
         <div className="product-title-row">
           <h3>{produto.nome}</h3>
           <span>{tipoItemTexto(produto.tipo_item)}</span>
-        </div>
-
-        {produto.descricao ? (
-          <p className="product-description">{produto.descricao}</p>
-        ) : null}
-
-        <div className="product-buy-row">
-          <strong>{precoTexto(produto)}</strong>
-
-          <button
-            className="primary-button product-add-button"
-            style={{ background: corPrincipal }}
-            type="button"
-            onClick={() => adicionar(produto)}
-          >
-            {precoSobConsulta ? 'Consultar' : 'Adicionar'}
-          </button>
-        </div>
       </div>
-    </article>
-  );
-}
-  return (
-    <div className="catalog-page" style={{ '--catalog-brand': corPrincipal }}>
-      <nav className="catalog-topbar">
-        <select className="catalog-category-select" defaultValue="" onChange={irParaCategoria}>
-          <option value="">Buscar por categoria</option>
-          {categoriasVisiveis.map((categoria) => (
-            <option key={categoria.id} value={`categoria-${categoria.id}`}>
-              {categoria.nome}
-            </option>
-          ))}
-        </select>
-
+      
+         {produto.descricao ? (
+         <p className="product-description">{produto.descricao}</p>
+          ) : null}
+      
+              <div className="product-buy-row">
+                <strong>{precoTexto(produto)}</strong>
+      
+                <button
+                  className="primary-button product-add-button"
+                  style={{ background: corPrincipal }}
+                  type="button"
+                  onClick={() => adicionar(produto)}
+                >
+                  {precoSobConsulta ? 'Consultar' : 'Adicionar'}
+                </button>
+              </div>
+            </div>
+          </article>
+        );
+      }
+        return (
+          <div className="catalog-page" style={{ '--catalog-brand': corPrincipal }}>
+            <nav className="catalog-topbar catalog-topbar-compact">
+        <div className="category-menu-wrap">
+          <button
+            className="category-icon-button"
+            type="button"
+            aria-label="Categorias"
+            onClick={() => setCategoriasAberto((aberto) => !aberto)}
+          >
+            <span className="category-icon-lines" />
+          </button>
+      
+          {categoriasAberto ? (
+            <div className="category-popover">
+              <strong>Categorias</strong>
+      
+              {categoriasVisiveis.map((categoria) => (
+                <button
+                  key={categoria.id}
+                  type="button"
+                  onClick={() => irParaCategoria(`categoria-${categoria.id}`)}
+                >
+                  {categoria.nome}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      
         <div className="catalog-order-summary">
           <span className="bag-icon" aria-hidden="true" />
-
+      
           <div className="catalog-order-totals">
             <strong>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'}</strong>
             <span>{total > 0 ? money(total) : 'R$ 0,00'}</span>
           </div>
-
+      
           <button type="button" onClick={() => setPedidoAberto(true)}>
             Ver pedido
           </button>
