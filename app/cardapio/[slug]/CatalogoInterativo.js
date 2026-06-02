@@ -118,24 +118,30 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
     ? `https://wa.me/${whatsapp}?text=${mensagem}`
     : '#';
 
-  function renderProduto(produto) {
-    return (
-      <article key={produto.id} className="product-card">
+ function renderProduto(produto) {
+  const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
+
+  return (
+    <article key={produto.id} className="product-card premium-product-card">
+      <div className="product-image-wrap">
         {produto.imagem_url ? (
           <img src={produto.imagem_url} alt={produto.nome} />
         ) : (
           <div className="product-placeholder">Sem foto</div>
         )}
+      </div>
 
-        <div className="product-info">
+      <div className="product-info">
+        <div className="product-title-row">
           <h3>{produto.nome}</h3>
+          <span>{tipoItemTexto(produto.tipo_item)}</span>
+        </div>
 
-          {produto.descricao ? <p>{produto.descricao}</p> : null}
+        {produto.descricao ? (
+          <p className="product-description">{produto.descricao}</p>
+        ) : null}
 
-          <div className="product-meta">
-            <span>{tipoItemTexto(produto.tipo_item)}</span>
-          </div>
-
+        <div className="product-buy-row">
           <strong>{precoTexto(produto)}</strong>
 
           <button
@@ -144,13 +150,13 @@ export default function CatalogoInterativo({ empresa, categorias, semCategoria }
             type="button"
             onClick={() => adicionar(produto)}
           >
-            Adicionar
+            {precoSobConsulta ? 'Consultar' : 'Adicionar'}
           </button>
         </div>
-      </article>
-    );
-  }
-
+      </div>
+    </article>
+  );
+}
   return (
     <div className="catalog-page" style={{ '--catalog-brand': corPrincipal }}>
       <nav className="catalog-topbar">
