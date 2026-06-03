@@ -295,9 +295,10 @@
   color: var(--text);
 }
 
-.order-drawer-icon .bag-icon {
-  width: 28px;
-  height: 25px;
+.order-drawer-icon svg {
+  width: 34px;
+  height: 34px;
+  display: block;
 }
 
 .order-cart-items {
@@ -360,8 +361,13 @@
   border-color: transparent;
   background: transparent;
   color: #dc2626;
-  font-size: 30px;
   box-shadow: none;
+}
+
+.cart-remove svg {
+  width: 26px;
+  height: 26px;
+  display: block;
 }
 
 .order-whatsapp-button {
@@ -379,10 +385,12 @@
   height: 25px;
   display: inline-grid;
   place-items: center;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  font-size: 17px;
-  line-height: 1;
+}
+
+.whatsapp-mark svg {
+  width: 25px;
+  height: 25px;
+  display: block;
 }
 
 .order-whatsapp-button.disabled {

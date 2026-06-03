@@ -118,6 +118,35 @@ function estaAbertoAgora(valor) {
   return minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
 }
 
+function CartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="20" r="1.8" fill="currentColor" />
+      <circle cx="18" cy="20" r="1.8" fill="currentColor" />
+      <path d="M3 4h2.6l2.2 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4l1.5-5.4H7.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M10 11v6M14 11v6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M6.5 7l.8 13h9.4l.8-13M9 7l.7-3h4.6l.7 3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5.1 18.9 6 15.6a7.6 7.6 0 1 1 2.7 2.7l-3.6.6Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M9.1 8.7c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.6c.1.3.1.5-.1.7l-.4.5c-.1.2-.2.3 0 .6.4.7 1.2 1.6 2.3 2.1.3.2.5.1.6-.1l.6-.7c.2-.2.4-.3.7-.2l1.6.8c.3.1.4.3.4.6 0 .7-.5 1.5-1.1 1.7-.8.3-2.3 0-4.1-1.1-1.8-1.1-3.3-3-3.8-4.8-.3-1 .1-1.4.4-1.6Z" fill="currentColor" />
+    </svg>
+  );
+}
+
  export default function CatalogoInterativo({ empresa, categorias, semCategoria }) {
   const [carrinho, setCarrinho] = useState([]);
   const [pedidoAberto, setPedidoAberto] = useState(false);
@@ -531,7 +560,7 @@ function estaAbertoAgora(valor) {
           <aside className="order-drawer" onClick={(event) => event.stopPropagation()}>
             <div className="order-drawer-header">
               <span className="order-drawer-icon" aria-hidden="true">
-                <span className="bag-icon" />
+                <CartIcon />
               </span>
 
               <div>
@@ -575,7 +604,7 @@ function estaAbertoAgora(valor) {
                           aria-label={`Remover ${item.nome}`}
                           onClick={() => alterarQuantidade(item.id, 0)}
                         >
-                          ×
+                          <TrashIcon />
                         </button>
                       </div>
                     </div>
@@ -628,7 +657,9 @@ function estaAbertoAgora(valor) {
                     if (!pedidoPodeEnviar) event.preventDefault();
                   }}
                 >
-                  <span className="whatsapp-mark" aria-hidden="true">☏</span>
+                  <span className="whatsapp-mark" aria-hidden="true">
+                    <WhatsAppIcon />
+                  </span>
                   Enviar pelo WhatsApp
                 </a>
               </>
