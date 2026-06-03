@@ -620,8 +620,8 @@ export default async function AdminPage({ searchParams }) {
                 src={empresa.logo_url}
                 alt={`Logo ${empresa.nome}`}
                 style={{
-                  objectPosition: empresa.logo_posicao || '50% 50%',
-                  transform: `scale(${Number(empresa.logo_zoom || 1) || 1})`
+                  objectPosition: Number(empresa.logo_zoom || 1) > 1.01 ? (empresa.logo_posicao || '50% 50%') : '50% 50%',
+                  transform: Number(empresa.logo_zoom || 1) > 1.01 ? `scale(${Number(empresa.logo_zoom || 1) || 1})` : 'scale(1)'
                 }}
               />
             </div>
@@ -694,8 +694,8 @@ export default async function AdminPage({ searchParams }) {
                 src={empresa.banner_url}
                 alt={`Banner ${empresa.nome}`}
                 style={{
-                  objectPosition: empresa.banner_posicao || '50% 50%',
-                  transform: `scale(${Number(empresa.banner_zoom || 1) || 1})`
+                  objectPosition: Number(empresa.banner_zoom || 1) > 1.01 ? (empresa.banner_posicao || '50% 50%') : '50% 50%',
+                  transform: Number(empresa.banner_zoom || 1) > 1.01 ? `scale(${Number(empresa.banner_zoom || 1) || 1})` : 'scale(1)'
                 }}
               />
             </div>
@@ -1280,10 +1280,13 @@ export default async function AdminPage({ searchParams }) {
             }
 
             function transformForPosition(position, zoom) {
+              var safeZoom = Number(zoom || 1) || 1;
+
+              if (safeZoom <= 1.01) return 'scale(1)';
+
               var match = String(position || '50% 50%').match(/([0-9.]+)%\s+([0-9.]+)%/);
               var x = match ? Number(match[1]) : 50;
               var y = match ? Number(match[2]) : 50;
-              var safeZoom = Number(zoom || 1) || 1;
               var moveFactor = Math.max(0, safeZoom - 1) * 55;
               var translateX = ((50 - x) / 50) * moveFactor;
               var translateY = ((50 - y) / 50) * moveFactor;
@@ -1295,6 +1298,9 @@ export default async function AdminPage({ searchParams }) {
               var preview = image();
               if (!preview || !zoomInput) return;
 
+              preview.style.objectPosition = Number(zoomInput.value || 1) > 1.01
+                ? (positionInput?.value || '50% 50%')
+                : '50% 50%';
               preview.style.transform = transformForPosition(positionInput?.value, zoomInput.value || '1');
               syncFields(zoomName, zoomInput.value || '1');
             }
@@ -1321,7 +1327,7 @@ export default async function AdminPage({ searchParams }) {
 
               positionInput.value = value;
               syncFields(positionName, value);
-              preview.style.objectPosition = value;
+              preview.style.objectPosition = Number(zoomInput?.value || 1) > 1.01 ? value : '50% 50%';
               preview.style.transform = transformForPosition(value, zoomInput?.value || '1');
             }
 
