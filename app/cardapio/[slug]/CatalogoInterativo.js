@@ -317,18 +317,32 @@ function montarMensagem(empresa, itens) {
             <p>Itens selecionados para facilitar sua escolha.</p>
           </div>
 
-          <div className="highlights-wrap">
+         <div className="highlights-wrap">
+            <button
+              className="highlights-arrow highlights-prev"
+              type="button"
+              aria-label="Voltar destaques"
+              onClick={() => {
+                destaquesRef.current?.scrollBy({
+                  left: -220,
+                  behavior: 'smooth'
+                });
+              }}
+            >
+              ‹
+            </button>
+          
             <div className="highlights-scroll" ref={destaquesRef}>
               {produtosDestaque.map(renderDestaque)}
             </div>
           
             <button
-              className="highlights-next"
+              className="highlights-arrow highlights-next"
               type="button"
               aria-label="Ver mais destaques"
               onClick={() => {
                 destaquesRef.current?.scrollBy({
-                  left: 420,
+                  left: 220,
                   behavior: 'smooth'
                 });
               }}
