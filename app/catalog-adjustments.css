@@ -31,10 +31,11 @@
 }
 
 .highlights-wrap {
-  padding-inline: 10px;
+  padding-inline: 0;
 }
 
 .highlights-scroll {
+  padding-left: 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(33, 31, 28, 0.1) transparent;
 }
@@ -107,6 +108,10 @@
   }
 
   .floating-whatsapp {
-    bottom: max(10px, env(safe-area-inset-bottom));
+    left: 52px;
+    right: 52px;
+    min-width: 0;
+    min-height: 46px;
+    bottom: max(4px, env(safe-area-inset-bottom));
   }
 }
