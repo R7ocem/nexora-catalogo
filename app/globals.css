@@ -1835,3 +1835,64 @@ input[type="checkbox"] {
     font-size: 13px;
   }
 }
+
+.highlights-wrap {
+  position: relative;
+}
+
+.highlights-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(33, 31, 28, 0.18) transparent;
+}
+
+.highlights-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.highlights-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.highlights-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(33, 31, 28, 0.18);
+}
+
+.highlights-next {
+  position: absolute;
+  top: 42%;
+  right: -18px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: white;
+  color: var(--catalog-brand);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(31, 24, 16, 0.16);
+}
+
+.highlights-next:hover {
+  background: var(--catalog-brand);
+  color: white;
+}
+
+@media (max-width: 720px) {
+  .highlights-next {
+    display: none;
+  }
+
+  .highlights-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .highlights-scroll {
+    scrollbar-width: none;
+  }
+}
