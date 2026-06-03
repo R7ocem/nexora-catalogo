@@ -1858,10 +1858,9 @@ input[type="checkbox"] {
   background: rgba(33, 31, 28, 0.18);
 }
 
-.highlights-next {
+.highlights-arrow {
   position: absolute;
   top: 42%;
-  right: -18px;
   z-index: 3;
   width: 42px;
   height: 42px;
@@ -1878,21 +1877,21 @@ input[type="checkbox"] {
   box-shadow: 0 12px 28px rgba(31, 24, 16, 0.16);
 }
 
-.highlights-next:hover {
+.highlights-prev {
+  left: -18px;
+}
+
+.highlights-next {
+  right: -18px;
+}
+
+.highlights-arrow:hover {
   background: var(--catalog-brand);
   color: white;
 }
 
 @media (max-width: 720px) {
-  .highlights-next {
+  .highlights-arrow {
     display: none;
-  }
-
-  .highlights-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .highlights-scroll {
-    scrollbar-width: none;
   }
 }
