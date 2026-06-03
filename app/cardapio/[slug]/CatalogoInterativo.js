@@ -530,13 +530,17 @@ function estaAbertoAgora(valor) {
         <div className="order-overlay" onClick={() => setPedidoAberto(false)}>
           <aside className="order-drawer" onClick={(event) => event.stopPropagation()}>
             <div className="order-drawer-header">
+              <span className="order-drawer-icon" aria-hidden="true">
+                <span className="bag-icon" />
+              </span>
+
               <div>
                 <h2>Seu pedido</h2>
                 <p>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'} na sacola</p>
               </div>
 
               <button type="button" onClick={() => setPedidoAberto(false)}>
-                Fechar
+                ×
               </button>
             </div>
 
@@ -552,7 +556,7 @@ function estaAbertoAgora(valor) {
                 <div className="cart-items order-cart-items">
                   {carrinho.map((item) => (
                     <div key={item.id} className="cart-item">
-                      <div>
+                      <div className="cart-item-main">
                         <strong>{item.nome}</strong>
                         <span>{precoTexto(item)}</span>
                       </div>
@@ -565,6 +569,14 @@ function estaAbertoAgora(valor) {
                         <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}>
                           +
                         </button>
+                        <button
+                          className="cart-remove"
+                          type="button"
+                          aria-label={`Remover ${item.nome}`}
+                          onClick={() => alterarQuantidade(item.id, 0)}
+                        >
+                          ×
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -572,7 +584,7 @@ function estaAbertoAgora(valor) {
 
                 {opcoesPedido.tiposEntrega.length > 0 ? (
                   <div className="order-choice-group">
-                    <strong>Recebimento</strong>
+                    <strong>Como quer receber?</strong>
                     <div className="choice-buttons">
                       {opcoesPedido.tiposEntrega.map((opcao) => (
                         <button
@@ -590,7 +602,7 @@ function estaAbertoAgora(valor) {
 
                 {opcoesPedido.pagamentos.length > 0 ? (
                   <div className="order-choice-group">
-                    <strong>Pagamento</strong>
+                    <strong>Forma de Pagamento?</strong>
                     <div className="choice-buttons">
                       {opcoesPedido.pagamentos.map((opcao) => (
                         <button
@@ -616,6 +628,7 @@ function estaAbertoAgora(valor) {
                     if (!pedidoPodeEnviar) event.preventDefault();
                   }}
                 >
+                  <span className="whatsapp-mark" aria-hidden="true">☏</span>
                   Enviar pelo WhatsApp
                 </a>
               </>
