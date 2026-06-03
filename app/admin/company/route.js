@@ -28,16 +28,25 @@ const fundosCatalogoPermitidos = [
   'personalizado'
 ];
 
-const posicoesImagemPermitidas = [
-  'center',
-  'top',
-  'bottom',
-  'left',
-  'right'
-];
-
 function texto(valor) {
   return String(valor || '').trim();
+}
+
+function numero(valor, fallback = 1) {
+  const numeroFinal = Number(String(valor || '').replace(',', '.'));
+
+  return Number.isFinite(numeroFinal) ? numeroFinal : fallback;
+}
+
+function posicaoImagem(valor) {
+  const partes = texto(valor).match(/^(\d{1,3}(?:\.\d+)?)%\s+(\d{1,3}(?:\.\d+)?)%$/);
+
+  if (!partes) return '50% 50%';
+
+  const x = Math.min(100, Math.max(0, Number(partes[1])));
+  const y = Math.min(100, Math.max(0, Number(partes[2])));
+
+  return `${x}% ${y}%`;
 }
 
 function montarHorarios(formData) {
@@ -93,8 +102,10 @@ export async function POST(request) {
   const usarGradiente = formData.get('usar_gradiente') === 'on';
   const catalogoFundoTipo = texto(formData.get('catalogo_fundo_tipo')) || 'claro';
   const catalogoFundoCor = texto(formData.get('catalogo_fundo_cor')) || '#f7f4ef';
-  const logoPosicao = texto(formData.get('logo_posicao')) || 'center';
-  const bannerPosicao = texto(formData.get('banner_posicao')) || 'center';
+  const logoPosicao = posicaoImagem(formData.get('logo_posicao'));
+  const logoZoom = Math.min(2, Math.max(1, numero(formData.get('logo_zoom'), 1)));
+  const bannerPosicao = posicaoImagem(formData.get('banner_posicao'));
+  const bannerZoom = Math.min(2, Math.max(1, numero(formData.get('banner_zoom'), 1)));
   const horariosFuncionamento = montarHorarios(formData);
   const opcoesPedido = montarOpcoesPedido(formData);
 
@@ -118,14 +129,6 @@ export async function POST(request) {
     ? catalogoFundoTipo
     : 'claro';
 
-  const logoPosicaoFinal = posicoesImagemPermitidas.includes(logoPosicao)
-    ? logoPosicao
-    : 'center';
-
-  const bannerPosicaoFinal = posicoesImagemPermitidas.includes(bannerPosicao)
-    ? bannerPosicao
-    : 'center';
-
   await query(
     `UPDATE food_empresas
      SET
@@ -145,7 +148,9 @@ export async function POST(request) {
        catalogo_fundo_tipo = $15,
        catalogo_fundo_cor = $16,
        logo_posicao = $17,
-       banner_posicao = $18
+       logo_zoom = $18,
+       banner_posicao = $19,
+       banner_zoom = $20
       WHERE id = $1`,
     [
       empresaId,
@@ -164,8 +169,10 @@ export async function POST(request) {
       JSON.stringify(opcoesPedido),
       catalogoFundoTipoFinal,
       catalogoFundoCor,
-      logoPosicaoFinal,
-      bannerPosicaoFinal
+      logoPosicao,
+      logoZoom,
+      bannerPosicao,
+      bannerZoom
     ]
   );
 

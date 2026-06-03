@@ -25,14 +25,6 @@ const tiposOferta = {
   misto: 'Produtos e serviços'
 };
 
-const posicoesImagem = [
-  ['center', 'Centro'],
-  ['top', 'Topo'],
-  ['bottom', 'Base'],
-  ['left', 'Esquerda'],
-  ['right', 'Direita']
-];
-
 const fundosCatalogo = [
   ['claro', 'Claro'],
   ['escuro', 'Escuro'],
@@ -91,7 +83,9 @@ async function getAdminData(user, selectedSlug) {
        catalogo_fundo_tipo,
        catalogo_fundo_cor,
        logo_posicao,
+       logo_zoom,
        banner_posicao,
+       banner_zoom,
        logo_url,
        banner_url,
        instagram_url,
@@ -611,27 +605,41 @@ export default async function AdminPage({ searchParams }) {
           <span className="field-title">Logo da empresa</span>
           <small className="media-hint">Ideal: imagem quadrada, 600 x 600 px.</small>
 
-          <label className="media-position-field">
-            Ajuste da logo
-            <select name="logo_posicao" form={`company-edit-form-${empresa.id}`} defaultValue={empresa.logo_posicao || 'center'}>
-              {posicoesImagem.map(([valor, label]) => (
-                <option key={valor} value={valor}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <input
+            type="hidden"
+            name="logo_posicao"
+            form={`company-edit-form-${empresa.id}`}
+            defaultValue={empresa.logo_posicao || '50% 50%'}
+          />
 
           {empresa.logo_url ? (
-            <img
-              className="company-logo-preview"
-              src={empresa.logo_url}
-              alt={`Logo ${empresa.nome}`}
-              style={{ objectPosition: empresa.logo_posicao || 'center' }}
-            />
+            <div className="media-adjust-frame logo-adjust-frame" data-position-input="logo_posicao">
+              <img
+                className="company-logo-preview"
+                src={empresa.logo_url}
+                alt={`Logo ${empresa.nome}`}
+                style={{
+                  objectPosition: empresa.logo_posicao || '50% 50%',
+                  transform: `scale(${Number(empresa.logo_zoom || 1) || 1})`
+                }}
+              />
+            </div>
           ) : (
             <span className="muted">Nenhuma logo cadastrada.</span>
           )}
+
+          <label className="media-zoom-field">
+            Zoom da logo
+            <input
+              name="logo_zoom"
+              form={`company-edit-form-${empresa.id}`}
+              type="range"
+              min="1"
+              max="2"
+              step="0.05"
+              defaultValue={empresa.logo_zoom || 1}
+            />
+          </label>
       
        <div className="photo-actions">
           <label className="secondary-button photo-button">
@@ -669,27 +677,41 @@ export default async function AdminPage({ searchParams }) {
           <span className="field-title">Banner do catálogo</span>
           <small className="media-hint">Ideal: imagem horizontal, 1600 x 600 px ou 1920 x 720 px.</small>
       
-          <label className="media-position-field">
-            Ajuste do banner
-            <select name="banner_posicao" form={`company-edit-form-${empresa.id}`} defaultValue={empresa.banner_posicao || 'center'}>
-              {posicoesImagem.map(([valor, label]) => (
-                <option key={valor} value={valor}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <input
+            type="hidden"
+            name="banner_posicao"
+            form={`company-edit-form-${empresa.id}`}
+            defaultValue={empresa.banner_posicao || '50% 50%'}
+          />
 
           {empresa.banner_url ? (
-            <img
-              className="company-banner-preview"
-              src={empresa.banner_url}
-              alt={`Banner ${empresa.nome}`}
-              style={{ objectPosition: empresa.banner_posicao || 'center' }}
-            />
+            <div className="media-adjust-frame banner-adjust-frame" data-position-input="banner_posicao">
+              <img
+                className="company-banner-preview"
+                src={empresa.banner_url}
+                alt={`Banner ${empresa.nome}`}
+                style={{
+                  objectPosition: empresa.banner_posicao || '50% 50%',
+                  transform: `scale(${Number(empresa.banner_zoom || 1) || 1})`
+                }}
+              />
+            </div>
           ) : (
             <span className="muted">Nenhum banner cadastrado.</span>
           )}
+
+          <label className="media-zoom-field">
+            Zoom do banner
+            <input
+              name="banner_zoom"
+              form={`company-edit-form-${empresa.id}`}
+              type="range"
+              min="1"
+              max="2"
+              step="0.05"
+              defaultValue={empresa.banner_zoom || 1}
+            />
+          </label>
       
         <div className="photo-actions">
           <label className="secondary-button photo-button">
@@ -1227,6 +1249,65 @@ export default async function AdminPage({ searchParams }) {
               }
             });
           });
+
+          document.querySelectorAll('.company-media-card').forEach(function (card) {
+            var frame = card.querySelector('.media-adjust-frame');
+            var zoomInput = card.querySelector('[name="logo_zoom"], [name="banner_zoom"]');
+            var positionInput = card.querySelector('[name="logo_posicao"], [name="banner_posicao"]');
+
+            function image() {
+              return card.querySelector('img');
+            }
+
+            function applyZoom() {
+              var preview = image();
+              if (!preview || !zoomInput) return;
+
+              preview.style.transform = 'scale(' + (zoomInput.value || '1') + ')';
+            }
+
+            function setPosition(clientX, clientY) {
+              var currentFrame = frame || card.querySelector('.media-adjust-frame');
+              var preview = image();
+              if (!currentFrame || !preview || !positionInput) return;
+
+              var rect = currentFrame.getBoundingClientRect();
+              var x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+              var y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+              var value = x.toFixed(1) + '% ' + y.toFixed(1) + '%';
+
+              positionInput.value = value;
+              preview.style.objectPosition = value;
+            }
+
+            if (zoomInput) {
+              zoomInput.addEventListener('input', applyZoom);
+              applyZoom();
+            }
+
+            if (frame && positionInput) {
+              var dragging = false;
+
+              frame.addEventListener('pointerdown', function (event) {
+                dragging = true;
+                frame.setPointerCapture(event.pointerId);
+                setPosition(event.clientX, event.clientY);
+              });
+
+              frame.addEventListener('pointermove', function (event) {
+                if (!dragging) return;
+                setPosition(event.clientX, event.clientY);
+              });
+
+              frame.addEventListener('pointerup', function () {
+                dragging = false;
+              });
+
+              frame.addEventListener('pointercancel', function () {
+                dragging = false;
+              });
+            }
+          });
           
           document.querySelectorAll('.company-media-card input[type="file"]').forEach(function (input) {
             input.addEventListener('change', function () {
@@ -1237,6 +1318,7 @@ export default async function AdminPage({ searchParams }) {
           
               if (!card || !file.type.startsWith('image/')) return;
           
+              var frame = card.querySelector('.media-adjust-frame');
               var preview = card.querySelector('img');
               var emptyText = card.querySelector('.muted');
               var url = URL.createObjectURL(file);
@@ -1245,7 +1327,15 @@ export default async function AdminPage({ searchParams }) {
                 preview = document.createElement('img');
                 preview.className = card.textContent.includes('Banner') ? 'company-banner-preview' : 'company-logo-preview';
                 preview.alt = 'Prévia da imagem';
-                card.insertBefore(preview, card.querySelector('.photo-actions'));
+                if (!frame) {
+                  frame = document.createElement('div');
+                  frame.className = card.textContent.includes('Banner')
+                    ? 'media-adjust-frame banner-adjust-frame'
+                    : 'media-adjust-frame logo-adjust-frame';
+                  card.insertBefore(frame, card.querySelector('.media-zoom-field'));
+                }
+
+                frame.appendChild(preview);
               }
           
               preview.src = url;

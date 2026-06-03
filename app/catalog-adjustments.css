@@ -176,7 +176,8 @@
   gap: 10px 16px;
 }
 
-.media-position-field {
+.media-position-field,
+.media-zoom-field {
   display: grid;
   gap: 7px;
   margin: 6px 0 10px;
@@ -184,6 +185,48 @@
 
 .media-position-field select {
   min-height: 42px;
+}
+
+.media-zoom-field input {
+  width: 100%;
+}
+
+.media-adjust-frame {
+  overflow: hidden;
+  background: #fff;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.media-adjust-frame:active {
+  cursor: grabbing;
+}
+
+.media-adjust-frame img {
+  pointer-events: none;
+  transform-origin: center;
+}
+
+.logo-adjust-frame {
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.banner-adjust-frame {
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  border-radius: 8px;
+}
+
+.logo-adjust-frame .company-logo-preview,
+.banner-adjust-frame .company-banner-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .company-action-bar {
@@ -201,9 +244,7 @@
 }
 
 .catalog-page.catalog-bg-escuro {
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 34%),
-    var(--catalog-bg-custom, #111827);
+  background: #000;
 }
 
 .catalog-page.catalog-bg-personalizado {
@@ -213,13 +254,36 @@
 }
 
 .catalog-bg-escuro .section-title-row h2,
-.catalog-bg-escuro .catalog-category-block h2 {
+.catalog-bg-escuro .catalog-category-block h2,
+.catalog-bg-escuro .catalog-brand-card h1,
+.catalog-bg-escuro .catalog-about h2 {
   color: #f8fafc;
 }
 
 .catalog-bg-escuro .section-title-row p,
+.catalog-bg-escuro .catalog-brand-card p,
+.catalog-bg-escuro .catalog-about p,
 .catalog-bg-escuro .catalog-footer {
   color: rgba(248, 250, 252, 0.72);
+}
+
+.catalog-bg-escuro .catalog-topbar {
+  background: rgba(0, 0, 0, 0.88);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.catalog-bg-escuro .catalog-logo {
+  border-color: #000;
+}
+
+.catalog-hero,
+.catalog-logo {
+  overflow: hidden;
+}
+
+.catalog-hero img,
+.catalog-logo img {
+  transform-origin: center;
 }
 
 .catalog-hero,

@@ -118,6 +118,14 @@ function estaAbertoAgora(valor) {
   return minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
 }
 
+function zoomImagem(valor) {
+  const numero = Number(valor);
+
+  if (!Number.isFinite(numero)) return 1;
+
+  return Math.min(2, Math.max(1, numero));
+}
+
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -166,12 +174,14 @@ function WhatsAppIcon() {
     ? empresa.catalogo_fundo_tipo
     : 'claro';
   const catalogoFundoCor = catalogoFundoTipo === 'escuro'
-    ? '#111827'
+    ? '#000000'
     : catalogoFundoTipo === 'personalizado'
       ? (empresa.catalogo_fundo_cor || '#f7f4ef')
       : '#f7f4ef';
-  const logoPosicao = empresa.logo_posicao || 'center';
-  const bannerPosicao = empresa.banner_posicao || 'center';
+  const logoPosicao = empresa.logo_posicao || '50% 50%';
+  const logoZoom = zoomImagem(empresa.logo_zoom);
+  const bannerPosicao = empresa.banner_posicao || '50% 50%';
+  const bannerZoom = zoomImagem(empresa.banner_zoom);
   const instagramUrl = normalizarInstagramUrl(empresa.instagram_url);
   const estabelecimentoAberto = estaAbertoAgora(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
@@ -426,7 +436,14 @@ function WhatsAppIcon() {
 
       <section className="catalog-hero">
         {empresa.banner_url ? (
-          <img src={empresa.banner_url} alt={nomeEmpresa} style={{ objectPosition: bannerPosicao }} />
+          <img
+            src={empresa.banner_url}
+            alt={nomeEmpresa}
+            style={{
+              objectPosition: bannerPosicao,
+              transform: `scale(${bannerZoom})`
+            }}
+          />
         ) : (
           <div className="catalog-banner-placeholder" />
         )}
@@ -435,7 +452,14 @@ function WhatsAppIcon() {
       <section className="catalog-brand-card">
         <div className="catalog-logo">
           {empresa.logo_url ? (
-            <img src={empresa.logo_url} alt={nomeEmpresa} style={{ objectPosition: logoPosicao }} />
+            <img
+              src={empresa.logo_url}
+              alt={nomeEmpresa}
+              style={{
+                objectPosition: logoPosicao,
+                transform: `scale(${logoZoom})`
+              }}
+            />
           ) : (
             <span>{nomeEmpresa.slice(0, 1)}</span>
           )}
