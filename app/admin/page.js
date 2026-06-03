@@ -608,6 +608,7 @@ export default async function AdminPage({ searchParams }) {
           <input
             type="hidden"
             name="logo_posicao"
+            data-media-position-field="logo_posicao"
             form={`company-edit-form-${empresa.id}`}
             defaultValue={empresa.logo_posicao || '50% 50%'}
           />
@@ -632,6 +633,7 @@ export default async function AdminPage({ searchParams }) {
             Zoom da logo
             <input
               name="logo_zoom"
+              data-media-zoom-field="logo_zoom"
               form={`company-edit-form-${empresa.id}`}
               type="range"
               min="1"
@@ -680,6 +682,7 @@ export default async function AdminPage({ searchParams }) {
           <input
             type="hidden"
             name="banner_posicao"
+            data-media-position-field="banner_posicao"
             form={`company-edit-form-${empresa.id}`}
             defaultValue={empresa.banner_posicao || '50% 50%'}
           />
@@ -704,6 +707,7 @@ export default async function AdminPage({ searchParams }) {
             Zoom do banner
             <input
               name="banner_zoom"
+              data-media-zoom-field="banner_zoom"
               form={`company-edit-form-${empresa.id}`}
               type="range"
               min="1"
@@ -751,6 +755,8 @@ export default async function AdminPage({ searchParams }) {
        <form id={`company-logo-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
        <input type="hidden" name="empresa_id" value={empresa.id} />
        <input type="hidden" name="tipo" value="logo" />
+       <input type="hidden" name="logo_posicao" value={empresa.logo_posicao || '50% 50%'} />
+       <input type="hidden" name="logo_zoom" value={empresa.logo_zoom || 1} />
       </form>
       
        <form id={`company-logo-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
@@ -762,6 +768,8 @@ export default async function AdminPage({ searchParams }) {
        <form id={`company-banner-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="banner" />
+        <input type="hidden" name="banner_posicao" value={empresa.banner_posicao || '50% 50%'} />
+        <input type="hidden" name="banner_zoom" value={empresa.banner_zoom || 1} />
       </form>
       
        <form id={`company-banner-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
@@ -1254,18 +1262,41 @@ export default async function AdminPage({ searchParams }) {
 
           document.querySelectorAll('.company-media-card').forEach(function (card) {
             var frame = card.querySelector('.media-adjust-frame');
-            var zoomInput = card.querySelector('[name="logo_zoom"], [name="banner_zoom"]');
-            var positionInput = card.querySelector('[name="logo_posicao"], [name="banner_posicao"]');
+            var zoomInput = card.querySelector('[data-media-zoom-field]');
+            var positionInput = card.querySelector('[data-media-position-field]');
+            var positionName = positionInput ? positionInput.name : '';
+            var zoomName = zoomInput ? zoomInput.name : '';
 
             function image() {
               return card.querySelector('img');
+            }
+
+            function syncFields(name, value) {
+              if (!name) return;
+
+              document.querySelectorAll('input[name="' + name + '"]').forEach(function (input) {
+                input.value = value;
+              });
+            }
+
+            function transformForPosition(position, zoom) {
+              var match = String(position || '50% 50%').match(/([0-9.]+)%\s+([0-9.]+)%/);
+              var x = match ? Number(match[1]) : 50;
+              var y = match ? Number(match[2]) : 50;
+              var safeZoom = Number(zoom || 1) || 1;
+              var moveFactor = Math.max(0, safeZoom - 1) * 55;
+              var translateX = ((50 - x) / 50) * moveFactor;
+              var translateY = ((50 - y) / 50) * moveFactor;
+
+              return 'translate(' + translateX.toFixed(2) + '%, ' + translateY.toFixed(2) + '%) scale(' + safeZoom + ')';
             }
 
             function applyZoom() {
               var preview = image();
               if (!preview || !zoomInput) return;
 
-              preview.style.transform = 'scale(' + (zoomInput.value || '1') + ')';
+              preview.style.transform = transformForPosition(positionInput?.value, zoomInput.value || '1');
+              syncFields(zoomName, zoomInput.value || '1');
             }
 
             function positionParts() {
@@ -1289,7 +1320,9 @@ export default async function AdminPage({ searchParams }) {
               var value = nextX.toFixed(1) + '% ' + nextY.toFixed(1) + '%';
 
               positionInput.value = value;
+              syncFields(positionName, value);
               preview.style.objectPosition = value;
+              preview.style.transform = transformForPosition(value, zoomInput?.value || '1');
             }
 
             function setPosition(clientX, clientY) {

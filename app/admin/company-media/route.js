@@ -78,6 +78,27 @@ async function enviarImagemParaR2(file, empresaId, tipo) {
   return `${process.env.R2_PUBLIC_URL}/${key}`;
 }
 
+function texto(valor) {
+  return String(valor || '').trim();
+}
+
+function numero(valor, fallback = 1) {
+  const numeroFinal = Number(String(valor || '').replace(',', '.'));
+
+  return Number.isFinite(numeroFinal) ? numeroFinal : fallback;
+}
+
+function posicaoImagem(valor) {
+  const partes = texto(valor).match(/^(\d{1,3}(?:\.\d+)?)%\s+(\d{1,3}(?:\.\d+)?)%$/);
+
+  if (!partes) return '50% 50%';
+
+  const x = Math.min(100, Math.max(0, Number(partes[1])));
+  const y = Math.min(100, Math.max(0, Number(partes[2])));
+
+  return `${x}% ${y}%`;
+}
+
 export async function POST(request) {
   const user = await getCurrentUser();
 
@@ -114,6 +135,10 @@ export async function POST(request) {
   }
 
   const campo = tipo === 'banner' ? 'banner_url' : 'logo_url';
+  const campoPosicao = tipo === 'banner' ? 'banner_posicao' : 'logo_posicao';
+  const campoZoom = tipo === 'banner' ? 'banner_zoom' : 'logo_zoom';
+  const posicao = posicaoImagem(formData.get(campoPosicao));
+  const zoom = Math.min(2, Math.max(1, numero(formData.get(campoZoom), 1)));
   const imagemAnterior = empresa[campo];
 
   if (acao === 'excluir') {
@@ -137,14 +162,24 @@ export async function POST(request) {
   if (novaUrl) {
     await query(
       `UPDATE food_empresas
-       SET ${campo} = $2
+       SET ${campo} = $2,
+           ${campoPosicao} = $3,
+           ${campoZoom} = $4
        WHERE id = $1`,
-      [empresaId, novaUrl]
+      [empresaId, novaUrl, posicao, zoom]
     );
 
     if (imagemAnterior) {
       await excluirDoR2(imagemAnterior);
     }
+  } else {
+    await query(
+      `UPDATE food_empresas
+       SET ${campoPosicao} = $2,
+           ${campoZoom} = $3
+       WHERE id = $1`,
+      [empresaId, posicao, zoom]
+    );
   }
 
   redirect(`/admin?slug=${empresa.slug}#empresa`);
