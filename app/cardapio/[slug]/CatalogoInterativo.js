@@ -162,6 +162,16 @@ function WhatsAppIcon() {
   const corPrincipal = empresa.tema_cor || '#0f766e';
   const corSecundaria = empresa.tema_cor_secundaria || '#14b8a6';
   const usarGradiente = empresa.usar_gradiente !== false;
+  const catalogoFundoTipo = ['claro', 'escuro', 'personalizado'].includes(empresa.catalogo_fundo_tipo)
+    ? empresa.catalogo_fundo_tipo
+    : 'claro';
+  const catalogoFundoCor = catalogoFundoTipo === 'escuro'
+    ? '#111827'
+    : catalogoFundoTipo === 'personalizado'
+      ? (empresa.catalogo_fundo_cor || '#f7f4ef')
+      : '#f7f4ef';
+  const logoPosicao = empresa.logo_posicao || 'center';
+  const bannerPosicao = empresa.banner_posicao || 'center';
   const instagramUrl = normalizarInstagramUrl(empresa.instagram_url);
   const estabelecimentoAberto = estaAbertoAgora(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
@@ -177,12 +187,16 @@ function WhatsAppIcon() {
     .flatMap((categoria) => categoria.produtos)
     .filter((produto) => produto.ativo !== false);
 
-  const produtosEscolhidosDestaque = todosProdutosVisiveis
-    .filter((produto) => produto.destaque)
+  const produtosEscolhidosDestaque = todosProdutosVisiveis.filter((produto) => produto.destaque);
+  const produtosComPosicaoDestaque = produtosEscolhidosDestaque
+    .filter((produto) => Number(produto.destaque_ordem || 0) >= 1 && Number(produto.destaque_ordem || 0) <= 6)
     .sort((a, b) => (Number(a.destaque_ordem || 0) - Number(b.destaque_ordem || 0)) || a.nome.localeCompare(b.nome));
+  const produtosDestaqueRestantes = produtosEscolhidosDestaque
+    .filter((produto) => Number(produto.destaque_ordem || 0) < 1 || Number(produto.destaque_ordem || 0) > 6)
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const produtosDestaque = (produtosEscolhidosDestaque.length > 0
-    ? produtosEscolhidosDestaque
+    ? [...produtosComPosicaoDestaque, ...produtosDestaqueRestantes]
     : todosProdutosVisiveis
   ).slice(0, 8);
 
@@ -358,10 +372,11 @@ function WhatsAppIcon() {
 
   return (
     <div
-      className="catalog-page"
+      className={`catalog-page catalog-bg-${catalogoFundoTipo}`}
       style={{
         '--catalog-brand': corPrincipal,
         '--catalog-brand-2': corSecundaria,
+        '--catalog-bg-custom': catalogoFundoCor,
         '--catalog-gradient': usarGradiente
           ? `linear-gradient(135deg, ${corPrincipal}, ${corSecundaria})`
           : corPrincipal
@@ -411,7 +426,7 @@ function WhatsAppIcon() {
 
       <section className="catalog-hero">
         {empresa.banner_url ? (
-          <img src={empresa.banner_url} alt={nomeEmpresa} />
+          <img src={empresa.banner_url} alt={nomeEmpresa} style={{ objectPosition: bannerPosicao }} />
         ) : (
           <div className="catalog-banner-placeholder" />
         )}
@@ -420,7 +435,7 @@ function WhatsAppIcon() {
       <section className="catalog-brand-card">
         <div className="catalog-logo">
           {empresa.logo_url ? (
-            <img src={empresa.logo_url} alt={nomeEmpresa} />
+            <img src={empresa.logo_url} alt={nomeEmpresa} style={{ objectPosition: logoPosicao }} />
           ) : (
             <span>{nomeEmpresa.slice(0, 1)}</span>
           )}

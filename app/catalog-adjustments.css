@@ -176,12 +176,70 @@
   gap: 10px 16px;
 }
 
+.media-position-field {
+  display: grid;
+  gap: 7px;
+  margin: 6px 0 10px;
+}
+
+.media-position-field select {
+  min-height: 42px;
+}
+
 .company-action-bar {
   display: flex;
   justify-content: space-between;
   gap: 14px;
   align-items: center;
   margin-top: 16px;
+}
+
+.catalog-page {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0)),
+    var(--catalog-bg-custom, #f7f4ef);
+}
+
+.catalog-page.catalog-bg-escuro {
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 34%),
+    var(--catalog-bg-custom, #111827);
+}
+
+.catalog-page.catalog-bg-personalizado {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)),
+    var(--catalog-bg-custom, #f7f4ef);
+}
+
+.catalog-bg-escuro .section-title-row h2,
+.catalog-bg-escuro .catalog-category-block h2 {
+  color: #f8fafc;
+}
+
+.catalog-bg-escuro .section-title-row p,
+.catalog-bg-escuro .catalog-footer {
+  color: rgba(248, 250, 252, 0.72);
+}
+
+.catalog-hero,
+.catalog-logo,
+.product-image-wrap,
+.highlight-image,
+.company-logo-preview,
+.company-banner-preview,
+.admin-image-preview {
+  background: #fff;
+}
+
+.catalog-hero img,
+.catalog-logo img,
+.product-image-wrap img,
+.highlight-image img,
+.company-logo-preview,
+.company-banner-preview,
+.admin-image-preview {
+  background: #fff;
 }
 
 .order-total-card {

@@ -199,7 +199,7 @@ export async function POST(request) {
   const apelidos = texto(formData.get('apelidos'));
   const ativo = formData.get('ativo') === 'on';
   const destaque = formData.get('destaque') === 'on';
-  const destaqueOrdem = Math.max(0, Math.round(numero(formData.get('destaque_ordem'))));
+  const destaqueOrdem = Math.min(6, Math.max(0, Math.round(numero(formData.get('destaque_ordem')))));
 
 if (!apelidos) {
    const empresa = await query(

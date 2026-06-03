@@ -25,6 +25,20 @@ const tiposOferta = {
   misto: 'Produtos e serviços'
 };
 
+const posicoesImagem = [
+  ['center', 'Centro'],
+  ['top', 'Topo'],
+  ['bottom', 'Base'],
+  ['left', 'Esquerda'],
+  ['right', 'Direita']
+];
+
+const fundosCatalogo = [
+  ['claro', 'Claro'],
+  ['escuro', 'Escuro'],
+  ['personalizado', 'Personalizado']
+];
+
 const diasSemana = [
   ['0', 'Domingo'],
   ['1', 'Segunda'],
@@ -74,6 +88,10 @@ async function getAdminData(user, selectedSlug) {
        tema_cor,
        tema_cor_secundaria,
        usar_gradiente,
+       catalogo_fundo_tipo,
+       catalogo_fundo_cor,
+       logo_posicao,
+       banner_posicao,
        logo_url,
        banner_url,
        instagram_url,
@@ -515,6 +533,29 @@ export default async function AdminPage({ searchParams }) {
         </div>
 
         <div className="full-span admin-options-panel">
+          <span className="field-title">Fundo do catalogo</span>
+          <small className="media-hint">Escolha um fundo claro, escuro ou uma cor personalizada para a tela do cliente.</small>
+
+          <div className="theme-grid">
+            <label>
+              Tipo de fundo
+              <select name="catalogo_fundo_tipo" defaultValue={empresa.catalogo_fundo_tipo || 'claro'}>
+                {fundosCatalogo.map(([valor, label]) => (
+                  <option key={valor} value={valor}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Cor personalizada
+              <input name="catalogo_fundo_cor" type="color" defaultValue={empresa.catalogo_fundo_cor || '#f7f4ef'} />
+            </label>
+          </div>
+        </div>
+
+        <div className="full-span admin-options-panel">
           <span className="field-title">Horários de funcionamento</span>
           <small className="media-hint">Marque os dias de atendimento. O catálogo mostra Aberto ou Fechado automaticamente.</small>
 
@@ -569,9 +610,25 @@ export default async function AdminPage({ searchParams }) {
         <div className="company-media-card">
           <span className="field-title">Logo da empresa</span>
           <small className="media-hint">Ideal: imagem quadrada, 600 x 600 px.</small>
-      
+
+          <label className="media-position-field">
+            Ajuste da logo
+            <select name="logo_posicao" form={`company-edit-form-${empresa.id}`} defaultValue={empresa.logo_posicao || 'center'}>
+              {posicoesImagem.map(([valor, label]) => (
+                <option key={valor} value={valor}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           {empresa.logo_url ? (
-            <img className="company-logo-preview" src={empresa.logo_url} alt={`Logo ${empresa.nome}`} />
+            <img
+              className="company-logo-preview"
+              src={empresa.logo_url}
+              alt={`Logo ${empresa.nome}`}
+              style={{ objectPosition: empresa.logo_posicao || 'center' }}
+            />
           ) : (
             <span className="muted">Nenhuma logo cadastrada.</span>
           )}
@@ -612,8 +669,24 @@ export default async function AdminPage({ searchParams }) {
           <span className="field-title">Banner do catálogo</span>
           <small className="media-hint">Ideal: imagem horizontal, 1600 x 600 px ou 1920 x 720 px.</small>
       
+          <label className="media-position-field">
+            Ajuste do banner
+            <select name="banner_posicao" form={`company-edit-form-${empresa.id}`} defaultValue={empresa.banner_posicao || 'center'}>
+              {posicoesImagem.map(([valor, label]) => (
+                <option key={valor} value={valor}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           {empresa.banner_url ? (
-            <img className="company-banner-preview" src={empresa.banner_url} alt={`Banner ${empresa.nome}`} />
+            <img
+              className="company-banner-preview"
+              src={empresa.banner_url}
+              alt={`Banner ${empresa.nome}`}
+              style={{ objectPosition: empresa.banner_posicao || 'center' }}
+            />
           ) : (
             <span className="muted">Nenhum banner cadastrado.</span>
           )}
@@ -677,10 +750,6 @@ export default async function AdminPage({ searchParams }) {
           
 
           <div className="company-action-bar">
-            <button className="primary-button" type="submit" form={`company-edit-form-${empresa.id}`}>
-              Salvar dados da empresa
-            </button>
-
             {isNexoraAdmin ? (
               empresa.bloqueado ? (
                 <form action="/admin/company-status" method="post">
@@ -700,6 +769,10 @@ export default async function AdminPage({ searchParams }) {
                 </form>
               )
             ) : <span />}
+
+            <button className="primary-button" type="submit" form={`company-edit-form-${empresa.id}`}>
+              Salvar dados da empresa
+            </button>
           </div>
         </section>
       
@@ -880,8 +953,15 @@ export default async function AdminPage({ searchParams }) {
           </label>
 
           <label>
-            Ordem no destaque
-            <input name="destaque_ordem" type="number" min="0" defaultValue="0" />
+            Posicao no destaque
+            <select name="destaque_ordem" defaultValue="0">
+              <option value="0">Depois dos 6 primeiros</option>
+              {[1, 2, 3, 4, 5, 6].map((posicao) => (
+                <option key={posicao} value={posicao}>
+                  {posicao}
+                </option>
+              ))}
+            </select>
           </label>
 
           <button className="primary-button" type="submit">
@@ -1029,8 +1109,15 @@ export default async function AdminPage({ searchParams }) {
                     </label>
 
                     <label>
-                      Ordem no destaque
-                      <input name="destaque_ordem" type="number" min="0" defaultValue={produto.destaque_ordem || 0} />
+                      Posicao no destaque
+                      <select name="destaque_ordem" defaultValue={String(Math.min(6, Math.max(0, Number(produto.destaque_ordem || 0))))}>
+                        <option value="0">Depois dos 6 primeiros</option>
+                        {[1, 2, 3, 4, 5, 6].map((posicao) => (
+                          <option key={posicao} value={posicao}>
+                            {posicao}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                   </div>
       

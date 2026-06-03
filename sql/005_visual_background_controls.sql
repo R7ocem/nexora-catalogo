@@ -1,0 +1,5 @@
+ALTER TABLE food_empresas
+ADD COLUMN IF NOT EXISTS catalogo_fundo_tipo TEXT NOT NULL DEFAULT 'claro',
+ADD COLUMN IF NOT EXISTS catalogo_fundo_cor TEXT NOT NULL DEFAULT '#f7f4ef',
+ADD COLUMN IF NOT EXISTS logo_posicao TEXT NOT NULL DEFAULT 'center',
+ADD COLUMN IF NOT EXISTS banner_posicao TEXT NOT NULL DEFAULT 'center';

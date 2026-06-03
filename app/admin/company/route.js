@@ -22,6 +22,20 @@ const tiposOfertaPermitidos = [
   'misto'
 ];
 
+const fundosCatalogoPermitidos = [
+  'claro',
+  'escuro',
+  'personalizado'
+];
+
+const posicoesImagemPermitidas = [
+  'center',
+  'top',
+  'bottom',
+  'left',
+  'right'
+];
+
 function texto(valor) {
   return String(valor || '').trim();
 }
@@ -77,6 +91,10 @@ export async function POST(request) {
   const temaCor = texto(formData.get('tema_cor')) || '#0f766e';
   const temaCorSecundaria = texto(formData.get('tema_cor_secundaria')) || '#14b8a6';
   const usarGradiente = formData.get('usar_gradiente') === 'on';
+  const catalogoFundoTipo = texto(formData.get('catalogo_fundo_tipo')) || 'claro';
+  const catalogoFundoCor = texto(formData.get('catalogo_fundo_cor')) || '#f7f4ef';
+  const logoPosicao = texto(formData.get('logo_posicao')) || 'center';
+  const bannerPosicao = texto(formData.get('banner_posicao')) || 'center';
   const horariosFuncionamento = montarHorarios(formData);
   const opcoesPedido = montarOpcoesPedido(formData);
 
@@ -96,6 +114,18 @@ export async function POST(request) {
     ? tipoOferta
     : 'produtos';
 
+  const catalogoFundoTipoFinal = fundosCatalogoPermitidos.includes(catalogoFundoTipo)
+    ? catalogoFundoTipo
+    : 'claro';
+
+  const logoPosicaoFinal = posicoesImagemPermitidas.includes(logoPosicao)
+    ? logoPosicao
+    : 'center';
+
+  const bannerPosicaoFinal = posicoesImagemPermitidas.includes(bannerPosicao)
+    ? bannerPosicao
+    : 'center';
+
   await query(
     `UPDATE food_empresas
      SET
@@ -111,7 +141,11 @@ export async function POST(request) {
        tema_cor_secundaria = $11,
        usar_gradiente = $12,
        horario_funcionamento = $13,
-       opcoes_pedido = $14
+       opcoes_pedido = $14,
+       catalogo_fundo_tipo = $15,
+       catalogo_fundo_cor = $16,
+       logo_posicao = $17,
+       banner_posicao = $18
       WHERE id = $1`,
     [
       empresaId,
@@ -127,7 +161,11 @@ export async function POST(request) {
       temaCorSecundaria,
       usarGradiente,
       JSON.stringify(horariosFuncionamento),
-      JSON.stringify(opcoesPedido)
+      JSON.stringify(opcoesPedido),
+      catalogoFundoTipoFinal,
+      catalogoFundoCor,
+      logoPosicaoFinal,
+      bannerPosicaoFinal
     ]
   );
 

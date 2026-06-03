@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS food_empresas (
   instagram_url TEXT,
   tema_cor_secundaria TEXT DEFAULT '#14b8a6',
   usar_gradiente BOOLEAN NOT NULL DEFAULT true,
+  catalogo_fundo_tipo TEXT NOT NULL DEFAULT 'claro',
+  catalogo_fundo_cor TEXT NOT NULL DEFAULT '#f7f4ef',
+  logo_posicao TEXT NOT NULL DEFAULT 'center',
+  banner_posicao TEXT NOT NULL DEFAULT 'center',
   horario_funcionamento JSONB NOT NULL DEFAULT '{}'::jsonb,
   opcoes_pedido JSONB NOT NULL DEFAULT '{"retirada":true,"entrega":true,"pix":true,"dinheiro":true,"cartao":true}'::jsonb,
   logo_url TEXT,
@@ -48,6 +52,10 @@ ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 ALTER TABLE food_empresas
 ADD COLUMN IF NOT EXISTS tema_cor_secundaria TEXT DEFAULT '#14b8a6',
 ADD COLUMN IF NOT EXISTS usar_gradiente BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS catalogo_fundo_tipo TEXT NOT NULL DEFAULT 'claro',
+ADD COLUMN IF NOT EXISTS catalogo_fundo_cor TEXT NOT NULL DEFAULT '#f7f4ef',
+ADD COLUMN IF NOT EXISTS logo_posicao TEXT NOT NULL DEFAULT 'center',
+ADD COLUMN IF NOT EXISTS banner_posicao TEXT NOT NULL DEFAULT 'center',
 ADD COLUMN IF NOT EXISTS horario_funcionamento JSONB NOT NULL DEFAULT '{}'::jsonb,
 ADD COLUMN IF NOT EXISTS opcoes_pedido JSONB NOT NULL DEFAULT '{"retirada":true,"entrega":true,"pix":true,"dinheiro":true,"cartao":true}'::jsonb;
 
