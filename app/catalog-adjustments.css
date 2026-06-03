@@ -470,6 +470,14 @@
   font-size: 16px;
 }
 
+.catalog-category-block {
+  border-top: 1px solid rgba(33, 31, 28, 0.1);
+}
+
+.catalog-bg-escuro .catalog-category-block {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
 .cart-quantity {
   display: grid;
   grid-template-columns: 44px 34px 44px 44px;

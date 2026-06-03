@@ -977,12 +977,13 @@ export default async function AdminPage({ searchParams }) {
           <label>
             Posicao no destaque
             <select name="destaque_ordem" defaultValue="0">
-              <option value="0">Depois dos 6 primeiros</option>
-              {[1, 2, 3, 4, 5, 6].map((posicao) => (
-                <option key={posicao} value={posicao}>
-                  {posicao}
-                </option>
-              ))}
+              <option value="0">Automatico</option>
+              <option value="1">Primeiro</option>
+              <option value="2">Segundo</option>
+              <option value="3">Terceiro</option>
+              <option value="4">Quarto</option>
+              <option value="5">Quinto</option>
+              <option value="6">Sexto</option>
             </select>
           </label>
 
@@ -1133,12 +1134,13 @@ export default async function AdminPage({ searchParams }) {
                     <label>
                       Posicao no destaque
                       <select name="destaque_ordem" defaultValue={String(Math.min(6, Math.max(0, Number(produto.destaque_ordem || 0))))}>
-                        <option value="0">Depois dos 6 primeiros</option>
-                        {[1, 2, 3, 4, 5, 6].map((posicao) => (
-                          <option key={posicao} value={posicao}>
-                            {posicao}
-                          </option>
-                        ))}
+                        <option value="0">Automatico</option>
+                        <option value="1">Primeiro</option>
+                        <option value="2">Segundo</option>
+                        <option value="3">Terceiro</option>
+                        <option value="4">Quarto</option>
+                        <option value="5">Quinto</option>
+                        <option value="6">Sexto</option>
                       </select>
                     </label>
                   </div>
@@ -1266,18 +1268,50 @@ export default async function AdminPage({ searchParams }) {
               preview.style.transform = 'scale(' + (zoomInput.value || '1') + ')';
             }
 
+            function positionParts() {
+              var value = positionInput ? String(positionInput.value || '50% 50%') : '50% 50%';
+              var match = value.match(/([0-9.]+)%\s+([0-9.]+)%/);
+
+              if (!match) return { x: 50, y: 50 };
+
+              return {
+                x: Number(match[1]) || 50,
+                y: Number(match[2]) || 50
+              };
+            }
+
+            function savePosition(x, y) {
+              var preview = image();
+              if (!preview || !positionInput) return;
+
+              var nextX = Math.max(0, Math.min(100, x));
+              var nextY = Math.max(0, Math.min(100, y));
+              var value = nextX.toFixed(1) + '% ' + nextY.toFixed(1) + '%';
+
+              positionInput.value = value;
+              preview.style.objectPosition = value;
+            }
+
             function setPosition(clientX, clientY) {
               var currentFrame = frame || card.querySelector('.media-adjust-frame');
-              var preview = image();
-              if (!currentFrame || !preview || !positionInput) return;
+              if (!currentFrame || !positionInput) return;
 
               var rect = currentFrame.getBoundingClientRect();
               var x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
               var y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-              var value = x.toFixed(1) + '% ' + y.toFixed(1) + '%';
 
-              positionInput.value = value;
-              preview.style.objectPosition = value;
+              savePosition(x, y);
+            }
+
+            function movePosition(start, clientX, clientY) {
+              var currentFrame = frame || card.querySelector('.media-adjust-frame');
+              if (!currentFrame || !positionInput || !start) return;
+
+              var rect = currentFrame.getBoundingClientRect();
+              var deltaX = ((clientX - start.clientX) / rect.width) * 100;
+              var deltaY = ((clientY - start.clientY) / rect.height) * 100;
+
+              savePosition(start.x + deltaX, start.y + deltaY);
             }
 
             if (zoomInput) {
@@ -1287,24 +1321,48 @@ export default async function AdminPage({ searchParams }) {
 
             if (frame && positionInput) {
               var dragging = false;
+              var dragStart = null;
+              var moved = false;
 
               frame.addEventListener('pointerdown', function (event) {
                 dragging = true;
-                frame.setPointerCapture(event.pointerId);
-                setPosition(event.clientX, event.clientY);
+                moved = false;
+                dragStart = {
+                  clientX: event.clientX,
+                  clientY: event.clientY,
+                  x: positionParts().x,
+                  y: positionParts().y
+                };
+
+                if (frame.setPointerCapture) {
+                  frame.setPointerCapture(event.pointerId);
+                }
               });
 
               frame.addEventListener('pointermove', function (event) {
                 if (!dragging) return;
-                setPosition(event.clientX, event.clientY);
+                moved = true;
+                movePosition(dragStart, event.clientX, event.clientY);
               });
 
               frame.addEventListener('pointerup', function () {
                 dragging = false;
+                dragStart = null;
               });
 
               frame.addEventListener('pointercancel', function () {
                 dragging = false;
+                dragStart = null;
+              });
+
+              frame.addEventListener('click', function (event) {
+                if (moved) {
+                  moved = false;
+                  return;
+                }
+
+                if (dragStart) return;
+                setPosition(event.clientX, event.clientY);
               });
             }
           });
