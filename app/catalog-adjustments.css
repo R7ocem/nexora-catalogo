@@ -276,6 +276,19 @@
   border-color: #000;
 }
 
+.catalog-bg-escuro .catalog-hero {
+  background: #000;
+  box-shadow: none;
+}
+
+.catalog-bg-escuro .catalog-hero img {
+  background: #000;
+}
+
+.catalog-bg-escuro .catalog-brand-card {
+  align-items: center;
+}
+
 .catalog-hero,
 .catalog-logo {
   overflow: hidden;
