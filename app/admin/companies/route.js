@@ -103,6 +103,7 @@ export async function POST(request) {
        nome,
        slug,
        whatsapp,
+       email_empresa,
        segmento,
        tipo_oferta,
        titulo_publico,
@@ -119,10 +120,11 @@ export async function POST(request) {
        $1,
        $2,
        $3,
+       $6,
        $4,
        $5,
        $1,
-       $6,
+       $7,
        '#0f766e',
        '#14b8a6',
        true,
@@ -132,7 +134,7 @@ export async function POST(request) {
        false
      )
      RETURNING id, slug`,
-    [nome, slug, whatsapp, segmentoFinal, tipoOfertaFinal, rotuloCatalogo(segmentoFinal)]
+    [nome, slug, whatsapp, segmentoFinal, tipoOfertaFinal, usuarioEmail, rotuloCatalogo(segmentoFinal)]
   );
 
   const empresa = empresaResult.rows[0];

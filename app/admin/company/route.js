@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { query } from '../../../lib/db';
 import { getCurrentUser, isTrustedAdminRequest } from '../../../lib/auth';
 import { rotuloCatalogo } from '../../../lib/catalog';
-import { normalizarWhatsapp } from '../../../lib/validation';
+import { emailValido, normalizarEmail, normalizarWhatsapp } from '../../../lib/validation';
 
 const segmentosPermitidos = [
   'alimentacao',
@@ -79,6 +79,7 @@ export async function POST(request) {
 
   const empresaId = Number(formData.get('empresa_id'));
   const nome = texto(formData.get('nome'));
+  const emailEmpresa = normalizarEmail(formData.get('email_empresa'));
   const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
@@ -104,6 +105,10 @@ export async function POST(request) {
 
   if (!whatsapp) {
     redirect('/admin?erro=whatsapp');
+  }
+
+  if (emailEmpresa && !emailValido(emailEmpresa)) {
+    redirect('/admin?erro=email_invalido');
   }
 
   if (user.papel !== 'nexora_admin' && user.empresa_id !== empresaId) {
@@ -164,7 +169,8 @@ export async function POST(request) {
        logo_posicao = $17,
        logo_zoom = $18,
        banner_posicao = $19,
-       banner_zoom = $20
+       banner_zoom = $20,
+       email_empresa = $21
       WHERE id = $1`,
     [
       empresaId,
@@ -186,7 +192,8 @@ export async function POST(request) {
       logoPosicao,
       logoZoom,
       bannerPosicao,
-      bannerZoom
+      bannerZoom,
+      emailEmpresa || null
     ]
   );
 

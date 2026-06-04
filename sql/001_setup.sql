@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS food_empresas (
   nome TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   whatsapp TEXT,
+  email_empresa TEXT,
   instagram_url TEXT,
   segmento TEXT NOT NULL DEFAULT 'outros',
   tipo_oferta TEXT NOT NULL DEFAULT 'produtos',
@@ -63,6 +64,9 @@ CREATE TABLE IF NOT EXISTS food_produtos (
 
 ALTER TABLE food_empresas
 ADD COLUMN IF NOT EXISTS instagram_url TEXT;
+
+ALTER TABLE food_empresas
+ADD COLUMN IF NOT EXISTS email_empresa TEXT;
 
 ALTER TABLE food_empresas
 ADD COLUMN IF NOT EXISTS segmento TEXT NOT NULL DEFAULT 'outros',

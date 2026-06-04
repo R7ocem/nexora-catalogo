@@ -1,5 +1,6 @@
 ALTER TABLE food_empresas
 ADD COLUMN IF NOT EXISTS segmento TEXT NOT NULL DEFAULT 'outros',
+ADD COLUMN IF NOT EXISTS email_empresa TEXT,
 ADD COLUMN IF NOT EXISTS tipo_oferta TEXT NOT NULL DEFAULT 'produtos',
 ADD COLUMN IF NOT EXISTS titulo_publico TEXT,
 ADD COLUMN IF NOT EXISTS subtitulo_publico TEXT,
