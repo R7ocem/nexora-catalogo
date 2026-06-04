@@ -2,7 +2,7 @@ import './globals.css';
 import './catalog-adjustments.css';
 
 export const metadata = {
-  title: 'Nexora Food',
+  title: 'Nexora Catálogos',
   description: 'Cardápio digital multiempresa'
 };
 

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { query } from '../../../lib/db';
 import { getCurrentUser, isTrustedAdminRequest } from '../../../lib/auth';
+import { rotuloCatalogo } from '../../../lib/catalog';
+import { normalizarWhatsapp } from '../../../lib/validation';
 
 const segmentosPermitidos = [
   'alimentacao',
@@ -77,13 +79,7 @@ export async function POST(request) {
 
   const empresaId = Number(formData.get('empresa_id'));
   const nome = texto(formData.get('nome'));
-  const whatsappDigitado = texto(formData.get('whatsapp')).replace(/\D/g, '');
-
-  let whatsapp = whatsappDigitado;
-
-  if (whatsapp.length > 0 && !whatsapp.startsWith('55')) {
-  whatsapp = `55${whatsapp}`;
-  }
+  const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
   const tituloPublico = texto(formData.get('titulo_publico'));
@@ -104,6 +100,10 @@ export async function POST(request) {
 
   if (!empresaId || !nome) {
     redirect('/admin');
+  }
+
+  if (!whatsapp) {
+    redirect('/admin?erro=whatsapp');
   }
 
   if (user.papel !== 'nexora_admin' && user.empresa_id !== empresaId) {
@@ -152,7 +152,7 @@ export async function POST(request) {
       segmentoFinal,
       tipoOfertaFinal,
       tituloPublico || nome,
-      subtituloPublico,
+      subtituloPublico || rotuloCatalogo(segmentoFinal),
       instagramUrl,
       descricaoPublica,
       temaCor,

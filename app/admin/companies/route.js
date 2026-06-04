@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { query } from '../../../lib/db';
 import { getCurrentUser, hashPassword, isTrustedAdminRequest } from '../../../lib/auth';
+import { rotuloCatalogo } from '../../../lib/catalog';
+import { emailValido, normalizarEmail, normalizarWhatsapp } from '../../../lib/validation';
 
 const segmentosPermitidos = [
   'alimentacao',
@@ -50,16 +52,24 @@ export async function POST(request) {
 
   const nome = texto(formData.get('nome'));
   const slug = normalizarSlug(formData.get('slug') || nome);
-  const whatsappDigitado = texto(formData.get('whatsapp')).replace(/\D/g, '');
+  const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
 
   const usuarioNome = texto(formData.get('usuario_nome'));
-  const usuarioEmail = texto(formData.get('usuario_email')).toLowerCase();
+  const usuarioEmail = normalizarEmail(formData.get('usuario_email'));
   const usuarioSenha = texto(formData.get('usuario_senha'));
 
   if (!nome || !slug || !usuarioNome || !usuarioEmail || !usuarioSenha) {
     redirect('/admin?erro=empresa');
+  }
+
+  if (!emailValido(usuarioEmail)) {
+    redirect('/admin?erro=email_invalido');
+  }
+
+  if (!whatsapp) {
+    redirect('/admin?erro=whatsapp');
   }
 
   const emailExistente = await query(
@@ -78,12 +88,6 @@ export async function POST(request) {
 
   if (slugExistente.rows.length > 0) {
     redirect('/admin?erro=slug');
-  }
-
-  let whatsapp = whatsappDigitado;
-
-  if (whatsapp.length > 0 && !whatsapp.startsWith('55')) {
-    whatsapp = `55${whatsapp}`;
   }
 
   const segmentoFinal = segmentosPermitidos.includes(segmento)
@@ -118,7 +122,7 @@ export async function POST(request) {
        $4,
        $5,
        $1,
-       'Catálogo digital',
+       $6,
        '#0f766e',
        '#14b8a6',
        true,
@@ -128,7 +132,7 @@ export async function POST(request) {
        false
      )
      RETURNING id, slug`,
-    [nome, slug, whatsapp, segmentoFinal, tipoOfertaFinal]
+    [nome, slug, whatsapp, segmentoFinal, tipoOfertaFinal, rotuloCatalogo(segmentoFinal)]
   );
 
   const empresa = empresaResult.rows[0];

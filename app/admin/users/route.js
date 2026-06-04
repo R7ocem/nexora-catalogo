@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { query } from '../../../lib/db';
 import { getCurrentUser, hashPassword, isTrustedAdminRequest } from '../../../lib/auth';
+import { emailValido, normalizarEmail } from '../../../lib/validation';
 
 function texto(valor) {
   return String(valor || '').trim();
@@ -21,7 +22,7 @@ export async function POST(request) {
 
   const empresaId = Number(formData.get('empresa_id'));
   const nome = texto(formData.get('nome'));
-  const email = texto(formData.get('email')).toLowerCase();
+  const email = normalizarEmail(formData.get('email'));
   const senha = texto(formData.get('senha'));
 
   if (!empresaId || !nome || !email || !senha) {
@@ -40,6 +41,10 @@ export async function POST(request) {
 
   if (!empresaAtual) {
     redirect('/admin');
+  }
+
+  if (!emailValido(email)) {
+    redirect(`/admin?slug=${empresaAtual.slug}&erro=email_invalido`);
   }
 
   const emailExistente = await query(

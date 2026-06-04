@@ -1,6 +1,7 @@
 import { query } from '../../lib/db';
 import { money } from '../../lib/format';
 import { getCurrentUser } from '../../lib/auth';
+import { caminhoCatalogo } from '../../lib/catalog';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -250,6 +251,7 @@ export default async function AdminPage({ searchParams }) {
 
   const isNexoraAdmin = user.papel === 'nexora_admin';
   const nomePublico = empresa.titulo_publico || empresa.nome;
+  const linkPublico = caminhoCatalogo(empresa);
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
 
@@ -333,6 +335,14 @@ export default async function AdminPage({ searchParams }) {
             <p className="error-text">Este link de catálogo já está em uso.</p>
           ) : null}
 
+          {searchParams?.erro === 'email_invalido' ? (
+            <p className="error-text">Informe um email valido. Exemplo: cliente@email.com.</p>
+          ) : null}
+
+          {searchParams?.erro === 'whatsapp' ? (
+            <p className="error-text">Informe um WhatsApp valido com DDD. Exemplo: 61999999999.</p>
+          ) : null}
+
           <form action="/admin/companies" method="post" className="admin-form">
             <label>
               Nome da empresa
@@ -346,7 +356,14 @@ export default async function AdminPage({ searchParams }) {
 
             <label>
               WhatsApp
-              <input name="whatsapp" placeholder="DDD + número. Ex: 61999999999" />
+              <input
+                name="whatsapp"
+                inputMode="numeric"
+                minLength="10"
+                maxLength="15"
+                placeholder="DDD + numero. Ex: 61999999999"
+                required
+              />
             </label>
 
             <label>
@@ -382,7 +399,13 @@ export default async function AdminPage({ searchParams }) {
             
             <label>
               Email de acesso
-              <input name="usuario_email" type="email" placeholder="cliente@email.com" required />
+              <input
+                name="usuario_email"
+                type="email"
+                placeholder="cliente@email.com"
+                pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
+                required
+              />
             </label>
             
             <label>
@@ -433,9 +456,25 @@ export default async function AdminPage({ searchParams }) {
     
         <div>
           <span>Link público</span>
-          <strong>/cardapio/{empresa.slug}</strong>
+          <strong>{linkPublico}</strong>
         </div>
       </div>
+
+      {searchParams?.erro === 'whatsapp' ? (
+        <p className="error-text">Informe um WhatsApp valido com DDD. Exemplo: 61999999999.</p>
+      ) : null}
+
+      {searchParams?.erro === 'email_invalido' ? (
+        <p className="error-text">Informe um email valido. Exemplo: cliente@email.com.</p>
+      ) : null}
+
+      {searchParams?.erro === 'excluir_empresa' ? (
+        <p className="error-text">Para excluir, a empresa precisa estar bloqueada e a confirmacao deve ser EXCLUIR.</p>
+      ) : null}
+
+      {searchParams?.empresa === 'excluida' ? (
+        <p className="warning-text">Empresa excluida com sucesso.</p>
+      ) : null}
     
       <form id={`company-edit-form-${empresa.id}`} action="/admin/company" method="post" className="admin-form company-edit-form">
         <input type="hidden" name="empresa_id" value={empresa.id} />
@@ -447,7 +486,15 @@ export default async function AdminPage({ searchParams }) {
     
         <label>
           WhatsApp
-          <input name="whatsapp" defaultValue={empresa.whatsapp || ''} placeholder="DDD + número. Ex: 61999999999" />
+          <input
+            name="whatsapp"
+            defaultValue={empresa.whatsapp || ''}
+            inputMode="numeric"
+            minLength="10"
+            maxLength="15"
+            placeholder="DDD + numero. Ex: 61999999999"
+            required
+          />
         </label>
     
         <label>
@@ -812,6 +859,28 @@ export default async function AdminPage({ searchParams }) {
             </button>
           </div>
         </section>
+
+        {isNexoraAdmin && empresa.bloqueado ? (
+          <section className="panel">
+            <h2>Excluir empresa</h2>
+            <p className="muted">
+              Use somente quando a empresa nao for mais cliente. A exclusao remove empresa, usuarios, categorias, itens e imagens.
+            </p>
+
+            <form action="/admin/companies/delete" method="post" className="admin-form compact-form">
+              <input type="hidden" name="empresa_id" value={empresa.id} />
+
+              <label>
+                Digite EXCLUIR para confirmar
+                <input name="confirmar" placeholder="EXCLUIR" required />
+              </label>
+
+              <button className="danger-button" type="submit">
+                Excluir empresa definitivamente
+              </button>
+            </form>
+          </section>
+        ) : null}
       
         <section className="panel" id="categorias">
          <h2>Categorias</h2>

@@ -1,5 +1,6 @@
 import CatalogoInterativo from './CatalogoInterativo';
 import { query } from '../../../lib/db';
+import { rotuloCatalogo } from '../../../lib/catalog';
 
 async function getCardapio(slug) {
   const empresas = await query(
@@ -8,6 +9,7 @@ async function getCardapio(slug) {
      nome,
      slug,
      whatsapp,
+     segmento,
      ativo,
      bloqueado,
      bloqueado_motivo,
@@ -84,7 +86,7 @@ async function getCardapio(slug) {
     return {
       title: empresa?.nome || 'Catálogo',
       description: empresa
-        ? `Catálogo digital ${empresa.nome}`
+        ? `${rotuloCatalogo(empresa.segmento)} ${empresa.nome}`
         : 'Catálogo digital'
     };
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { money } from '../../../lib/format';
+import { subtituloCatalogo } from '../../../lib/catalog';
 
 function precoTexto(produto) {
   if (produto.tipo_preco === 'sob_consulta') return 'Consultar valor';
@@ -166,7 +167,7 @@ function WhatsAppIcon() {
   const destaquesRef = useRef(null);
 
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
-  const subtitulo = empresa.subtitulo_publico || 'Catálogo digital';
+  const subtitulo = subtituloCatalogo(empresa);
   const corPrincipal = empresa.tema_cor || '#0f766e';
   const corSecundaria = empresa.tema_cor_secundaria || '#14b8a6';
   const usarGradiente = empresa.usar_gradiente !== false;
