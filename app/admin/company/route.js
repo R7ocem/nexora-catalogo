@@ -110,6 +110,20 @@ export async function POST(request) {
     redirect('/admin');
   }
 
+  const empresaAtualResult = await query(
+    `SELECT id, nome, titulo_publico
+     FROM food_empresas
+     WHERE id = $1
+     LIMIT 1`,
+    [empresaId]
+  );
+
+  const empresaAtual = empresaAtualResult.rows[0];
+
+  if (!empresaAtual) {
+    redirect('/admin');
+  }
+
   const segmentoFinal = segmentosPermitidos.includes(segmento)
     ? segmento
     : 'outros';
@@ -121,6 +135,10 @@ export async function POST(request) {
   const catalogoFundoTipoFinal = fundosCatalogoPermitidos.includes(catalogoFundoTipo)
     ? catalogoFundoTipo
     : 'claro';
+
+  const tituloPublicoFinal = !tituloPublico || tituloPublico === empresaAtual.nome
+    ? nome
+    : tituloPublico;
 
   await query(
     `UPDATE food_empresas
@@ -151,7 +169,7 @@ export async function POST(request) {
       whatsapp,
       segmentoFinal,
       tipoOfertaFinal,
-      tituloPublico || nome,
+      tituloPublicoFinal,
       subtituloPublico || rotuloCatalogo(segmentoFinal),
       instagramUrl,
       descricaoPublica,

@@ -117,7 +117,7 @@ async function getAdminData(user, selectedSlug) {
   }
 
   if (!empresa) {
-    return { empresas, empresa: null, categorias: [], produtos: [] };
+    return { empresas, empresa: null, categorias: [], produtos: [], usuarios: [] };
   }
 
   const categorias = await query(
@@ -151,11 +151,22 @@ async function getAdminData(user, selectedSlug) {
     [empresa.id]
   );
 
+  const usuarios = user.papel === 'nexora_admin'
+    ? await query(
+      `SELECT id, nome, email, papel, ativo, criado_em
+       FROM food_usuarios
+       WHERE empresa_id = $1
+       ORDER BY ativo DESC, nome`,
+      [empresa.id]
+    )
+    : { rows: [] };
+
   return {
     empresas,
     empresa,
     categorias: categorias.rows,
-    produtos: produtos.rows
+    produtos: produtos.rows,
+    usuarios: usuarios.rows
   };
 }
 
@@ -223,7 +234,7 @@ export default async function AdminPage({ searchParams }) {
 
   const selectedSlug = user.papel === 'nexora_admin' ? searchParams?.slug : null;
 
-  const { empresas, empresa, categorias, produtos } = await getAdminData(
+  const { empresas, empresa, categorias, produtos, usuarios } = await getAdminData(
     user,
     selectedSlug
   );
@@ -301,6 +312,12 @@ export default async function AdminPage({ searchParams }) {
           </p>
         ) : null}
 
+        {searchParams?.senha === 'redefinida' ? (
+          <p className="warning-text">
+            Senha do usuário redefinida com sucesso.
+          </p>
+        ) : null}
+
         <form action="/admin/password" method="post" className="admin-form">
           <label>
             Senha atual
@@ -322,6 +339,47 @@ export default async function AdminPage({ searchParams }) {
           </button>
         </form>
       </section>
+
+      {isNexoraAdmin ? (
+        <section className="panel">
+          <h2>Acessos da empresa</h2>
+          <p className="muted">
+            As senhas não podem ser visualizadas. Para ajudar um cliente, defina uma senha temporária.
+          </p>
+
+          {usuarios.length === 0 ? (
+            <p className="muted">Nenhum acesso cadastrado para esta empresa.</p>
+          ) : (
+            <div className="admin-products editable-products">
+              {usuarios.map((usuario) => (
+                <form
+                  key={usuario.id}
+                  action="/admin/users/reset"
+                  method="post"
+                  className="admin-form compact-form"
+                >
+                  <input type="hidden" name="empresa_id" value={empresa.id} />
+                  <input type="hidden" name="usuario_id" value={usuario.id} />
+
+                  <label>
+                    Usuário
+                    <input value={`${usuario.nome} - ${usuario.email}`} readOnly />
+                  </label>
+
+                  <label>
+                    Nova senha temporária
+                    <input name="senha" type="text" minLength="8" placeholder="Mínimo 8 caracteres" required />
+                  </label>
+
+                  <button className="secondary-button" type="submit">
+                    Redefinir senha
+                  </button>
+                </form>
+              ))}
+            </div>
+          )}
+        </section>
+      ) : null}
       
       {isNexoraAdmin ? (
         <section className="panel">

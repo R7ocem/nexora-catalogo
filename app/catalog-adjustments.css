@@ -2,7 +2,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.catalog-brand-title-row h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .catalog-instagram-link {
@@ -584,6 +589,7 @@
 
   .catalog-brand-title-row {
     gap: 8px;
+    align-items: flex-start;
   }
 
   .catalog-instagram-link {
