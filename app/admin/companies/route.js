@@ -55,12 +55,15 @@ export async function POST(request) {
   const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
+  const proprietarioNome = texto(formData.get('proprietario_nome'));
+  const cpfCnpj = texto(formData.get('documento'));
+  const endereco = texto(formData.get('endereco'));
 
-  const usuarioNome = texto(formData.get('usuario_nome'));
+  const usuarioNome = texto(formData.get('usuario_nome')) || proprietarioNome;
   const usuarioEmail = normalizarEmail(formData.get('usuario_email'));
   const usuarioSenha = texto(formData.get('usuario_senha'));
 
-  if (!nome || !slug || !usuarioNome || !usuarioEmail || !usuarioSenha) {
+  if (!nome || !slug || !proprietarioNome || !cpfCnpj || !endereco || !usuarioNome || !usuarioEmail || !usuarioSenha) {
     redirect('/admin?erro=empresa');
   }
 
@@ -104,6 +107,9 @@ export async function POST(request) {
        slug,
        whatsapp,
        email_empresa,
+       proprietario_nome,
+       cpf_cnpj,
+       endereco,
        segmento,
        tipo_oferta,
        titulo_publico,
@@ -121,6 +127,9 @@ export async function POST(request) {
        $2,
        $3,
        $6,
+       $8,
+       $9,
+       $10,
        $4,
        $5,
        $1,
@@ -134,7 +143,18 @@ export async function POST(request) {
        false
      )
      RETURNING id, slug`,
-    [nome, slug, whatsapp, segmentoFinal, tipoOfertaFinal, usuarioEmail, rotuloCatalogo(segmentoFinal)]
+    [
+      nome,
+      slug,
+      whatsapp,
+      segmentoFinal,
+      tipoOfertaFinal,
+      usuarioEmail,
+      rotuloCatalogo(segmentoFinal),
+      proprietarioNome,
+      cpfCnpj,
+      endereco
+    ]
   );
 
   const empresa = empresaResult.rows[0];
