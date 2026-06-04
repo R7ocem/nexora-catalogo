@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { query } from '../../../lib/db';
 import { getCurrentUser, isTrustedAdminRequest } from '../../../lib/auth';
 import { rotuloCatalogo } from '../../../lib/catalog';
-import { emailValido, normalizarEmail, normalizarWhatsapp } from '../../../lib/validation';
+import { documentoValido, emailValido, normalizarDocumento, normalizarEmail, normalizarWhatsapp } from '../../../lib/validation';
 
 const segmentosPermitidos = [
   'alimentacao',
@@ -80,6 +80,11 @@ export async function POST(request) {
   const empresaId = Number(formData.get('empresa_id'));
   const nome = texto(formData.get('nome'));
   const emailEmpresa = normalizarEmail(formData.get('email_empresa'));
+  const proprietarioNome = texto(formData.get('proprietario_nome'));
+  const cpfCnpj = normalizarDocumento(formData.get('cpf_cnpj'));
+  const endereco = texto(formData.get('endereco'));
+  const cidade = texto(formData.get('cidade'));
+  const estado = texto(formData.get('estado')).toUpperCase();
   const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
@@ -109,6 +114,10 @@ export async function POST(request) {
 
   if (emailEmpresa && !emailValido(emailEmpresa)) {
     redirect('/admin?erro=email_invalido');
+  }
+
+  if (cpfCnpj && !documentoValido(cpfCnpj)) {
+    redirect('/admin?erro=documento');
   }
 
   if (user.papel !== 'nexora_admin' && user.empresa_id !== empresaId) {
@@ -170,7 +179,12 @@ export async function POST(request) {
        logo_zoom = $18,
        banner_posicao = $19,
        banner_zoom = $20,
-       email_empresa = $21
+       email_empresa = $21,
+       proprietario_nome = $22,
+       cpf_cnpj = $23,
+       endereco = $24,
+       cidade = $25,
+       estado = $26
       WHERE id = $1`,
     [
       empresaId,
@@ -193,7 +207,12 @@ export async function POST(request) {
       logoZoom,
       bannerPosicao,
       bannerZoom,
-      emailEmpresa || null
+      emailEmpresa || null,
+      proprietarioNome || null,
+      cpfCnpj || null,
+      endereco || null,
+      cidade || null,
+      estado || null
     ]
   );
 

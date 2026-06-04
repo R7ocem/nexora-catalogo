@@ -633,45 +633,16 @@ export default async function AdminPage({ searchParams }) {
     
       </div>
 
-      {isNexoraAdmin ? (
-        <div>
-          <h3>Dados cadastrais</h3>
-
-          <div className="company-summary">
-            <div>
-              <span>Proprietario</span>
-              <strong>{empresa.proprietario_nome || 'Nao informado'}</strong>
-            </div>
-
-            <div>
-              <span>CPF/CNPJ</span>
-              <strong>{empresa.cpf_cnpj || 'Nao informado'}</strong>
-            </div>
-
-            <div>
-              <span>Endereco</span>
-              <strong>{empresa.endereco || 'Nao informado'}</strong>
-            </div>
-
-            <div>
-              <span>Cidade</span>
-              <strong>{empresa.cidade || 'Nao informado'}</strong>
-            </div>
-
-            <div>
-              <span>Estado</span>
-              <strong>{empresa.estado || 'Nao informado'}</strong>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
       {searchParams?.erro === 'whatsapp' ? (
         <p className="error-text">Informe um WhatsApp valido com DDD. Exemplo: 61999999999.</p>
       ) : null}
 
       {searchParams?.erro === 'email_invalido' ? (
         <p className="error-text">Informe um email valido. Exemplo: cliente@email.com.</p>
+      ) : null}
+
+      {searchParams?.erro === 'documento' ? (
+        <p className="error-text">Informe CPF com 11 digitos ou CNPJ com 14 digitos.</p>
       ) : null}
 
       {searchParams?.erro === 'excluir_empresa' ? (
@@ -684,6 +655,61 @@ export default async function AdminPage({ searchParams }) {
     
       <form id={`company-edit-form-${empresa.id}`} action="/admin/company" method="post" className="admin-form company-edit-form">
         <input type="hidden" name="empresa_id" value={empresa.id} />
+
+        {isNexoraAdmin ? (
+          <>
+            <h3>Dados cadastrais</h3>
+
+            <label>
+              Proprietario
+              <input name="proprietario_nome" defaultValue={empresa.proprietario_nome || ''} placeholder="Nome completo" />
+            </label>
+
+            <label>
+              CPF/CNPJ
+              <input
+                name="cpf_cnpj"
+                defaultValue={empresa.cpf_cnpj || ''}
+                inputMode="numeric"
+                minLength="11"
+                maxLength="18"
+                pattern="(?:\D*\d\D*){11}|(?:\D*\d\D*){14}"
+                title="Informe CPF com 11 digitos ou CNPJ com 14 digitos."
+                placeholder="CPF ou CNPJ"
+              />
+            </label>
+
+            <label>
+              Endereco
+              <input name="endereco" defaultValue={empresa.endereco || ''} placeholder="Rua, numero e bairro" />
+            </label>
+
+            <label>
+              Cidade
+              <input name="cidade" defaultValue={empresa.cidade || ''} placeholder="Cidade" />
+            </label>
+
+            <label>
+              Estado
+              <select name="estado" defaultValue={empresa.estado || ''}>
+                <option value="">UF</option>
+                {estadosBrasil.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {estado}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </>
+        ) : (
+          <>
+            <input type="hidden" name="proprietario_nome" value={empresa.proprietario_nome || ''} />
+            <input type="hidden" name="cpf_cnpj" value={empresa.cpf_cnpj || ''} />
+            <input type="hidden" name="endereco" value={empresa.endereco || ''} />
+            <input type="hidden" name="cidade" value={empresa.cidade || ''} />
+            <input type="hidden" name="estado" value={empresa.estado || ''} />
+          </>
+        )}
     
         <label>
           Nome da empresa
