@@ -370,7 +370,6 @@ export default async function AdminPage({ searchParams }) {
                       name="email"
                       type="email"
                       defaultValue={usuario.email || ''}
-                      pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
                       required
                     />
                   </label>
@@ -404,7 +403,6 @@ export default async function AdminPage({ searchParams }) {
                 name="email"
                 type="email"
                 placeholder="cliente@email.com"
-                pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
                 required
               />
             </label>
@@ -501,7 +499,6 @@ export default async function AdminPage({ searchParams }) {
                 name="usuario_email"
                 type="email"
                 placeholder="cliente@email.com"
-                pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
                 required
               />
             </label>
