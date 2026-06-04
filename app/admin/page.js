@@ -146,7 +146,7 @@ async function getAdminData(user, selectedSlug) {
        descricao_publica,
        horario_funcionamento,
        opcoes_pedido
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE ativo = true
      ORDER BY nome`
   );
@@ -173,7 +173,7 @@ async function getAdminData(user, selectedSlug) {
 
   const categorias = await query(
     `SELECT id, nome
-     FROM food_categorias
+     FROM catalogo_categorias
      WHERE empresa_id = $1
      ORDER BY ordem, nome`,
     [empresa.id]
@@ -195,8 +195,8 @@ async function getAdminData(user, selectedSlug) {
        p.apelidos,
        p.categoria_id,
        c.nome AS categoria_nome
-     FROM food_produtos p
-     LEFT JOIN food_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
+     FROM catalogo_produtos p
+     LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
      WHERE p.empresa_id = $1
      ORDER BY p.ativo DESC, c.ordem, p.nome`,
     [empresa.id]
@@ -205,7 +205,7 @@ async function getAdminData(user, selectedSlug) {
   const usuarios = user.papel === 'nexora_admin'
     ? await query(
       `SELECT id, nome, email, papel, ativo, criado_em
-       FROM food_usuarios
+       FROM catalogo_usuarios
        WHERE empresa_id = $1
        ORDER BY ativo DESC, nome`,
       [empresa.id]

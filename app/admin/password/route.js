@@ -29,7 +29,7 @@ export async function POST(request) {
 
   const usuarios = await query(
     `SELECT id, senha_hash
-     FROM food_usuarios
+     FROM catalogo_usuarios
      WHERE id = $1
      LIMIT 1`,
     [user.id]
@@ -44,7 +44,7 @@ export async function POST(request) {
   const senhaHash = hashPassword(senhaNova);
 
   await query(
-    `UPDATE food_usuarios
+    `UPDATE catalogo_usuarios
      SET senha_hash = $2
      WHERE id = $1`,
     [user.id, senhaHash]

@@ -67,7 +67,7 @@ export async function POST(request) {
 
   const empresa = await query(
     `SELECT id, slug
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -81,7 +81,7 @@ export async function POST(request) {
 
   const produto = await query(
     `SELECT imagem_url
-     FROM food_produtos
+     FROM catalogo_produtos
      WHERE id = $1
        AND empresa_id = $2
      LIMIT 1`,
@@ -91,7 +91,7 @@ export async function POST(request) {
   const imagemUrl = produto.rows[0]?.imagem_url;
 
   await query(
-    `DELETE FROM food_produtos
+    `DELETE FROM catalogo_produtos
      WHERE id = $1
        AND empresa_id = $2`,
     [produtoId, empresaId]

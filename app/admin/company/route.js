@@ -126,7 +126,7 @@ export async function POST(request) {
 
   const empresaAtualResult = await query(
     `SELECT id, nome, titulo_publico
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -158,7 +158,7 @@ export async function POST(request) {
       : (tituloPublico || nome);
 
   await query(
-    `UPDATE food_empresas
+    `UPDATE catalogo_empresas
      SET
        nome = $2,
        whatsapp = $3,
@@ -217,7 +217,7 @@ export async function POST(request) {
   );
 
   const empresa = await query(
-    `SELECT slug FROM food_empresas WHERE id = $1 LIMIT 1`,
+    `SELECT slug FROM catalogo_empresas WHERE id = $1 LIMIT 1`,
     [empresaId]
   );
 

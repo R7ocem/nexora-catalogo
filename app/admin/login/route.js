@@ -64,7 +64,7 @@ export async function POST(request) {
 
   const result = await query(
     `SELECT id, empresa_id, nome, email, senha_hash, papel
-     FROM food_usuarios
+     FROM catalogo_usuarios
      WHERE email = $1 AND ativo = true
      LIMIT 1`,
     [email]

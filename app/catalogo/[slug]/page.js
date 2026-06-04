@@ -30,7 +30,7 @@ async function getCatalogo(slug) {
        instagram_url,
        horario_funcionamento,
        opcoes_pedido
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE slug = $1
      LIMIT 1`,
     [slug]
@@ -48,7 +48,7 @@ async function getCatalogo(slug) {
 
   const categorias = await query(
     `SELECT id, nome
-     FROM food_categorias
+     FROM catalogo_categorias
      WHERE empresa_id = $1
      ORDER BY ordem, nome`,
     [empresa.id]
@@ -69,8 +69,8 @@ async function getCatalogo(slug) {
        p.destaque_ordem,
        p.apelidos,
        c.nome AS categoria_nome
-     FROM food_produtos p
-     LEFT JOIN food_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
+     FROM catalogo_produtos p
+     LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
      WHERE p.empresa_id = $1
        AND p.ativo = true
      ORDER BY c.ordem, p.nome`,

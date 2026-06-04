@@ -115,7 +115,7 @@ export async function POST(request) {
 
   const empresaResult = await query(
     `SELECT id, slug, logo_url, banner_url
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -136,7 +136,7 @@ export async function POST(request) {
 
   if (acao === 'excluir') {
     await query(
-      `UPDATE food_empresas
+      `UPDATE catalogo_empresas
        SET ${campo} = ''
        WHERE id = $1`,
       [empresaId]
@@ -154,7 +154,7 @@ export async function POST(request) {
 
   if (novaUrl) {
     await query(
-      `UPDATE food_empresas
+      `UPDATE catalogo_empresas
        SET ${campo} = $2,
            ${campoPosicao} = $3,
            ${campoZoom} = $4
@@ -167,7 +167,7 @@ export async function POST(request) {
     }
   } else {
     await query(
-      `UPDATE food_empresas
+      `UPDATE catalogo_empresas
        SET ${campoPosicao} = $2,
            ${campoZoom} = $3
        WHERE id = $1`,

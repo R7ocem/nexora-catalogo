@@ -15,7 +15,7 @@ async function getEmpresaPermitida(user, empresaId) {
 
   const empresa = await query(
     `SELECT id, slug
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -60,13 +60,13 @@ export async function POST(request) {
 
     const ordem = await query(
       `SELECT COALESCE(MAX(ordem), 0) + 1 AS proxima_ordem
-       FROM food_categorias
+       FROM catalogo_categorias
        WHERE empresa_id = $1`,
       [empresaId]
     );
 
     await query(
-      `INSERT INTO food_categorias (empresa_id, nome, ordem, ativo)
+      `INSERT INTO catalogo_categorias (empresa_id, nome, ordem, ativo)
        VALUES ($1, $2, $3, true)`,
       [empresaId, nome, ordem.rows[0].proxima_ordem]
     );
@@ -80,7 +80,7 @@ export async function POST(request) {
     }
 
     await query(
-      `UPDATE food_categorias
+      `UPDATE catalogo_categorias
        SET nome = $3, atualizado_em = now()
        WHERE id = $1
          AND empresa_id = $2`,
@@ -96,7 +96,7 @@ export async function POST(request) {
     }
 
     await query(
-      `DELETE FROM food_categorias
+      `DELETE FROM catalogo_categorias
        WHERE id = $1
          AND empresa_id = $2`,
       [categoriaId, empresaId]
@@ -112,7 +112,7 @@ export async function POST(request) {
 
     const categorias = await query(
       `SELECT id, ordem
-       FROM food_categorias
+       FROM catalogo_categorias
        WHERE empresa_id = $1
        ORDER BY ordem, nome`,
       [empresaId]
@@ -127,12 +127,12 @@ export async function POST(request) {
       const outro = lista[outroIndex];
 
       await query(
-        `UPDATE food_categorias SET ordem = $2 WHERE id = $1 AND empresa_id = $3`,
+        `UPDATE catalogo_categorias SET ordem = $2 WHERE id = $1 AND empresa_id = $3`,
         [atual.id, outro.ordem, empresaId]
       );
 
       await query(
-        `UPDATE food_categorias SET ordem = $2 WHERE id = $1 AND empresa_id = $3`,
+        `UPDATE catalogo_categorias SET ordem = $2 WHERE id = $1 AND empresa_id = $3`,
         [outro.id, atual.ordem, empresaId]
       );
     }

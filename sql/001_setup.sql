@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS food_empresas (
+CREATE TABLE IF NOT EXISTS catalogo_empresas (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS food_empresas (
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS food_categorias (
+CREATE TABLE IF NOT EXISTS catalogo_categorias (
   id SERIAL PRIMARY KEY,
-  empresa_id INTEGER NOT NULL REFERENCES food_empresas(id) ON DELETE CASCADE,
+  empresa_id INTEGER NOT NULL REFERENCES catalogo_empresas(id) ON DELETE CASCADE,
   nome TEXT NOT NULL,
   ordem INTEGER NOT NULL DEFAULT 0,
   ativo BOOLEAN NOT NULL DEFAULT true,
@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS food_categorias (
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS food_produtos (
+CREATE TABLE IF NOT EXISTS catalogo_produtos (
   id SERIAL PRIMARY KEY,
-  empresa_id INTEGER NOT NULL REFERENCES food_empresas(id) ON DELETE CASCADE,
-  categoria_id INTEGER REFERENCES food_categorias(id) ON DELETE SET NULL,
+  empresa_id INTEGER NOT NULL REFERENCES catalogo_empresas(id) ON DELETE CASCADE,
+  categoria_id INTEGER REFERENCES catalogo_categorias(id) ON DELETE SET NULL,
   codigo TEXT NOT NULL,
   nome TEXT NOT NULL,
   descricao TEXT,
@@ -67,20 +67,20 @@ CREATE TABLE IF NOT EXISTS food_produtos (
   UNIQUE (empresa_id, codigo)
 );
 
-ALTER TABLE food_empresas
+ALTER TABLE catalogo_empresas
 ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 
-ALTER TABLE food_empresas
+ALTER TABLE catalogo_empresas
 ADD COLUMN IF NOT EXISTS email_empresa TEXT;
 
-ALTER TABLE food_empresas
+ALTER TABLE catalogo_empresas
 ADD COLUMN IF NOT EXISTS proprietario_nome TEXT,
 ADD COLUMN IF NOT EXISTS cpf_cnpj TEXT,
 ADD COLUMN IF NOT EXISTS endereco TEXT,
 ADD COLUMN IF NOT EXISTS cidade TEXT,
 ADD COLUMN IF NOT EXISTS estado TEXT;
 
-ALTER TABLE food_empresas
+ALTER TABLE catalogo_empresas
 ADD COLUMN IF NOT EXISTS segmento TEXT NOT NULL DEFAULT 'outros',
 ADD COLUMN IF NOT EXISTS tipo_oferta TEXT NOT NULL DEFAULT 'produtos',
 ADD COLUMN IF NOT EXISTS titulo_publico TEXT,
@@ -102,26 +102,26 @@ ADD COLUMN IF NOT EXISTS bloqueado BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN IF NOT EXISTS bloqueado_motivo TEXT,
 ADD COLUMN IF NOT EXISTS bloqueado_em TIMESTAMP;
 
-ALTER TABLE food_produtos
+ALTER TABLE catalogo_produtos
 ADD COLUMN IF NOT EXISTS tipo_item TEXT NOT NULL DEFAULT 'produto',
 ADD COLUMN IF NOT EXISTS tipo_preco TEXT NOT NULL DEFAULT 'fixo',
 ADD COLUMN IF NOT EXISTS destaque BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN IF NOT EXISTS destaque_ordem INTEGER NOT NULL DEFAULT 0,
 ADD COLUMN IF NOT EXISTS apelidos TEXT NOT NULL DEFAULT '';
 
-CREATE INDEX IF NOT EXISTS idx_food_empresas_slug
-ON food_empresas (slug);
+CREATE INDEX IF NOT EXISTS idx_catalogo_empresas_slug
+ON catalogo_empresas (slug);
 
-CREATE INDEX IF NOT EXISTS idx_food_categorias_empresa_ordem
-ON food_categorias (empresa_id, ordem);
+CREATE INDEX IF NOT EXISTS idx_catalogo_categorias_empresa_ordem
+ON catalogo_categorias (empresa_id, ordem);
 
-CREATE INDEX IF NOT EXISTS idx_food_produtos_empresa_ativo_categoria
-ON food_produtos (empresa_id, ativo, categoria_id);
+CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_empresa_ativo_categoria
+ON catalogo_produtos (empresa_id, ativo, categoria_id);
 
-CREATE INDEX IF NOT EXISTS idx_food_produtos_empresa_destaque
-ON food_produtos (empresa_id, destaque, destaque_ordem);
+CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_empresa_destaque
+ON catalogo_produtos (empresa_id, destaque, destaque_ordem);
 
-INSERT INTO food_empresas (nome, slug, whatsapp, ativo)
+INSERT INTO catalogo_empresas (nome, slug, whatsapp, ativo)
 VALUES ('Savore Gourmet', 'savore', '556199327471', true)
 ON CONFLICT (slug)
 DO UPDATE SET
@@ -131,9 +131,9 @@ DO UPDATE SET
   atualizado_em = NOW();
 
 WITH empresa AS (
-  SELECT id FROM food_empresas WHERE slug = 'savore'
+  SELECT id FROM catalogo_empresas WHERE slug = 'savore'
 )
-INSERT INTO food_categorias (empresa_id, nome, ordem, ativo)
+INSERT INTO catalogo_categorias (empresa_id, nome, ordem, ativo)
 SELECT e.id, c.nome, c.ordem, true
 FROM empresa e
 CROSS JOIN (
@@ -143,6 +143,6 @@ CROSS JOIN (
     ('Sobremesas', 3)
 ) AS c(nome, ordem)
 WHERE NOT EXISTS (
-  SELECT 1 FROM food_categorias fc
+  SELECT 1 FROM catalogo_categorias fc
   WHERE fc.empresa_id = e.id AND fc.nome = c.nome
 );

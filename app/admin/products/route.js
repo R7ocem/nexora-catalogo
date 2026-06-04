@@ -139,7 +139,7 @@ export async function POST(request) {
 
   const empresa = await query(
     `SELECT id, slug
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -157,7 +157,7 @@ export async function POST(request) {
   if (categoriaId) {
     const categoria = await query(
       `SELECT id
-       FROM food_categorias
+       FROM catalogo_categorias
        WHERE id = $1
          AND empresa_id = $2
        LIMIT 1`,
@@ -214,7 +214,7 @@ export async function POST(request) {
 
   if (produtoId) {
     await query(
-      `UPDATE food_produtos
+      `UPDATE catalogo_produtos
        SET
          codigo = $3,
          nome = $4,
@@ -249,7 +249,7 @@ export async function POST(request) {
     );
   } else {
     await query(
-      `INSERT INTO food_produtos (
+      `INSERT INTO catalogo_produtos (
          empresa_id,
          categoria_id,
          codigo,

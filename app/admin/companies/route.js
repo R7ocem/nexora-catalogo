@@ -118,7 +118,7 @@ export async function POST(request) {
   }
 
   const emailExistente = await query(
-    `SELECT id FROM food_usuarios WHERE email = $1 LIMIT 1`,
+    `SELECT id FROM catalogo_usuarios WHERE email = $1 LIMIT 1`,
     [usuarioEmail]
   );
 
@@ -127,7 +127,7 @@ export async function POST(request) {
   }
 
   const slugExistente = await query(
-    `SELECT id FROM food_empresas WHERE slug = $1 LIMIT 1`,
+    `SELECT id FROM catalogo_empresas WHERE slug = $1 LIMIT 1`,
     [slug]
   );
 
@@ -144,7 +144,7 @@ export async function POST(request) {
     : 'produtos';
 
   const empresaResult = await query(
-    `INSERT INTO food_empresas (
+    `INSERT INTO catalogo_empresas (
        nome,
        slug,
        whatsapp,
@@ -209,7 +209,7 @@ export async function POST(request) {
   const senhaHash = hashPassword(usuarioSenha);
 
   await query(
-    `INSERT INTO food_usuarios (
+    `INSERT INTO catalogo_usuarios (
        empresa_id,
        nome,
        email,

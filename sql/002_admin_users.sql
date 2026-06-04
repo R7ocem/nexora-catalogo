@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS food_usuarios (
+CREATE TABLE IF NOT EXISTS catalogo_usuarios (
   id SERIAL PRIMARY KEY,
-  empresa_id INTEGER REFERENCES food_empresas(id) ON DELETE CASCADE,
+  empresa_id INTEGER REFERENCES catalogo_empresas(id) ON DELETE CASCADE,
   nome TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   senha_hash TEXT NOT NULL,
@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS food_usuarios (
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_food_usuarios_empresa_id
-ON food_usuarios (empresa_id);
+CREATE INDEX IF NOT EXISTS idx_catalogo_usuarios_empresa_id
+ON catalogo_usuarios (empresa_id);
 
-INSERT INTO food_usuarios (empresa_id, nome, email, senha_hash, papel, ativo)
+INSERT INTO catalogo_usuarios (empresa_id, nome, email, senha_hash, papel, ativo)
 VALUES (
   NULL,
   'Nexora Admin',
@@ -31,9 +31,9 @@ DO UPDATE SET
   atualizado_em = NOW();
 
 WITH empresa AS (
-  SELECT id FROM food_empresas WHERE slug = 'savore'
+  SELECT id FROM catalogo_empresas WHERE slug = 'savore'
 )
-INSERT INTO food_usuarios (empresa_id, nome, email, senha_hash, papel, ativo)
+INSERT INTO catalogo_usuarios (empresa_id, nome, email, senha_hash, papel, ativo)
 SELECT
   e.id,
   'Savore Admin',

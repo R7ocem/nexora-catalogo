@@ -24,7 +24,7 @@ export async function POST(request) {
 
   const empresaAtual = await query(
     `SELECT id, slug
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -38,7 +38,7 @@ export async function POST(request) {
 
   if (acao === 'bloquear') {
     await query(
-      `UPDATE food_empresas
+      `UPDATE catalogo_empresas
        SET
          bloqueado = true,
          bloqueado_motivo = 'mensalidade_pendente',
@@ -50,7 +50,7 @@ export async function POST(request) {
 
   if (acao === 'desbloquear') {
     await query(
-      `UPDATE food_empresas
+      `UPDATE catalogo_empresas
        SET
          bloqueado = false,
          bloqueado_motivo = NULL,

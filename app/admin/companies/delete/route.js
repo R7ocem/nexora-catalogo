@@ -62,7 +62,7 @@ export async function POST(request) {
 
   const empresa = await query(
     `SELECT id, logo_url, banner_url, bloqueado
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -76,7 +76,7 @@ export async function POST(request) {
 
   const produtos = await query(
     `SELECT imagem_url
-     FROM food_produtos
+     FROM catalogo_produtos
      WHERE empresa_id = $1
        AND imagem_url IS NOT NULL
        AND imagem_url <> ''`,
@@ -90,7 +90,7 @@ export async function POST(request) {
   ].filter(Boolean);
 
   await query(
-    `DELETE FROM food_empresas
+    `DELETE FROM catalogo_empresas
      WHERE id = $1
        AND bloqueado = true`,
     [empresaId]

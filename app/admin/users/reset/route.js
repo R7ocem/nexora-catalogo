@@ -31,7 +31,7 @@ export async function POST(request) {
 
   const empresa = await query(
     `SELECT id, slug
-     FROM food_empresas
+     FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
     [empresaId]
@@ -49,7 +49,7 @@ export async function POST(request) {
 
   const emailExistente = await query(
     `SELECT id
-     FROM food_usuarios
+     FROM catalogo_usuarios
      WHERE email = $1
        AND id <> $2
      LIMIT 1`,
@@ -67,7 +67,7 @@ export async function POST(request) {
   const senhaHash = senha ? hashPassword(senha) : null;
 
   await query(
-    `UPDATE food_usuarios
+    `UPDATE catalogo_usuarios
      SET nome = $3,
          email = $4,
          senha_hash = COALESCE($5, senha_hash),
