@@ -348,12 +348,6 @@ export default async function AdminPage({ searchParams }) {
             As senhas não podem ser visualizadas. Para ajudar um cliente, defina uma senha temporária.
           </p>
 
-          <div className="company-summary">
-            <div>
-              <span>Link do catalogo</span>
-              <strong>{linkPublico}</strong>
-            </div>
-          </div>
 
           {usuarios.length > 0 ? (
             <div className="admin-products editable-products">
@@ -397,33 +391,35 @@ export default async function AdminPage({ searchParams }) {
             <p className="muted">Nenhum acesso cadastrado para esta empresa.</p>
           )}
 
-          <form action="/admin/users" method="post" className="admin-form compact-form">
-            <input type="hidden" name="empresa_id" value={empresa.id} />
+          {usuarios.length === 0 ? (
+            <form action="/admin/users" method="post" className="admin-form compact-form">
+              <input type="hidden" name="empresa_id" value={empresa.id} />
 
-            <label>
-              Nome do usuario
-              <input name="nome" placeholder="Nome de quem vai acessar" required />
-            </label>
+              <label>
+                Nome do usuario
+                <input name="nome" placeholder="Nome de quem vai acessar" required />
+              </label>
 
-            <label>
-              Email de acesso
-              <input
-                name="email"
-                type="email"
-                placeholder="cliente@email.com"
-                required
-              />
-            </label>
+              <label>
+                Email de acesso
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="cliente@email.com"
+                  required
+                />
+              </label>
 
-            <label>
-              Senha temporaria
-              <input name="senha" type="text" minLength="8" placeholder="Minimo 8 caracteres" required />
-            </label>
+              <label>
+                Senha temporaria
+                <input name="senha" type="text" minLength="8" placeholder="Minimo 8 caracteres" required />
+              </label>
 
-            <button className="primary-button" type="submit">
-              Criar acesso
-            </button>
-          </form>
+              <button className="primary-button" type="submit">
+                Criar acesso
+              </button>
+            </form>
+          ) : null}
         </section>
       ) : null}
       
@@ -447,6 +443,10 @@ export default async function AdminPage({ searchParams }) {
             <p className="error-text">Informe um WhatsApp valido com DDD. Exemplo: 61999999999.</p>
           ) : null}
 
+          {searchParams?.erro === 'empresa' ? (
+            <p className="error-text">Preencha todos os dados obrigatorios da empresa.</p>
+          ) : null}
+
           <form action="/admin/companies" method="post" className="admin-form">
             <label>
               Nome da empresa
@@ -459,6 +459,21 @@ export default async function AdminPage({ searchParams }) {
             </label>
 
             <label>
+              Nome do Proprietario da empresa
+              <input name="proprietario_nome" placeholder="Nome completo" required />
+            </label>
+
+            <label>
+              CPF/CNPJ
+              <input name="documento" placeholder="CPF ou CNPJ" required />
+            </label>
+
+            <label>
+              Endereco
+              <input name="endereco" placeholder="Endereco da empresa" required />
+            </label>
+
+            <label>
               WhatsApp
               <input
                 name="whatsapp"
@@ -468,37 +483,6 @@ export default async function AdminPage({ searchParams }) {
                 placeholder="DDD + numero. Ex: 61999999999"
                 required
               />
-            </label>
-
-            <label>
-              Segmento
-              <select name="segmento" defaultValue="outros">
-                <option value="alimentacao">Alimentação</option>
-                <option value="festas_decoracao">Festas e decoração</option>
-                <option value="moda">Moda</option>
-                <option value="beleza">Beleza</option>
-                <option value="saude">Saúde</option>
-                <option value="educacao">Educação</option>
-                <option value="servicos_gerais">Serviços gerais</option>
-                <option value="automotivo">Automotivo</option>
-                <option value="casa_construcao">Casa e construção</option>
-                <option value="tecnologia">Tecnologia</option>
-                <option value="outros">Outros</option>
-              </select>
-            </label>
-
-            <label>
-              Tipo de oferta
-              <select name="tipo_oferta" defaultValue="produtos">
-                <option value="produtos">Produtos</option>
-                <option value="servicos">Serviços</option>
-                <option value="misto">Produtos e serviços</option>
-              </select>
-            </label>
-
-            <label>
-              Nome do responsável
-              <input name="usuario_nome" placeholder="Nome de quem vai acessar" required />
             </label>
             
             <label>
@@ -555,6 +539,11 @@ export default async function AdminPage({ searchParams }) {
         <div>
           <span>Oferta</span>
           <strong>{tiposOferta[empresa.tipo_oferta] || empresa.tipo_oferta}</strong>
+        </div>
+
+        <div>
+          <span>Link publico</span>
+          <strong>{linkPublico}</strong>
         </div>
     
       </div>

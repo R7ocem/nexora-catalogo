@@ -1,0 +1,4 @@
+ALTER TABLE food_empresas
+ADD COLUMN IF NOT EXISTS proprietario_nome TEXT,
+ADD COLUMN IF NOT EXISTS cpf_cnpj TEXT,
+ADD COLUMN IF NOT EXISTS endereco TEXT;
