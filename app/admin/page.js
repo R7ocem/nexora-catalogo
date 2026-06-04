@@ -119,6 +119,11 @@ async function getAdminData(user, selectedSlug) {
        slug,
        whatsapp,
        email_empresa,
+       proprietario_nome,
+       cpf_cnpj,
+       endereco,
+       cidade,
+       estado,
        ativo,
        bloqueado,
        bloqueado_motivo,
@@ -627,6 +632,39 @@ export default async function AdminPage({ searchParams }) {
         </div>
     
       </div>
+
+      {isNexoraAdmin ? (
+        <div>
+          <h3>Dados cadastrais</h3>
+
+          <div className="company-summary">
+            <div>
+              <span>Proprietario</span>
+              <strong>{empresa.proprietario_nome || 'Nao informado'}</strong>
+            </div>
+
+            <div>
+              <span>CPF/CNPJ</span>
+              <strong>{empresa.cpf_cnpj || 'Nao informado'}</strong>
+            </div>
+
+            <div>
+              <span>Endereco</span>
+              <strong>{empresa.endereco || 'Nao informado'}</strong>
+            </div>
+
+            <div>
+              <span>Cidade</span>
+              <strong>{empresa.cidade || 'Nao informado'}</strong>
+            </div>
+
+            <div>
+              <span>Estado</span>
+              <strong>{empresa.estado || 'Nao informado'}</strong>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {searchParams?.erro === 'whatsapp' ? (
         <p className="error-text">Informe um WhatsApp valido com DDD. Exemplo: 61999999999.</p>
