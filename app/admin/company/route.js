@@ -38,17 +38,6 @@ function numero(valor, fallback = 1) {
   return Number.isFinite(numeroFinal) ? numeroFinal : fallback;
 }
 
-function posicaoImagem(valor) {
-  const partes = texto(valor).match(/^(\d{1,3}(?:\.\d+)?)%\s+(\d{1,3}(?:\.\d+)?)%$/);
-
-  if (!partes) return '50% 50%';
-
-  const x = Math.min(100, Math.max(0, Number(partes[1])));
-  const y = Math.min(100, Math.max(0, Number(partes[2])));
-
-  return `${x}% ${y}%`;
-}
-
 function montarHorarios(formData) {
   const horarios = {};
 
@@ -102,9 +91,9 @@ export async function POST(request) {
   const usarGradiente = formData.get('usar_gradiente') === 'on';
   const catalogoFundoTipo = texto(formData.get('catalogo_fundo_tipo')) || 'claro';
   const catalogoFundoCor = texto(formData.get('catalogo_fundo_cor')) || '#f7f4ef';
-  const logoPosicao = posicaoImagem(formData.get('logo_posicao'));
+  const logoPosicao = '50% 50%';
   const logoZoom = Math.min(2, Math.max(1, numero(formData.get('logo_zoom'), 1)));
-  const bannerPosicao = posicaoImagem(formData.get('banner_posicao'));
+  const bannerPosicao = '50% 50%';
   const bannerZoom = Math.min(2, Math.max(1, numero(formData.get('banner_zoom'), 1)));
   const horariosFuncionamento = montarHorarios(formData);
   const opcoesPedido = montarOpcoesPedido(formData);

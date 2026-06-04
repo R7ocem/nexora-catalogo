@@ -126,25 +126,6 @@ function zoomImagem(valor) {
   return Math.min(2, Math.max(1, numero));
 }
 
-function posicaoImagem(posicao, zoom) {
-  if (zoom <= 1.01) return '50% 50%';
-
-  return posicao || '50% 50%';
-}
-
-function transformImagem(posicao, zoom) {
-  if (zoom <= 1.01) return 'scale(1)';
-
-  const match = String(posicao || '50% 50%').match(/([0-9.]+)%\s+([0-9.]+)%/);
-  const x = match ? Number(match[1]) : 50;
-  const y = match ? Number(match[2]) : 50;
-  const moveFactor = Math.max(0, zoom - 1) * 55;
-  const translateX = ((50 - x) / 50) * moveFactor;
-  const translateY = ((50 - y) / 50) * moveFactor;
-
-  return `translate(${translateX.toFixed(2)}%, ${translateY.toFixed(2)}%) scale(${zoom})`;
-}
-
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -197,12 +178,8 @@ function WhatsAppIcon() {
     : catalogoFundoTipo === 'personalizado'
       ? (empresa.catalogo_fundo_cor || '#f7f4ef')
       : '#f7f4ef';
-  const logoPosicao = empresa.logo_posicao || '50% 50%';
   const logoZoom = zoomImagem(empresa.logo_zoom);
-  const logoPosicaoVisual = posicaoImagem(logoPosicao, logoZoom);
-  const bannerPosicao = empresa.banner_posicao || '50% 50%';
   const bannerZoom = zoomImagem(empresa.banner_zoom);
-  const bannerPosicaoVisual = posicaoImagem(bannerPosicao, bannerZoom);
   const instagramUrl = normalizarInstagramUrl(empresa.instagram_url);
   const estabelecimentoAberto = estaAbertoAgora(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
@@ -461,8 +438,8 @@ function WhatsAppIcon() {
             src={empresa.banner_url}
             alt={nomeEmpresa}
             style={{
-              objectPosition: bannerPosicaoVisual,
-              transform: transformImagem(bannerPosicaoVisual, bannerZoom)
+              objectPosition: '50% 50%',
+              transform: `scale(${bannerZoom})`
             }}
           />
         ) : (
@@ -477,8 +454,8 @@ function WhatsAppIcon() {
               src={empresa.logo_url}
               alt={nomeEmpresa}
               style={{
-                objectPosition: logoPosicaoVisual,
-                transform: transformImagem(logoPosicaoVisual, logoZoom)
+                objectPosition: '50% 50%',
+                transform: `scale(${logoZoom})`
               }}
             />
           ) : (

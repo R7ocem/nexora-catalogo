@@ -88,17 +88,6 @@ function numero(valor, fallback = 1) {
   return Number.isFinite(numeroFinal) ? numeroFinal : fallback;
 }
 
-function posicaoImagem(valor) {
-  const partes = texto(valor).match(/^(\d{1,3}(?:\.\d+)?)%\s+(\d{1,3}(?:\.\d+)?)%$/);
-
-  if (!partes) return '50% 50%';
-
-  const x = Math.min(100, Math.max(0, Number(partes[1])));
-  const y = Math.min(100, Math.max(0, Number(partes[2])));
-
-  return `${x}% ${y}%`;
-}
-
 export async function POST(request) {
   const user = await getCurrentUser();
 
@@ -137,7 +126,7 @@ export async function POST(request) {
   const campo = tipo === 'banner' ? 'banner_url' : 'logo_url';
   const campoPosicao = tipo === 'banner' ? 'banner_posicao' : 'logo_posicao';
   const campoZoom = tipo === 'banner' ? 'banner_zoom' : 'logo_zoom';
-  const posicao = posicaoImagem(formData.get(campoPosicao));
+  const posicao = '50% 50%';
   const zoom = Math.min(2, Math.max(1, numero(formData.get(campoZoom), 1)));
   const imagemAnterior = empresa[campo];
 

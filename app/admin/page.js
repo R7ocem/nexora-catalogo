@@ -608,9 +608,8 @@ export default async function AdminPage({ searchParams }) {
           <input
             type="hidden"
             name="logo_posicao"
-            data-media-position-field="logo_posicao"
             form={`company-edit-form-${empresa.id}`}
-            defaultValue={empresa.logo_posicao || '50% 50%'}
+            defaultValue="50% 50%"
           />
 
           {empresa.logo_url ? (
@@ -620,8 +619,8 @@ export default async function AdminPage({ searchParams }) {
                 src={empresa.logo_url}
                 alt={`Logo ${empresa.nome}`}
                 style={{
-                  objectPosition: Number(empresa.logo_zoom || 1) > 1.01 ? (empresa.logo_posicao || '50% 50%') : '50% 50%',
-                  transform: Number(empresa.logo_zoom || 1) > 1.01 ? `scale(${Number(empresa.logo_zoom || 1) || 1})` : 'scale(1)'
+                  objectPosition: '50% 50%',
+                  transform: `scale(${Number(empresa.logo_zoom || 1) || 1})`
                 }}
               />
             </div>
@@ -682,9 +681,8 @@ export default async function AdminPage({ searchParams }) {
           <input
             type="hidden"
             name="banner_posicao"
-            data-media-position-field="banner_posicao"
             form={`company-edit-form-${empresa.id}`}
-            defaultValue={empresa.banner_posicao || '50% 50%'}
+            defaultValue="50% 50%"
           />
 
           {empresa.banner_url ? (
@@ -694,8 +692,8 @@ export default async function AdminPage({ searchParams }) {
                 src={empresa.banner_url}
                 alt={`Banner ${empresa.nome}`}
                 style={{
-                  objectPosition: Number(empresa.banner_zoom || 1) > 1.01 ? (empresa.banner_posicao || '50% 50%') : '50% 50%',
-                  transform: Number(empresa.banner_zoom || 1) > 1.01 ? `scale(${Number(empresa.banner_zoom || 1) || 1})` : 'scale(1)'
+                  objectPosition: '50% 50%',
+                  transform: `scale(${Number(empresa.banner_zoom || 1) || 1})`
                 }}
               />
             </div>
@@ -755,7 +753,7 @@ export default async function AdminPage({ searchParams }) {
        <form id={`company-logo-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
        <input type="hidden" name="empresa_id" value={empresa.id} />
        <input type="hidden" name="tipo" value="logo" />
-       <input type="hidden" name="logo_posicao" value={empresa.logo_posicao || '50% 50%'} />
+       <input type="hidden" name="logo_posicao" value="50% 50%" />
        <input type="hidden" name="logo_zoom" value={empresa.logo_zoom || 1} />
       </form>
       
@@ -768,7 +766,7 @@ export default async function AdminPage({ searchParams }) {
        <form id={`company-banner-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="banner" />
-        <input type="hidden" name="banner_posicao" value={empresa.banner_posicao || '50% 50%'} />
+        <input type="hidden" name="banner_posicao" value="50% 50%" />
         <input type="hidden" name="banner_zoom" value={empresa.banner_zoom || 1} />
       </form>
       
@@ -1261,10 +1259,7 @@ export default async function AdminPage({ searchParams }) {
           });
 
           document.querySelectorAll('.company-media-card').forEach(function (card) {
-            var frame = card.querySelector('.media-adjust-frame');
             var zoomInput = card.querySelector('[data-media-zoom-field]');
-            var positionInput = card.querySelector('[data-media-position-field]');
-            var positionName = positionInput ? positionInput.name : '';
             var zoomName = zoomInput ? zoomInput.name : '';
 
             function image() {
@@ -1279,130 +1274,18 @@ export default async function AdminPage({ searchParams }) {
               });
             }
 
-            function transformForPosition(position, zoom) {
-              var safeZoom = Number(zoom || 1) || 1;
-
-              if (safeZoom <= 1.01) return 'scale(1)';
-
-              var match = String(position || '50% 50%').match(/([0-9.]+)%\s+([0-9.]+)%/);
-              var x = match ? Number(match[1]) : 50;
-              var y = match ? Number(match[2]) : 50;
-              var moveFactor = Math.max(0, safeZoom - 1) * 55;
-              var translateX = ((50 - x) / 50) * moveFactor;
-              var translateY = ((50 - y) / 50) * moveFactor;
-
-              return 'translate(' + translateX.toFixed(2) + '%, ' + translateY.toFixed(2) + '%) scale(' + safeZoom + ')';
-            }
-
             function applyZoom() {
               var preview = image();
               if (!preview || !zoomInput) return;
 
-              preview.style.objectPosition = Number(zoomInput.value || 1) > 1.01
-                ? (positionInput?.value || '50% 50%')
-                : '50% 50%';
-              preview.style.transform = transformForPosition(positionInput?.value, zoomInput.value || '1');
+              preview.style.objectPosition = '50% 50%';
+              preview.style.transform = 'scale(' + (zoomInput.value || '1') + ')';
               syncFields(zoomName, zoomInput.value || '1');
-            }
-
-            function positionParts() {
-              var value = positionInput ? String(positionInput.value || '50% 50%') : '50% 50%';
-              var match = value.match(/([0-9.]+)%\s+([0-9.]+)%/);
-
-              if (!match) return { x: 50, y: 50 };
-
-              return {
-                x: Number(match[1]) || 50,
-                y: Number(match[2]) || 50
-              };
-            }
-
-            function savePosition(x, y) {
-              var preview = image();
-              if (!preview || !positionInput) return;
-
-              var nextX = Math.max(0, Math.min(100, x));
-              var nextY = Math.max(0, Math.min(100, y));
-              var value = nextX.toFixed(1) + '% ' + nextY.toFixed(1) + '%';
-
-              positionInput.value = value;
-              syncFields(positionName, value);
-              preview.style.objectPosition = Number(zoomInput?.value || 1) > 1.01 ? value : '50% 50%';
-              preview.style.transform = transformForPosition(value, zoomInput?.value || '1');
-            }
-
-            function setPosition(clientX, clientY) {
-              var currentFrame = frame || card.querySelector('.media-adjust-frame');
-              if (!currentFrame || !positionInput) return;
-
-              var rect = currentFrame.getBoundingClientRect();
-              var x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-              var y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
-
-              savePosition(x, y);
-            }
-
-            function movePosition(start, clientX, clientY) {
-              var currentFrame = frame || card.querySelector('.media-adjust-frame');
-              if (!currentFrame || !positionInput || !start) return;
-
-              var rect = currentFrame.getBoundingClientRect();
-              var deltaX = ((clientX - start.clientX) / rect.width) * 100;
-              var deltaY = ((clientY - start.clientY) / rect.height) * 100;
-
-              savePosition(start.x + deltaX, start.y + deltaY);
             }
 
             if (zoomInput) {
               zoomInput.addEventListener('input', applyZoom);
               applyZoom();
-            }
-
-            if (frame && positionInput) {
-              var dragging = false;
-              var dragStart = null;
-              var moved = false;
-
-              frame.addEventListener('pointerdown', function (event) {
-                dragging = true;
-                moved = false;
-                dragStart = {
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  x: positionParts().x,
-                  y: positionParts().y
-                };
-
-                if (frame.setPointerCapture) {
-                  frame.setPointerCapture(event.pointerId);
-                }
-              });
-
-              frame.addEventListener('pointermove', function (event) {
-                if (!dragging) return;
-                moved = true;
-                movePosition(dragStart, event.clientX, event.clientY);
-              });
-
-              frame.addEventListener('pointerup', function () {
-                dragging = false;
-                dragStart = null;
-              });
-
-              frame.addEventListener('pointercancel', function () {
-                dragging = false;
-                dragStart = null;
-              });
-
-              frame.addEventListener('click', function (event) {
-                if (moved) {
-                  moved = false;
-                  return;
-                }
-
-                if (dragStart) return;
-                setPosition(event.clientX, event.clientY);
-              });
             }
           });
           

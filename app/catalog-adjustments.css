@@ -194,13 +194,7 @@
 .media-adjust-frame {
   overflow: hidden;
   background: #fff;
-  cursor: grab;
-  touch-action: none;
   user-select: none;
-}
-
-.media-adjust-frame:active {
-  cursor: grabbing;
 }
 
 .media-adjust-frame img {
