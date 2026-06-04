@@ -136,9 +136,12 @@ export async function POST(request) {
     ? catalogoFundoTipo
     : 'claro';
 
-  const tituloPublicoFinal = !tituloPublico || tituloPublico === empresaAtual.nome
-    ? nome
-    : tituloPublico;
+  const tituloPublicoAtual = texto(empresaAtual.titulo_publico);
+  const tituloPublicoFinal = tituloPublico !== tituloPublicoAtual
+    ? (tituloPublico || nome)
+    : nome !== empresaAtual.nome
+      ? nome
+      : (tituloPublico || nome);
 
   await query(
     `UPDATE food_empresas

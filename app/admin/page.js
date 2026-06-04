@@ -347,9 +347,7 @@ export default async function AdminPage({ searchParams }) {
             As senhas não podem ser visualizadas. Para ajudar um cliente, defina uma senha temporária.
           </p>
 
-          {usuarios.length === 0 ? (
-            <p className="muted">Nenhum acesso cadastrado para esta empresa.</p>
-          ) : (
+          {usuarios.length > 0 ? (
             <div className="admin-products editable-products">
               {usuarios.map((usuario) => (
                 <form
@@ -362,22 +360,64 @@ export default async function AdminPage({ searchParams }) {
                   <input type="hidden" name="usuario_id" value={usuario.id} />
 
                   <label>
-                    Usuário
-                    <input value={`${usuario.nome} - ${usuario.email}`} readOnly />
+                    Nome do usuario
+                    <input name="nome" defaultValue={usuario.nome || ''} required />
                   </label>
 
                   <label>
-                    Nova senha temporária
-                    <input name="senha" type="text" minLength="8" placeholder="Mínimo 8 caracteres" required />
+                    Email de acesso
+                    <input
+                      name="email"
+                      type="email"
+                      defaultValue={usuario.email || ''}
+                      pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Nova senha temporaria
+                    <input name="senha" type="text" minLength="8" placeholder="Deixe vazio para manter" />
                   </label>
 
                   <button className="secondary-button" type="submit">
-                    Redefinir senha
+                    Salvar acesso
                   </button>
                 </form>
               ))}
             </div>
+          ) : (
+            <p className="muted">Nenhum acesso cadastrado para esta empresa.</p>
           )}
+
+          <form action="/admin/users" method="post" className="admin-form compact-form">
+            <input type="hidden" name="empresa_id" value={empresa.id} />
+
+            <label>
+              Nome do usuario
+              <input name="nome" placeholder="Nome de quem vai acessar" required />
+            </label>
+
+            <label>
+              Email de acesso
+              <input
+                name="email"
+                type="email"
+                placeholder="cliente@email.com"
+                pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$"
+                required
+              />
+            </label>
+
+            <label>
+              Senha temporaria
+              <input name="senha" type="text" minLength="8" placeholder="Minimo 8 caracteres" required />
+            </label>
+
+            <button className="primary-button" type="submit">
+              Criar acesso para esta empresa
+            </button>
+          </form>
         </section>
       ) : null}
       
