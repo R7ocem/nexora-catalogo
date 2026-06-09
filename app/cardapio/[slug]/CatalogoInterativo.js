@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { money } from '../../../lib/format';
-import { subtituloCatalogo } from '../../../lib/catalog';
 
 function precoTexto(produto) {
   if (produto.tipo_preco === 'sob_consulta') return 'Consultar valor';
@@ -167,7 +166,6 @@ function WhatsAppIcon() {
   const destaquesRef = useRef(null);
 
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
-  const subtitulo = subtituloCatalogo(empresa);
   const corPrincipal = empresa.tema_cor || '#0f766e';
   const corSecundaria = empresa.tema_cor_secundaria || '#14b8a6';
   const usarGradiente = empresa.usar_gradiente !== false;
@@ -207,7 +205,7 @@ function WhatsAppIcon() {
   const produtosDestaque = (produtosEscolhidosDestaque.length > 0
     ? [...produtosComPosicaoDestaque, ...produtosDestaqueRestantes]
     : todosProdutosVisiveis
-  ).slice(0, 8);
+  ).slice(0, 30);
 
   useEffect(() => {
   if (!categoriasAberto) return;
@@ -485,7 +483,6 @@ function WhatsAppIcon() {
               </a>
             ) : null}
           </div>
-          <p>{subtitulo}</p>
           <span className={estabelecimentoAberto ? 'open-status open' : 'open-status closed'}>
             {estabelecimentoAberto ? 'Aberto' : 'Fechado'}
           </span>
