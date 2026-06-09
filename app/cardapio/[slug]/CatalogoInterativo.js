@@ -19,15 +19,59 @@ function itemTemValor(produto) {
   return produto.tipo_preco !== 'sob_consulta';
 }
 
+function normalizarVariacoes(valor) {
+  const variacoes = valorJson(valor, []);
+
+  if (!Array.isArray(variacoes)) return [];
+
+  return variacoes
+    .map((grupo) => {
+      const nome = String(grupo?.nome || '').trim();
+      const valores = Array.isArray(grupo?.valores)
+        ? grupo.valores.map((opcao) => String(opcao || '').trim()).filter(Boolean)
+        : [];
+
+      return nome && valores.length > 0 ? { nome, valores } : null;
+    })
+    .filter(Boolean);
+}
+
+function produtoTemVariacoes(produto) {
+  return normalizarVariacoes(produto.variacoes).length > 0;
+}
+
+function textoVariacoes(escolhas) {
+  return Object.entries(escolhas || {})
+    .filter(([, valor]) => valor)
+    .map(([nome, valor]) => `${nome}: ${valor}`)
+    .join(', ');
+}
+
+function nomeComVariacoes(item) {
+  const detalhes = textoVariacoes(item.variacoes_escolhidas);
+  return detalhes ? `${item.nome} (${detalhes})` : item.nome;
+}
+
+function chaveCarrinho(produto, escolhas = {}) {
+  const partes = Object.entries(escolhas)
+    .filter(([, valor]) => valor)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([nome, valor]) => `${nome}:${valor}`);
+
+  return `${produto.id}:${partes.join('|')}`;
+}
+
 function montarMensagem(empresa, itens, detalhesPedido) {
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
 
   const linhas = itens.map((item) => {
+    const nomeItem = nomeComVariacoes(item);
+
     if (itemTemValor(item)) {
-      return `${item.quantidade}x ${item.nome} - ${money(Number(item.preco) * item.quantidade)}`;
+      return `${item.quantidade}x ${nomeItem} - ${money(Number(item.preco) * item.quantidade)}`;
     }
 
-    return `${item.quantidade}x ${item.nome} - Consultar valor`;
+    return `${item.quantidade}x ${nomeItem} - Consultar valor`;
   });
 
   const total = itens.reduce((soma, item) => {
@@ -160,6 +204,7 @@ function WhatsAppIcon() {
   const [pedidoAberto, setPedidoAberto] = useState(false);
   const [categoriasAberto, setCategoriasAberto] = useState(false);
   const [produtoAberto, setProdutoAberto] = useState(null);
+  const [variacoesSelecionadas, setVariacoesSelecionadas] = useState({});
   const [tipoEntrega, setTipoEntrega] = useState('');
   const [pagamento, setPagamento] = useState('');
   const categoriasRef = useRef(null);
@@ -231,31 +276,53 @@ function WhatsAppIcon() {
   };
 }, [categoriasAberto]);
 
-  function adicionar(produto) {
+  useEffect(() => {
+    setVariacoesSelecionadas({});
+  }, [produtoAberto?.id]);
+
+  function adicionar(produto, escolhas = {}) {
+    const variacoesProduto = normalizarVariacoes(produto.variacoes);
+    const escolhasValidas = variacoesProduto.reduce((acc, grupo) => {
+      if (escolhas[grupo.nome]) {
+        acc[grupo.nome] = escolhas[grupo.nome];
+      }
+
+      return acc;
+    }, {});
+    const carrinhoKey = chaveCarrinho(produto, escolhasValidas);
+
     setCarrinho((atual) => {
-      const existente = atual.find((item) => item.id === produto.id);
+      const existente = atual.find((item) => item.carrinho_key === carrinhoKey);
 
       if (existente) {
         return atual.map((item) =>
-          item.id === produto.id
+          item.carrinho_key === carrinhoKey
             ? { ...item, quantidade: item.quantidade + 1 }
             : item
         );
       }
 
-      return [...atual, { ...produto, quantidade: 1 }];
+      return [
+        ...atual,
+        {
+          ...produto,
+          quantidade: 1,
+          carrinho_key: carrinhoKey,
+          variacoes_escolhidas: escolhasValidas
+        }
+      ];
     });
   }
 
-  function alterarQuantidade(produtoId, quantidade) {
+  function alterarQuantidade(carrinhoKey, quantidade) {
     if (quantidade <= 0) {
-      setCarrinho((atual) => atual.filter((item) => item.id !== produtoId));
+      setCarrinho((atual) => atual.filter((item) => item.carrinho_key !== carrinhoKey));
       return;
     }
 
     setCarrinho((atual) =>
       atual.map((item) =>
-        item.id === produtoId ? { ...item, quantidade } : item
+        item.carrinho_key === carrinhoKey ? { ...item, quantidade } : item
       )
     );
   }
@@ -292,6 +359,7 @@ function WhatsAppIcon() {
 
   function renderProduto(produto) {
     const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
+    const temVariacoes = produtoTemVariacoes(produto);
 
     return (
       <article key={produto.id} className="product-card premium-product-card">
@@ -334,9 +402,9 @@ function WhatsAppIcon() {
           className="primary-button product-add-button"
              style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
             type="button"
-            onClick={() => adicionar(produto)}
+            onClick={() => (temVariacoes ? setProdutoAberto(produto) : adicionar(produto))}
           >
-              {precoSobConsulta ? 'Consultar' : 'Adicionar'}
+              {temVariacoes ? 'Escolher' : precoSobConsulta ? 'Consultar' : 'Adicionar'}
             </button>
           </div>
         </div>
@@ -344,8 +412,9 @@ function WhatsAppIcon() {
     );
   }
 
-    function renderDestaque(produto) {
+  function renderDestaque(produto) {
     const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
+    const temVariacoes = produtoTemVariacoes(produto);
   
     return (
       <article key={produto.id} className="highlight-card">
@@ -367,15 +436,20 @@ function WhatsAppIcon() {
             <button
               type="button"
               style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
-              onClick={() => adicionar(produto)}
+              onClick={() => (temVariacoes ? setProdutoAberto(produto) : adicionar(produto))}
             >
-              {precoSobConsulta ? 'Consultar' : 'Adicionar'}
+              {temVariacoes ? 'Escolher' : precoSobConsulta ? 'Consultar' : 'Adicionar'}
             </button>
           </div>
         </div>
       </article>
     );
   }
+
+  const variacoesProdutoAberto = produtoAberto ? normalizarVariacoes(produtoAberto.variacoes) : [];
+  const variacoesProdutoAbertoCompletas = variacoesProdutoAberto.every((grupo) =>
+    Boolean(variacoesSelecionadas[grupo.nome])
+  );
 
   return (
     <div
@@ -573,17 +647,49 @@ function WhatsAppIcon() {
               ) : null}
       
               <strong>{precoTexto(produtoAberto)}</strong>
+
+              {variacoesProdutoAberto.length > 0 ? (
+                <div className="product-variation-groups">
+                  {variacoesProdutoAberto.map((grupo) => (
+                    <div key={grupo.nome} className="product-variation-group">
+                      <strong>{grupo.nome}</strong>
+                      <div className="product-variation-options">
+                        {grupo.valores.map((opcao) => (
+                          <button
+                            key={opcao}
+                            className={variacoesSelecionadas[grupo.nome] === opcao
+                              ? 'product-variation-option active'
+                              : 'product-variation-option'}
+                            type="button"
+                            onClick={() =>
+                              setVariacoesSelecionadas((atual) => ({
+                                ...atual,
+                                [grupo.nome]: opcao
+                              }))
+                            }
+                          >
+                            {opcao}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
       
               <button
                 className="primary-button"
                 style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
                 type="button"
+                disabled={variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas}
                 onClick={() => {
-                  adicionar(produtoAberto);
+                  adicionar(produtoAberto, variacoesSelecionadas);
                   setProdutoAberto(null);
                 }}
               >
-                {produtoAberto.tipo_preco === 'sob_consulta' ? 'Consultar' : 'Adicionar'}
+                {variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas
+                  ? 'Escolha as opções'
+                  : produtoAberto.tipo_preco === 'sob_consulta' ? 'Consultar' : 'Adicionar'}
               </button>
             </div>
           </aside>
@@ -619,25 +725,28 @@ function WhatsAppIcon() {
 
                 <div className="cart-items order-cart-items">
                   {carrinho.map((item) => (
-                    <div key={item.id} className="cart-item">
+                    <div key={item.carrinho_key} className="cart-item">
                       <div className="cart-item-main">
                         <strong>{item.nome}</strong>
+                        {textoVariacoes(item.variacoes_escolhidas) ? (
+                          <small>{textoVariacoes(item.variacoes_escolhidas)}</small>
+                        ) : null}
                         <span>{precoTexto(item)}</span>
                       </div>
 
                       <div className="cart-quantity">
-                        <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade - 1)}>
+                        <button type="button" onClick={() => alterarQuantidade(item.carrinho_key, item.quantidade - 1)}>
                           -
                         </button>
                         <span>{item.quantidade}</span>
-                        <button type="button" onClick={() => alterarQuantidade(item.id, item.quantidade + 1)}>
+                        <button type="button" onClick={() => alterarQuantidade(item.carrinho_key, item.quantidade + 1)}>
                           +
                         </button>
                         <button
                           className="cart-remove"
                           type="button"
                           aria-label={`Remover ${item.nome}`}
-                          onClick={() => alterarQuantidade(item.id, 0)}
+                          onClick={() => alterarQuantidade(item.carrinho_key, 0)}
                         >
                           <TrashIcon />
                         </button>

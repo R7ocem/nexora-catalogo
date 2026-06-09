@@ -111,6 +111,31 @@ function getOpcoesPedido(valor) {
   };
 }
 
+function variacoesParaTexto(valor) {
+  let variacoes = Array.isArray(valor) ? valor : [];
+
+  if (!Array.isArray(valor) && typeof valor === 'string') {
+    try {
+      const parsed = JSON.parse(valor);
+      variacoes = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      variacoes = [];
+    }
+  }
+
+  return variacoes
+    .map((grupo) => {
+      const nome = String(grupo?.nome || '').trim();
+      const valores = Array.isArray(grupo?.valores)
+        ? grupo.valores.map((opcao) => String(opcao || '').trim()).filter(Boolean)
+        : [];
+
+      return nome && valores.length > 0 ? `${nome}: ${valores.join(', ')}` : '';
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
 async function getAdminData(user, selectedSlug) {
   const empresasResult = await query(
     `SELECT
@@ -193,6 +218,7 @@ async function getAdminData(user, selectedSlug) {
        p.destaque,
        p.destaque_ordem,
        p.apelidos,
+       p.variacoes,
        p.categoria_id,
        c.nome AS categoria_nome
      FROM catalogo_produtos p
@@ -1286,6 +1312,14 @@ export default async function AdminPage({ searchParams }) {
           </label>
 
           <label className="full-span">
+            Variações
+            <textarea
+              name="variacoes_texto"
+              placeholder={'Cor: Vermelho, Azul, Dourado\nTamanho: P, M, G'}
+            />
+          </label>
+
+          <label className="full-span">
             Apelidos para o bot
             <input name="apelidos" placeholder="produtos ou serviços do bot" required />
           </label>
@@ -1343,6 +1377,7 @@ export default async function AdminPage({ searchParams }) {
                   <input type="hidden" name="tipo_item" value={produto.tipo_item || 'produto'} />
                   <input type="hidden" name="tipo_preco" value={produto.tipo_preco || 'fixo'} />
                   <input type="hidden" name="descricao" value={produto.descricao || ''} />
+                  <input type="hidden" name="variacoes_texto" value={variacoesParaTexto(produto.variacoes)} />
                   <input type="hidden" name="apelidos" value={produto.apelidos || ''} />
                   <input type="hidden" name="imagem_url" value={produto.imagem_url || ''} />
                   {produto.ativo ? <input type="hidden" name="ativo" value="on" /> : null}
@@ -1440,6 +1475,15 @@ export default async function AdminPage({ searchParams }) {
                     <label className="full-span">
                       Descrição
                       <textarea name="descricao" defaultValue={produto.descricao || ''} />
+                    </label>
+
+                    <label className="full-span">
+                      Variações
+                      <textarea
+                        name="variacoes_texto"
+                        defaultValue={variacoesParaTexto(produto.variacoes)}
+                        placeholder={'Cor: Vermelho, Azul, Dourado\nTamanho: P, M, G'}
+                      />
                     </label>
       
                     <label className="full-span">

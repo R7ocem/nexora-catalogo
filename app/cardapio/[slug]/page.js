@@ -68,6 +68,7 @@ async function getCardapio(slug) {
        p.destaque,
        p.destaque_ordem,
        p.apelidos,
+       p.variacoes,
        c.nome AS categoria_nome
      FROM catalogo_produtos p
      LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
