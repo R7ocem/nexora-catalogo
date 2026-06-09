@@ -1315,8 +1315,11 @@ export default async function AdminPage({ searchParams }) {
             Variações
             <textarea
               name="variacoes_texto"
-              placeholder={'Cor: Vermelho, Azul, Dourado\nTamanho: P, M, G'}
+              placeholder="Digite as opções que o cliente poderá escolher"
             />
+            <small className="media-hint">
+              Uma variação por linha. Exemplo: Cor: Vermelho, Azul, Dourado
+            </small>
           </label>
 
           <label className="full-span">
@@ -1482,8 +1485,11 @@ export default async function AdminPage({ searchParams }) {
                       <textarea
                         name="variacoes_texto"
                         defaultValue={variacoesParaTexto(produto.variacoes)}
-                        placeholder={'Cor: Vermelho, Azul, Dourado\nTamanho: P, M, G'}
+                        placeholder="Digite as opções que o cliente poderá escolher"
                       />
+                      <small className="media-hint">
+                        Uma variação por linha. Exemplo: Cor: Vermelho, Azul, Dourado
+                      </small>
                     </label>
       
                     <label className="full-span">

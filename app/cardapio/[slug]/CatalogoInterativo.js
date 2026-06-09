@@ -360,6 +360,7 @@ function WhatsAppIcon() {
   function renderProduto(produto) {
     const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
     const temVariacoes = produtoTemVariacoes(produto);
+    const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
 
     return (
       <article key={produto.id} className="product-card premium-product-card">
@@ -380,6 +381,12 @@ function WhatsAppIcon() {
           {produto.descricao ? (
             <p className="product-description" title={produto.descricao}>
               {produto.descricao}
+            </p>
+          ) : null}
+
+          {nomesVariacoes.length > 0 ? (
+            <p className="product-options-hint">
+              Opções: {nomesVariacoes.join(', ')}
             </p>
           ) : null}
 
@@ -415,6 +422,7 @@ function WhatsAppIcon() {
   function renderDestaque(produto) {
     const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
     const temVariacoes = produtoTemVariacoes(produto);
+    const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
   
     return (
       <article key={produto.id} className="highlight-card">
@@ -429,6 +437,12 @@ function WhatsAppIcon() {
         <div className="highlight-info">
           <span>{tipoItemTexto(produto.tipo_item)}</span>
           <h3>{produto.nome}</h3>
+
+          {nomesVariacoes.length > 0 ? (
+            <p className="highlight-options-hint">
+              Opções: {nomesVariacoes.join(', ')}
+            </p>
+          ) : null}
   
           <div className="highlight-bottom">
             <strong>{precoTexto(produto)}</strong>

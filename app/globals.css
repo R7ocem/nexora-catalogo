@@ -859,6 +859,15 @@ input[type="checkbox"] {
   cursor: help;
 }
 
+.product-options-hint,
+.highlight-options-hint {
+  margin: 0;
+  color: var(--catalog-brand);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
 .product-buy-row {
   display: grid;
   gap: 10px;
