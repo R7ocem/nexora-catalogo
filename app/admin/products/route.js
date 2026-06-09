@@ -104,6 +104,25 @@ function numero(valor) {
   return Number.isFinite(numeroFinal) ? numeroFinal : 0;
 }
 
+function variacoesDoTexto(valor) {
+  return texto(valor)
+    .split(/\r?\n/)
+    .map((linha) => linha.trim())
+    .filter(Boolean)
+    .map((linha) => {
+      const [nomeRaw, ...valoresRaw] = linha.split(':');
+      const nome = texto(nomeRaw);
+      const valores = valoresRaw
+        .join(':')
+        .split(',')
+        .map((opcao) => texto(opcao))
+        .filter(Boolean);
+
+      return nome && valores.length > 0 ? { nome, valores } : null;
+    })
+    .filter(Boolean);
+}
+
 export async function POST(request) {
   if (!isTrustedAdminRequest(request)) {
     redirect('/admin');
@@ -180,6 +199,7 @@ export async function POST(request) {
   }
 
   const descricao = texto(formData.get('descricao'));
+  const variacoes = variacoesDoTexto(formData.get('variacoes_texto'));
   const apelidos = texto(formData.get('apelidos'));
   const ativo = formData.get('ativo') === 'on';
   const destaque = formData.get('destaque') === 'on';
@@ -227,7 +247,8 @@ export async function POST(request) {
          apelidos = $11,
          ativo = $12,
          destaque = $13,
-         destaque_ordem = $14
+         destaque_ordem = $14,
+         variacoes = $15::jsonb
        WHERE id = $1
          AND empresa_id = $2`,
       [
@@ -244,7 +265,8 @@ export async function POST(request) {
         apelidos,
         ativo,
         destaque,
-        destaqueOrdem
+        destaqueOrdem,
+        JSON.stringify(variacoes)
       ]
     );
   } else {
@@ -262,9 +284,10 @@ export async function POST(request) {
          apelidos,
          ativo,
          destaque,
-         destaque_ordem
+         destaque_ordem,
+         variacoes
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb)`,
       [
         empresaId,
         categoriaId,
@@ -278,7 +301,8 @@ export async function POST(request) {
         apelidos,
         ativo,
         destaque,
-        destaqueOrdem
+        destaqueOrdem,
+        JSON.stringify(variacoes)
       ]
     );
   }

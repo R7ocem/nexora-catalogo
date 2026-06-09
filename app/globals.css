@@ -949,6 +949,17 @@ input[type="checkbox"] {
   gap: 10px;
 }
 
+.cart-item-main {
+  display: grid;
+  gap: 3px;
+}
+
+.cart-item-main small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .order-whatsapp-button {
   width: 100%;
   margin-top: 16px;
@@ -1439,6 +1450,48 @@ input[type="checkbox"] {
 .product-detail-content strong {
   color: var(--catalog-brand);
   font-size: 24px;
+}
+
+.product-variation-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.product-variation-group {
+  display: grid;
+  gap: 8px;
+}
+
+.product-variation-group > strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.product-variation-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-variation-option {
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.product-variation-option.active {
+  border-color: transparent;
+  background: var(--catalog-gradient);
+  color: #fff;
+}
+
+.product-detail-content .primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .detail-close {
