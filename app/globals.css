@@ -2103,6 +2103,7 @@ input[type="checkbox"] {
 }
 
 .catalog-item-card {
+  position: relative;
   width: 100%;
   padding: 0;
   border: 1px solid rgba(33, 31, 28, 0.12);
@@ -2113,6 +2114,13 @@ input[type="checkbox"] {
   text-align: left;
   cursor: pointer;
   line-height: normal;
+}
+
+.catalog-stock-dot {
+  right: 10px;
+  bottom: 10px;
+  width: 14px;
+  height: 14px;
 }
 
 .catalog-item-card:focus-visible {

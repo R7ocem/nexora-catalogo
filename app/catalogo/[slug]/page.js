@@ -69,6 +69,43 @@ async function getCatalogo(slug) {
        p.track_stock,
        p.show_when_out_of_stock,
        p.is_available,
+       p.replenishment_days,
+       p.safety_days,
+       p.auto_calculate_min_stock,
+       COALESCE(vendas.total_vendido_14_dias, 0) AS total_vendido_14_dias,
+       COALESCE(vendas.dias_com_venda, 0) AS dias_com_venda,
+       CASE
+         WHEN COALESCE(vendas.dias_com_venda, 0) >= 7
+         THEN ROUND(COALESCE(vendas.total_vendido_14_dias, 0)::numeric / 14, 2)
+         ELSE 0
+       END AS average_daily_sales,
+       CASE
+         WHEN COALESCE(p.track_stock, false) = false THEN 'SEM_CONTROLE'
+         WHEN COALESCE(p.stock_quantity, 0) <= 0 THEN 'ESGOTADO'
+         WHEN COALESCE(p.stock_quantity, 0) <= (
+           CASE
+             WHEN COALESCE(p.auto_calculate_min_stock, true) = true
+               AND COALESCE(vendas.dias_com_venda, 0) >= 7
+             THEN CEIL(
+               ROUND(COALESCE(vendas.total_vendido_14_dias, 0)::numeric / 14, 2)
+               * (COALESCE(p.replenishment_days, 7) + COALESCE(p.safety_days, 3))
+             )
+             ELSE COALESCE(p.min_stock, 0)
+           END
+         ) * 0.5 THEN 'CRITICO'
+         WHEN COALESCE(p.stock_quantity, 0) <= (
+           CASE
+             WHEN COALESCE(p.auto_calculate_min_stock, true) = true
+               AND COALESCE(vendas.dias_com_venda, 0) >= 7
+             THEN CEIL(
+               ROUND(COALESCE(vendas.total_vendido_14_dias, 0)::numeric / 14, 2)
+               * (COALESCE(p.replenishment_days, 7) + COALESCE(p.safety_days, 3))
+             )
+             ELSE COALESCE(p.min_stock, 0)
+           END
+         ) THEN 'ATENCAO'
+         ELSE 'NORMAL'
+       END AS stock_status,
        p.imagem_url,
        p.ativo,
        p.destaque,
@@ -78,6 +115,15 @@ async function getCatalogo(slug) {
        c.nome AS categoria_nome
      FROM catalogo_produtos p
      LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
+     LEFT JOIN LATERAL (
+       SELECT
+         COALESCE(SUM(sm.quantity), 0) AS total_vendido_14_dias,
+         COUNT(DISTINCT sm.created_at::date) AS dias_com_venda
+       FROM stock_movements sm
+       WHERE sm.product_id = p.id
+         AND sm.type = 'saida'
+         AND sm.created_at >= NOW() - INTERVAL '14 days'
+     ) vendas ON true
      WHERE p.empresa_id = $1
        AND p.ativo = true
        AND COALESCE(p.is_available, true) = true
