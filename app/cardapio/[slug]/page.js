@@ -63,6 +63,7 @@ async function getCardapio(slug) {
        p.preco,
        p.tipo_item,
        p.tipo_preco,
+       p.frete_texto,
        p.imagem_url,
        p.ativo,
        p.destaque,

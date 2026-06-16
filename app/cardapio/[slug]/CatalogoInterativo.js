@@ -389,6 +389,10 @@ function WhatsAppIcon() {
           <div className="product-price-line">
             <strong>{precoTexto(produto)}</strong>
           </div>
+
+          {produto.frete_texto ? (
+            <span className="product-shipping-line">{produto.frete_texto}</span>
+          ) : null}
         </div>
       </button>
     );
@@ -424,6 +428,10 @@ function WhatsAppIcon() {
           <div className="highlight-bottom">
             <strong>{precoTexto(produto)}</strong>
           </div>
+
+          {produto.frete_texto ? (
+            <span className="product-shipping-line">{produto.frete_texto}</span>
+          ) : null}
         </div>
       </button>
     );
@@ -630,6 +638,10 @@ function WhatsAppIcon() {
               ) : null}
       
               <strong>{precoTexto(produtoAberto)}</strong>
+
+              {produtoAberto.frete_texto ? (
+                <span className="product-detail-shipping">{produtoAberto.frete_texto}</span>
+              ) : null}
 
               {variacoesProdutoAberto.length > 0 ? (
                 <div className="product-variation-groups">

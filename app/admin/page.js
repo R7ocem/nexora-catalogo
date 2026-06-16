@@ -213,6 +213,7 @@ async function getAdminData(user, selectedSlug) {
        p.preco,
        p.tipo_item,
        p.tipo_preco,
+       p.frete_texto,
        p.imagem_url,
        p.ativo,
        p.destaque,
@@ -1282,13 +1283,18 @@ export default async function AdminPage({ searchParams }) {
             </select>
           </label>
 
-            <label>
+          <label>
             Tipo de preço
             <select name="tipo_preco" defaultValue="fixo">
               <option value="fixo">Preço fixo</option>
               <option value="a_partir_de">A partir de</option>
               <option value="sob_consulta">Sob consulta</option>
             </select>
+          </label>
+
+          <label>
+            Frete no card
+            <input name="frete_texto" placeholder="Ex: Frete grátis" />
           </label>
 
           <div className="full-span photo-editor">
@@ -1379,6 +1385,7 @@ export default async function AdminPage({ searchParams }) {
                   <input type="hidden" name="preco" value={produto.preco || '0'} />
                   <input type="hidden" name="tipo_item" value={produto.tipo_item || 'produto'} />
                   <input type="hidden" name="tipo_preco" value={produto.tipo_preco || 'fixo'} />
+                  <input type="hidden" name="frete_texto" value={produto.frete_texto || ''} />
                   <input type="hidden" name="descricao" value={produto.descricao || ''} />
                   <input type="hidden" name="variacoes_texto" value={variacoesParaTexto(produto.variacoes)} />
                   <input type="hidden" name="apelidos" value={produto.apelidos || ''} />
@@ -1473,6 +1480,11 @@ export default async function AdminPage({ searchParams }) {
                         <option value="a_partir_de">A partir de</option>
                         <option value="sob_consulta">Sob consulta</option>
                       </select>
+                    </label>
+
+                    <label>
+                      Frete no card
+                      <input name="frete_texto" defaultValue={produto.frete_texto || ''} placeholder="Ex: Frete grátis" />
                     </label>
       
                     <label className="full-span">
