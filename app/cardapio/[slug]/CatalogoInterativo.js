@@ -358,12 +358,15 @@ function WhatsAppIcon() {
     : '#';
 
   function renderProduto(produto) {
-    const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
-    const temVariacoes = produtoTemVariacoes(produto);
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
 
     return (
-      <article key={produto.id} className="product-card premium-product-card">
+      <button
+        key={produto.id}
+        className="product-card premium-product-card catalog-item-card"
+        type="button"
+        onClick={() => setProdutoAberto(produto)}
+      >
         <div className="product-image-wrap">
           {produto.imagem_url ? (
             <img src={produto.imagem_url} alt={produto.nome} />
@@ -375,14 +378,7 @@ function WhatsAppIcon() {
         <div className="product-info">
           <div className="product-title-row">
             <h3>{produto.nome}</h3>
-            <span>{tipoItemTexto(produto.tipo_item)}</span>
           </div>
-
-          {produto.descricao ? (
-            <p className="product-description" title={produto.descricao}>
-              {produto.descricao}
-            </p>
-          ) : null}
 
           {nomesVariacoes.length > 0 ? (
             <p className="product-options-hint">
@@ -390,42 +386,24 @@ function WhatsAppIcon() {
             </p>
           ) : null}
 
-          <div className="product-buy-row">
-            <div className="product-price-line">
-              <strong>{precoTexto(produto)}</strong>
-          
-              {produto.descricao ? (
-                <button
-                  className="details-link"
-                  type="button"
-                  onClick={() => setProdutoAberto(produto)}
-                >
-                  Ver detalhes
-                </button>
-              ) : null}
-            </div>
-          
-            <button
-          className="primary-button product-add-button"
-             style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
-            type="button"
-            onClick={() => (temVariacoes ? setProdutoAberto(produto) : adicionar(produto))}
-          >
-              {temVariacoes ? 'Escolher' : precoSobConsulta ? 'Consultar' : 'Adicionar'}
-            </button>
+          <div className="product-price-line">
+            <strong>{precoTexto(produto)}</strong>
           </div>
         </div>
-      </article>
+      </button>
     );
   }
 
   function renderDestaque(produto) {
-    const precoSobConsulta = produto.tipo_preco === 'sob_consulta';
-    const temVariacoes = produtoTemVariacoes(produto);
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
   
     return (
-      <article key={produto.id} className="highlight-card">
+      <button
+        key={produto.id}
+        className="highlight-card catalog-item-card"
+        type="button"
+        onClick={() => setProdutoAberto(produto)}
+      >
         <div className="highlight-image">
           {produto.imagem_url ? (
             <img src={produto.imagem_url} alt={produto.nome} />
@@ -435,7 +413,6 @@ function WhatsAppIcon() {
         </div>
   
         <div className="highlight-info">
-          <span>{tipoItemTexto(produto.tipo_item)}</span>
           <h3>{produto.nome}</h3>
 
           {nomesVariacoes.length > 0 ? (
@@ -446,17 +423,9 @@ function WhatsAppIcon() {
   
           <div className="highlight-bottom">
             <strong>{precoTexto(produto)}</strong>
-  
-            <button
-              type="button"
-              style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
-              onClick={() => (temVariacoes ? setProdutoAberto(produto) : adicionar(produto))}
-            >
-              {temVariacoes ? 'Escolher' : precoSobConsulta ? 'Consultar' : 'Adicionar'}
-            </button>
           </div>
         </div>
-      </article>
+      </button>
     );
   }
 
