@@ -1467,6 +1467,51 @@ input[type="checkbox"] {
   gap: 12px;
 }
 
+.product-detail-quantity {
+  display: grid;
+  gap: 8px;
+}
+
+.product-detail-quantity > strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.product-detail-quantity-control {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px;
+  border: 1px solid rgba(33, 31, 28, 0.12);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.product-detail-quantity-control button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(33, 31, 28, 0.1);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(33, 31, 28, 0.08);
+}
+
+.product-detail-quantity-control span {
+  min-width: 26px;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 18px;
+  text-align: center;
+}
+
 .product-variation-group {
   display: grid;
   gap: 8px;
@@ -2051,7 +2096,7 @@ input[type="checkbox"] {
 
 .product-shipping-line,
 .product-detail-shipping {
-  color: #16a34a;
+  color: #16a34a !important;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.2;

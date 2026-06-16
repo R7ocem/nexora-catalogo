@@ -205,6 +205,7 @@ function WhatsAppIcon() {
   const [categoriasAberto, setCategoriasAberto] = useState(false);
   const [produtoAberto, setProdutoAberto] = useState(null);
   const [variacoesSelecionadas, setVariacoesSelecionadas] = useState({});
+  const [quantidadeProdutoAberto, setQuantidadeProdutoAberto] = useState(1);
   const [tipoEntrega, setTipoEntrega] = useState('');
   const [pagamento, setPagamento] = useState('');
   const categoriasRef = useRef(null);
@@ -278,9 +279,10 @@ function WhatsAppIcon() {
 
   useEffect(() => {
     setVariacoesSelecionadas({});
+    setQuantidadeProdutoAberto(1);
   }, [produtoAberto?.id]);
 
-  function adicionar(produto, escolhas = {}) {
+  function adicionar(produto, escolhas = {}, quantidade = 1) {
     const variacoesProduto = normalizarVariacoes(produto.variacoes);
     const escolhasValidas = variacoesProduto.reduce((acc, grupo) => {
       if (escolhas[grupo.nome]) {
@@ -290,6 +292,7 @@ function WhatsAppIcon() {
       return acc;
     }, {});
     const carrinhoKey = chaveCarrinho(produto, escolhasValidas);
+    const quantidadeFinal = Math.max(1, Number(quantidade) || 1);
 
     setCarrinho((atual) => {
       const existente = atual.find((item) => item.carrinho_key === carrinhoKey);
@@ -297,7 +300,7 @@ function WhatsAppIcon() {
       if (existente) {
         return atual.map((item) =>
           item.carrinho_key === carrinhoKey
-            ? { ...item, quantidade: item.quantidade + 1 }
+            ? { ...item, quantidade: item.quantidade + quantidadeFinal }
             : item
         );
       }
@@ -306,7 +309,7 @@ function WhatsAppIcon() {
         ...atual,
         {
           ...produto,
-          quantidade: 1,
+          quantidade: quantidadeFinal,
           carrinho_key: carrinhoKey,
           variacoes_escolhidas: escolhasValidas
         }
@@ -643,6 +646,25 @@ function WhatsAppIcon() {
                 <span className="product-detail-shipping">{produtoAberto.frete_texto}</span>
               ) : null}
 
+              <div className="product-detail-quantity">
+                <strong>Quantidade</strong>
+                <div className="product-detail-quantity-control">
+                  <button
+                    type="button"
+                    onClick={() => setQuantidadeProdutoAberto((atual) => Math.max(1, atual - 1))}
+                  >
+                    -
+                  </button>
+                  <span>{quantidadeProdutoAberto}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantidadeProdutoAberto((atual) => atual + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
               {variacoesProdutoAberto.length > 0 ? (
                 <div className="product-variation-groups">
                   {variacoesProdutoAberto.map((grupo) => (
@@ -678,7 +700,7 @@ function WhatsAppIcon() {
                 type="button"
                 disabled={variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas}
                 onClick={() => {
-                  adicionar(produtoAberto, variacoesSelecionadas);
+                  adicionar(produtoAberto, variacoesSelecionadas, quantidadeProdutoAberto);
                   setProdutoAberto(null);
                 }}
               >
