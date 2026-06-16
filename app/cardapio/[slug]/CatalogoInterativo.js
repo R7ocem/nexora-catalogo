@@ -31,6 +31,23 @@ function produtoEsgotado(produto) {
   return produtoControlaEstoque(produto) && estoqueDisponivel(produto) <= 0;
 }
 
+function rotuloEstoqueCatalogo(status) {
+  const rotulos = {
+    NORMAL: 'Estoque normal',
+    ATENCAO: 'Estoque em atenção',
+    CRITICO: 'Estoque crítico',
+    ESGOTADO: 'Produto esgotado',
+    SEM_CONTROLE: 'Estoque sem controle'
+  };
+
+  return rotulos[status] || 'Estoque sem controle';
+}
+
+function estoqueStatusVisivel(produto) {
+  if (!produtoControlaEstoque(produto)) return null;
+  return produto.stock_status || (produtoEsgotado(produto) ? 'ESGOTADO' : 'NORMAL');
+}
+
 function normalizarVariacoes(valor) {
   const variacoes = valorJson(valor, []);
 
@@ -395,6 +412,7 @@ function WhatsAppIcon() {
   function renderProduto(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
     const esgotado = produtoEsgotado(produto);
+    const stockStatus = estoqueStatusVisivel(produto);
 
     return (
       <button
@@ -436,6 +454,14 @@ function WhatsAppIcon() {
             <span className="product-shipping-line">{produto.frete_texto}</span>
           ) : null}
         </div>
+
+        {stockStatus ? (
+          <span
+            className={`stock-card-dot catalog-stock-dot stock-${stockStatus}`}
+            title={rotuloEstoqueCatalogo(stockStatus)}
+            aria-label={rotuloEstoqueCatalogo(stockStatus)}
+          />
+        ) : null}
       </button>
     );
   }
@@ -443,6 +469,7 @@ function WhatsAppIcon() {
   function renderDestaque(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
     const esgotado = produtoEsgotado(produto);
+    const stockStatus = estoqueStatusVisivel(produto);
   
     return (
       <button
@@ -480,6 +507,14 @@ function WhatsAppIcon() {
             <span className="product-shipping-line">{produto.frete_texto}</span>
           ) : null}
         </div>
+
+        {stockStatus ? (
+          <span
+            className={`stock-card-dot catalog-stock-dot stock-${stockStatus}`}
+            title={rotuloEstoqueCatalogo(stockStatus)}
+            aria-label={rotuloEstoqueCatalogo(stockStatus)}
+          />
+        ) : null}
       </button>
     );
   }
