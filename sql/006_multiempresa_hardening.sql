@@ -20,6 +20,11 @@ ALTER TABLE catalogo_produtos
 ADD COLUMN IF NOT EXISTS tipo_item TEXT NOT NULL DEFAULT 'produto',
 ADD COLUMN IF NOT EXISTS tipo_preco TEXT NOT NULL DEFAULT 'fixo',
 ADD COLUMN IF NOT EXISTS frete_texto TEXT,
+ADD COLUMN IF NOT EXISTS stock_quantity INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS min_stock INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS track_stock BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN IF NOT EXISTS show_when_out_of_stock BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN IF NOT EXISTS apelidos TEXT NOT NULL DEFAULT '',
 ADD COLUMN IF NOT EXISTS variacoes JSONB NOT NULL DEFAULT '[]'::jsonb;
 
@@ -34,3 +39,6 @@ ON catalogo_produtos (empresa_id, ativo, categoria_id);
 
 CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_empresa_destaque
 ON catalogo_produtos (empresa_id, destaque, destaque_ordem);
+
+CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_low_stock
+ON catalogo_produtos (empresa_id, track_stock, stock_quantity, min_stock);

@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS catalogo_produtos (
   tipo_item TEXT NOT NULL DEFAULT 'produto',
   tipo_preco TEXT NOT NULL DEFAULT 'fixo',
   frete_texto TEXT,
+  stock_quantity INTEGER NOT NULL DEFAULT 0,
+  min_stock INTEGER NOT NULL DEFAULT 0,
+  track_stock BOOLEAN NOT NULL DEFAULT false,
+  show_when_out_of_stock BOOLEAN NOT NULL DEFAULT true,
+  is_available BOOLEAN NOT NULL DEFAULT true,
   imagem_url TEXT,
   destaque BOOLEAN NOT NULL DEFAULT false,
   destaque_ordem INTEGER NOT NULL DEFAULT 0,
@@ -108,6 +113,11 @@ ALTER TABLE catalogo_produtos
 ADD COLUMN IF NOT EXISTS tipo_item TEXT NOT NULL DEFAULT 'produto',
 ADD COLUMN IF NOT EXISTS tipo_preco TEXT NOT NULL DEFAULT 'fixo',
 ADD COLUMN IF NOT EXISTS frete_texto TEXT,
+ADD COLUMN IF NOT EXISTS stock_quantity INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS min_stock INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN IF NOT EXISTS track_stock BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN IF NOT EXISTS show_when_out_of_stock BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT true,
 ADD COLUMN IF NOT EXISTS destaque BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN IF NOT EXISTS destaque_ordem INTEGER NOT NULL DEFAULT 0,
 ADD COLUMN IF NOT EXISTS apelidos TEXT NOT NULL DEFAULT '',
@@ -124,6 +134,26 @@ ON catalogo_produtos (empresa_id, ativo, categoria_id);
 
 CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_empresa_destaque
 ON catalogo_produtos (empresa_id, destaque, destaque_ordem);
+
+CREATE INDEX IF NOT EXISTS idx_catalogo_produtos_low_stock
+ON catalogo_produtos (empresa_id, track_stock, stock_quantity, min_stock);
+
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER NOT NULL REFERENCES catalogo_produtos(id) ON DELETE CASCADE,
+  business_id INTEGER NOT NULL REFERENCES catalogo_empresas(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('entrada', 'saida', 'ajuste', 'cancelamento')),
+  quantity INTEGER NOT NULL,
+  previous_quantity INTEGER NOT NULL,
+  new_quantity INTEGER NOT NULL,
+  reason TEXT,
+  order_id TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  created_by TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_movements_product_created_at
+ON stock_movements (product_id, created_at DESC);
 
 INSERT INTO catalogo_empresas (nome, slug, whatsapp, ativo)
 VALUES ('Savore Gourmet', 'savore', '556199327471', true)

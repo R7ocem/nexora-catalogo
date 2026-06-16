@@ -214,6 +214,11 @@ async function getAdminData(user, selectedSlug) {
        p.tipo_item,
        p.tipo_preco,
        p.frete_texto,
+       p.stock_quantity,
+       p.min_stock,
+       p.track_stock,
+       p.show_when_out_of_stock,
+       p.is_available,
        p.imagem_url,
        p.ativo,
        p.destaque,
@@ -1297,6 +1302,27 @@ export default async function AdminPage({ searchParams }) {
             <input name="frete_texto" placeholder="Ex: Frete grátis" />
           </label>
 
+          <div className="full-span inventory-fields">
+            <label className="checkbox-field">
+              <input name="track_stock" type="checkbox" />
+              Controlar estoque
+            </label>
+
+            <label>
+              Quantidade em estoque
+              <input name="stock_quantity" type="number" min="0" step="1" defaultValue="0" />
+            </label>
+
+            <label>
+              Estoque minimo para alerta
+              <input name="min_stock" type="number" min="0" step="1" defaultValue="0" />
+            </label>
+
+            <label className="checkbox-field">
+              <input name="show_when_out_of_stock" type="checkbox" defaultChecked />
+              Mostrar produto quando esgotado
+            </label>
+          </div>
           <div className="full-span photo-editor">
             <span className="field-title">Foto do item</span>
           
@@ -1386,6 +1412,13 @@ export default async function AdminPage({ searchParams }) {
                   <input type="hidden" name="tipo_item" value={produto.tipo_item || 'produto'} />
                   <input type="hidden" name="tipo_preco" value={produto.tipo_preco || 'fixo'} />
                   <input type="hidden" name="frete_texto" value={produto.frete_texto || ''} />
+                  <input type="hidden" name="stock_quantity" value={produto.stock_quantity || 0} />
+                  <input type="hidden" name="min_stock" value={produto.min_stock || 0} />
+                  {produto.track_stock ? <input type="hidden" name="track_stock" value="on" /> : null}
+                  {produto.show_when_out_of_stock !== false ? (
+                    <input type="hidden" name="show_when_out_of_stock" value="on" />
+                  ) : null}
+                  {produto.is_available !== false ? <input type="hidden" name="is_available" value="on" /> : null}
                   <input type="hidden" name="descricao" value={produto.descricao || ''} />
                   <input type="hidden" name="variacoes_texto" value={variacoesParaTexto(produto.variacoes)} />
                   <input type="hidden" name="apelidos" value={produto.apelidos || ''} />
@@ -1487,6 +1520,44 @@ export default async function AdminPage({ searchParams }) {
                       <input name="frete_texto" defaultValue={produto.frete_texto || ''} placeholder="Ex: Frete grátis" />
                     </label>
       
+                    <div className="full-span inventory-fields">
+                      <label className="checkbox-field">
+                        <input name="track_stock" type="checkbox" defaultChecked={produto.track_stock === true} />
+                        Controlar estoque
+                      </label>
+
+                      <label>
+                        Quantidade em estoque
+                        <input
+                          name="stock_quantity"
+                          type="number"
+                          min="0"
+                          step="1"
+                          defaultValue={produto.stock_quantity || 0}
+                        />
+                      </label>
+
+                      <label>
+                        Estoque minimo para alerta
+                        <input
+                          name="min_stock"
+                          type="number"
+                          min="0"
+                          step="1"
+                          defaultValue={produto.min_stock || 0}
+                        />
+                      </label>
+
+                      <label className="checkbox-field">
+                        <input
+                          name="show_when_out_of_stock"
+                          type="checkbox"
+                          defaultChecked={produto.show_when_out_of_stock !== false}
+                        />
+                        Mostrar produto quando esgotado
+                      </label>
+                    </div>
+
                     <label className="full-span">
                       Descrição
                       <textarea name="descricao" defaultValue={produto.descricao || ''} />
