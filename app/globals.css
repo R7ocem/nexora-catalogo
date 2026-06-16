@@ -365,12 +365,30 @@ input[type="checkbox"] {
   gap: 14px;
 }
 
+.inventory-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.inventory-fields .checkbox-field {
+  align-content: center;
+}
+
 .admin-product-edit textarea {
   min-height: 74px;
 }
 
 @media (max-width: 720px) {
   .edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-fields {
     grid-template-columns: 1fr;
   }
 }
@@ -2104,6 +2122,39 @@ input[type="checkbox"] {
 
 .product-detail-shipping {
   font-size: 15px;
+}
+
+.product-stock-badge,
+.product-detail-stock {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.product-detail-stock {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+  font-size: 14px;
+}
+
+.product-detail-stock.out {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.catalog-item-card.out-of-stock {
+  opacity: 0.72;
+}
+
+.catalog-item-card.out-of-stock img {
+  filter: grayscale(0.25);
 }
 
 .highlight-card.catalog-item-card {

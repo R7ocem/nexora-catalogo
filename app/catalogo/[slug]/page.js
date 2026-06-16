@@ -64,6 +64,11 @@ async function getCatalogo(slug) {
        p.tipo_item,
        p.tipo_preco,
        p.frete_texto,
+       p.stock_quantity,
+       p.min_stock,
+       p.track_stock,
+       p.show_when_out_of_stock,
+       p.is_available,
        p.imagem_url,
        p.ativo,
        p.destaque,
@@ -75,6 +80,12 @@ async function getCatalogo(slug) {
      LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
      WHERE p.empresa_id = $1
        AND p.ativo = true
+       AND COALESCE(p.is_available, true) = true
+       AND (
+         COALESCE(p.track_stock, false) = false
+         OR COALESCE(p.stock_quantity, 0) > 0
+         OR COALESCE(p.show_when_out_of_stock, true) = true
+       )
      ORDER BY c.ordem, p.nome`,
     [empresa.id]
   );

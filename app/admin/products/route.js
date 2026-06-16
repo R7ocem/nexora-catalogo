@@ -104,6 +104,10 @@ function numero(valor) {
   return Number.isFinite(numeroFinal) ? numeroFinal : 0;
 }
 
+function inteiroNaoNegativo(valor) {
+  return Math.max(0, Math.floor(numero(valor)));
+}
+
 function variacoesDoTexto(valor) {
   return texto(valor)
     .split(/\r?\n/)
@@ -201,6 +205,11 @@ export async function POST(request) {
   const descricao = texto(formData.get('descricao'));
   const variacoes = variacoesDoTexto(formData.get('variacoes_texto'));
   const freteTexto = texto(formData.get('frete_texto'));
+  const trackStock = formData.get('track_stock') === 'on';
+  const stockQuantity = inteiroNaoNegativo(formData.get('stock_quantity'));
+  const minStock = inteiroNaoNegativo(formData.get('min_stock'));
+  const showWhenOutOfStock = formData.get('show_when_out_of_stock') === 'on';
+  const isAvailable = formData.get('is_available') !== 'off';
   const apelidos = texto(formData.get('apelidos'));
   const ativo = formData.get('ativo') === 'on';
   const destaque = formData.get('destaque') === 'on';
@@ -250,7 +259,12 @@ export async function POST(request) {
          destaque = $13,
          destaque_ordem = $14,
          variacoes = $15::jsonb,
-         frete_texto = $16
+         frete_texto = $16,
+         stock_quantity = $17,
+         min_stock = $18,
+         track_stock = $19,
+         show_when_out_of_stock = $20,
+         is_available = $21
        WHERE id = $1
          AND empresa_id = $2`,
       [
@@ -269,7 +283,12 @@ export async function POST(request) {
         destaque,
         destaqueOrdem,
         JSON.stringify(variacoes),
-        freteTexto
+        freteTexto,
+        stockQuantity,
+        minStock,
+        trackStock,
+        showWhenOutOfStock,
+        isAvailable
       ]
     );
   } else {
@@ -289,9 +308,14 @@ export async function POST(request) {
          destaque,
          destaque_ordem,
          variacoes,
-         frete_texto
+         frete_texto,
+         stock_quantity,
+         min_stock,
+         track_stock,
+         show_when_out_of_stock,
+         is_available
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17, $18, $19, $20)`,
       [
         empresaId,
         categoriaId,
@@ -307,7 +331,12 @@ export async function POST(request) {
         destaque,
         destaqueOrdem,
         JSON.stringify(variacoes),
-        freteTexto
+        freteTexto,
+        stockQuantity,
+        minStock,
+        trackStock,
+        showWhenOutOfStock,
+        isAvailable
       ]
     );
   }

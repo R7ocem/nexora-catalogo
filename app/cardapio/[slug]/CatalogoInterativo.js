@@ -19,6 +19,18 @@ function itemTemValor(produto) {
   return produto.tipo_preco !== 'sob_consulta';
 }
 
+function estoqueDisponivel(produto) {
+  return Math.max(0, Math.floor(Number(produto?.stock_quantity || 0)));
+}
+
+function produtoControlaEstoque(produto) {
+  return produto?.track_stock === true;
+}
+
+function produtoEsgotado(produto) {
+  return produtoControlaEstoque(produto) && estoqueDisponivel(produto) <= 0;
+}
+
 function normalizarVariacoes(valor) {
   const variacoes = valorJson(valor, []);
 
@@ -283,6 +295,8 @@ function WhatsAppIcon() {
   }, [produtoAberto?.id]);
 
   function adicionar(produto, escolhas = {}, quantidade = 1) {
+    if (produtoEsgotado(produto)) return;
+
     const variacoesProduto = normalizarVariacoes(produto.variacoes);
     const escolhasValidas = variacoesProduto.reduce((acc, grupo) => {
       if (escolhas[grupo.nome]) {
@@ -292,7 +306,13 @@ function WhatsAppIcon() {
       return acc;
     }, {});
     const carrinhoKey = chaveCarrinho(produto, escolhasValidas);
-    const quantidadeFinal = Math.max(1, Number(quantidade) || 1);
+    const quantidadeSolicitada = Math.max(1, Math.floor(Number(quantidade) || 1));
+    const estoque = estoqueDisponivel(produto);
+    const quantidadeFinal = produtoControlaEstoque(produto)
+      ? Math.min(quantidadeSolicitada, estoque)
+      : quantidadeSolicitada;
+
+    if (quantidadeFinal <= 0) return;
 
     setCarrinho((atual) => {
       const existente = atual.find((item) => item.carrinho_key === carrinhoKey);
@@ -300,7 +320,12 @@ function WhatsAppIcon() {
       if (existente) {
         return atual.map((item) =>
           item.carrinho_key === carrinhoKey
-            ? { ...item, quantidade: item.quantidade + quantidadeFinal }
+            ? {
+              ...item,
+              quantidade: produtoControlaEstoque(item)
+                ? Math.min(item.quantidade + quantidadeFinal, estoqueDisponivel(item))
+                : item.quantidade + quantidadeFinal
+            }
             : item
         );
       }
@@ -325,7 +350,14 @@ function WhatsAppIcon() {
 
     setCarrinho((atual) =>
       atual.map((item) =>
-        item.carrinho_key === carrinhoKey ? { ...item, quantidade } : item
+        item.carrinho_key === carrinhoKey
+          ? {
+            ...item,
+            quantidade: produtoControlaEstoque(item)
+              ? Math.min(quantidade, estoqueDisponivel(item))
+              : quantidade
+          }
+          : item
       )
     );
   }
@@ -362,11 +394,14 @@ function WhatsAppIcon() {
 
   function renderProduto(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
+    const esgotado = produtoEsgotado(produto);
 
     return (
       <button
         key={produto.id}
-        className="product-card premium-product-card catalog-item-card"
+        className={esgotado
+          ? 'product-card premium-product-card catalog-item-card out-of-stock'
+          : 'product-card premium-product-card catalog-item-card'}
         type="button"
         onClick={() => setProdutoAberto(produto)}
       >
@@ -382,6 +417,10 @@ function WhatsAppIcon() {
           <div className="product-title-row">
             <h3>{produto.nome}</h3>
           </div>
+
+          {esgotado ? (
+            <span className="product-stock-badge">Esgotado</span>
+          ) : null}
 
           {nomesVariacoes.length > 0 ? (
             <p className="product-options-hint">
@@ -403,11 +442,12 @@ function WhatsAppIcon() {
 
   function renderDestaque(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
+    const esgotado = produtoEsgotado(produto);
   
     return (
       <button
         key={produto.id}
-        className="highlight-card catalog-item-card"
+        className={esgotado ? 'highlight-card catalog-item-card out-of-stock' : 'highlight-card catalog-item-card'}
         type="button"
         onClick={() => setProdutoAberto(produto)}
       >
@@ -421,6 +461,10 @@ function WhatsAppIcon() {
   
         <div className="highlight-info">
           <h3>{produto.nome}</h3>
+
+          {esgotado ? (
+            <span className="product-stock-badge">Esgotado</span>
+          ) : null}
 
           {nomesVariacoes.length > 0 ? (
             <p className="highlight-options-hint">
@@ -444,6 +488,8 @@ function WhatsAppIcon() {
   const variacoesProdutoAbertoCompletas = variacoesProdutoAberto.every((grupo) =>
     Boolean(variacoesSelecionadas[grupo.nome])
   );
+  const produtoAbertoEsgotado = produtoAberto ? produtoEsgotado(produtoAberto) : false;
+  const estoqueProdutoAberto = produtoAberto ? estoqueDisponivel(produtoAberto) : 0;
 
   return (
     <div
@@ -646,6 +692,14 @@ function WhatsAppIcon() {
                 <span className="product-detail-shipping">{produtoAberto.frete_texto}</span>
               ) : null}
 
+              {produtoAbertoEsgotado ? (
+                <span className="product-detail-stock out">Produto esgotado no momento</span>
+              ) : produtoControlaEstoque(produtoAberto) ? (
+                <span className="product-detail-stock">
+                  Disponível: {estoqueProdutoAberto} unidade{estoqueProdutoAberto === 1 ? '' : 's'}
+                </span>
+              ) : null}
+
               <div className="product-detail-quantity">
                 <strong>Quantidade</strong>
                 <div className="product-detail-quantity-control">
@@ -658,7 +712,13 @@ function WhatsAppIcon() {
                   <span>{quantidadeProdutoAberto}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantidadeProdutoAberto((atual) => atual + 1)}
+                    onClick={() =>
+                      setQuantidadeProdutoAberto((atual) =>
+                        produtoControlaEstoque(produtoAberto)
+                          ? Math.min(estoqueProdutoAberto, atual + 1)
+                          : atual + 1
+                      )
+                    }
                   >
                     +
                   </button>
@@ -698,15 +758,17 @@ function WhatsAppIcon() {
                 className="primary-button"
                 style={{ background: usarGradiente ? 'var(--catalog-gradient)' : corPrincipal }}
                 type="button"
-                disabled={variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas}
+                disabled={produtoAbertoEsgotado || (variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas)}
                 onClick={() => {
                   adicionar(produtoAberto, variacoesSelecionadas, quantidadeProdutoAberto);
                   setProdutoAberto(null);
                 }}
               >
-                {variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas
-                  ? 'Escolha as opções'
-                  : produtoAberto.tipo_preco === 'sob_consulta' ? 'Consultar' : 'Adicionar'}
+                {produtoAbertoEsgotado
+                  ? 'Esgotado'
+                  : variacoesProdutoAberto.length > 0 && !variacoesProdutoAbertoCompletas
+                    ? 'Escolha as opções'
+                    : produtoAberto.tipo_preco === 'sob_consulta' ? 'Consultar' : 'Adicionar'}
               </button>
             </div>
           </aside>
