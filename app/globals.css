@@ -1962,3 +1962,115 @@ input[type="checkbox"] {
     display: none;
   }
 }
+
+.catalog-item-card {
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(33, 31, 28, 0.12);
+  appearance: none;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.catalog-item-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--catalog-brand) 36%, transparent);
+  outline-offset: 2px;
+}
+
+.catalog-category-block .product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.catalog-category-block .premium-product-card {
+  min-height: 0;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.catalog-category-block .premium-product-card:hover {
+  transform: none;
+  box-shadow: 0 8px 22px rgba(33, 31, 28, 0.08);
+}
+
+.catalog-category-block .product-image-wrap {
+  aspect-ratio: 1 / 0.82;
+}
+
+.catalog-category-block .product-info {
+  min-height: 104px;
+  padding: 10px;
+  gap: 6px;
+}
+
+.catalog-category-block .product-title-row h3 {
+  display: -webkit-box;
+  min-height: 38px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.catalog-category-block .product-title-row span,
+.catalog-category-block .product-description,
+.catalog-category-block .product-buy-row,
+.catalog-category-block .details-link,
+.catalog-category-block .product-add-button {
+  display: none;
+}
+
+.catalog-category-block .product-options-hint {
+  display: -webkit-box;
+  min-height: 15px;
+  margin: 0;
+  overflow: hidden;
+  font-size: 11px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.catalog-category-block .product-price-line {
+  margin-top: auto;
+}
+
+.catalog-category-block .product-price-line strong {
+  color: var(--catalog-brand);
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.highlight-card.catalog-item-card {
+  border-radius: 8px;
+}
+
+.highlight-card.catalog-item-card .highlight-info span,
+.highlight-card.catalog-item-card .highlight-bottom button {
+  display: none;
+}
+
+.highlight-card.catalog-item-card .highlight-info h3 {
+  min-height: 36px;
+}
+
+@media (min-width: 900px) {
+  .catalog-category-block .product-grid {
+    gap: 14px;
+  }
+
+  .catalog-category-block .product-title-row h3 {
+    font-size: 17px;
+  }
+
+  .catalog-category-block .product-price-line strong {
+    font-size: 21px;
+  }
+}
