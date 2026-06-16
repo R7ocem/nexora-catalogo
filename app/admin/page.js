@@ -136,6 +136,24 @@ function variacoesParaTexto(valor) {
     .join('\n');
 }
 
+function rotuloEstoque(status) {
+  const rotulos = {
+    NORMAL: 'Normal',
+    ATENCAO: 'Atenção',
+    CRITICO: 'Crítico',
+    ESGOTADO: 'Esgotado',
+    SEM_CONTROLE: 'Sem controle'
+  };
+
+  return rotulos[status] || 'Sem controle';
+}
+
+function numeroEstoque(valor, casas = 0) {
+  const numero = Number(valor || 0);
+
+  return Number.isFinite(numero) ? numero.toFixed(casas).replace('.', ',') : '0';
+}
+
 async function getAdminData(user, selectedSlug) {
   const empresasResult = await query(
     `SELECT
@@ -205,32 +223,84 @@ async function getAdminData(user, selectedSlug) {
   );
 
   const produtos = await query(
-    `SELECT
-       p.id,
-       p.codigo,
-       p.nome,
-       p.descricao,
-       p.preco,
-       p.tipo_item,
-       p.tipo_preco,
-       p.frete_texto,
-       p.stock_quantity,
-       p.min_stock,
-       p.track_stock,
-       p.show_when_out_of_stock,
-       p.is_available,
-       p.imagem_url,
-       p.ativo,
-       p.destaque,
-       p.destaque_ordem,
-       p.apelidos,
-       p.variacoes,
-       p.categoria_id,
-       c.nome AS categoria_nome
-     FROM catalogo_produtos p
-     LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
-     WHERE p.empresa_id = $1
-     ORDER BY p.ativo DESC, c.ordem, p.nome`,
+    `WITH produtos_base AS (
+       SELECT
+         p.*,
+         c.nome AS categoria_nome,
+         c.ordem AS categoria_ordem,
+         COALESCE(vendas.total_vendido_14_dias, 0) AS total_vendido_14_dias,
+         COALESCE(vendas.dias_com_venda, 0) AS dias_com_venda,
+         CASE
+           WHEN COALESCE(vendas.dias_com_venda, 0) >= 7 THEN ROUND(COALESCE(vendas.total_vendido_14_dias, 0)::numeric / 14, 2)
+           ELSE 0
+         END AS average_daily_sales
+       FROM catalogo_produtos p
+       LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id AND c.empresa_id = p.empresa_id
+       LEFT JOIN LATERAL (
+         SELECT
+           COALESCE(SUM(sm.quantity), 0) AS total_vendido_14_dias,
+           COUNT(DISTINCT sm.created_at::date) AS dias_com_venda
+         FROM stock_movements sm
+         WHERE sm.product_id = p.id
+           AND sm.type = 'saida'
+           AND sm.created_at >= NOW() - INTERVAL '14 days'
+       ) vendas ON true
+       WHERE p.empresa_id = $1
+     ),
+     produtos_metricas AS (
+       SELECT
+         *,
+         CASE
+           WHEN COALESCE(auto_calculate_min_stock, true) = true
+             AND dias_com_venda >= 7
+             THEN CEIL(average_daily_sales * (COALESCE(replenishment_days, 7) + COALESCE(safety_days, 3)))
+           ELSE COALESCE(min_stock, 0)
+         END AS stock_minimum_calculated,
+         CASE
+           WHEN average_daily_sales > 0 THEN ROUND(COALESCE(stock_quantity, 0)::numeric / average_daily_sales, 1)
+           ELSE NULL
+         END AS days_remaining
+       FROM produtos_base
+     )
+     SELECT
+       id,
+       codigo,
+       nome,
+       descricao,
+       preco,
+       tipo_item,
+       tipo_preco,
+       frete_texto,
+       stock_quantity,
+       min_stock,
+       track_stock,
+       replenishment_days,
+       safety_days,
+       auto_calculate_min_stock,
+       show_when_out_of_stock,
+       is_available,
+       total_vendido_14_dias,
+       dias_com_venda,
+       average_daily_sales,
+       stock_minimum_calculated,
+       days_remaining,
+       CASE
+         WHEN COALESCE(track_stock, false) = false THEN 'SEM_CONTROLE'
+         WHEN COALESCE(stock_quantity, 0) <= 0 THEN 'ESGOTADO'
+         WHEN COALESCE(stock_quantity, 0) <= stock_minimum_calculated * 0.5 THEN 'CRITICO'
+         WHEN COALESCE(stock_quantity, 0) <= stock_minimum_calculated THEN 'ATENCAO'
+         ELSE 'NORMAL'
+       END AS stock_status,
+       imagem_url,
+       ativo,
+       destaque,
+       destaque_ordem,
+       apelidos,
+       variacoes,
+       categoria_id,
+       categoria_nome
+     FROM produtos_metricas
+     ORDER BY ativo DESC, categoria_ordem, nome`,
     [empresa.id]
   );
 
@@ -1318,6 +1388,21 @@ export default async function AdminPage({ searchParams }) {
               <input name="min_stock" type="number" min="0" step="1" defaultValue="0" />
             </label>
 
+            <label>
+              Dias para reposicao
+              <input name="replenishment_days" type="number" min="1" step="1" defaultValue="7" />
+            </label>
+
+            <label>
+              Dias de seguranca
+              <input name="safety_days" type="number" min="0" step="1" defaultValue="3" />
+            </label>
+
+            <label className="checkbox-field">
+              <input name="auto_calculate_min_stock" type="checkbox" defaultChecked />
+              Calcular minimo inteligente
+            </label>
+
             <label className="checkbox-field">
               <input name="show_when_out_of_stock" type="checkbox" defaultChecked />
               Mostrar produto quando esgotado
@@ -1397,6 +1482,11 @@ export default async function AdminPage({ searchParams }) {
           <div className="admin-products editable-products">
             {produtos.map((produto) => (
               <div key={produto.id} className="admin-product-edit-wrap">
+                <span
+                  className={`stock-card-dot stock-${produto.stock_status || 'SEM_CONTROLE'}`}
+                  title={`Estoque: ${rotuloEstoque(produto.stock_status)}`}
+                />
+
                 <form
                   action="/admin/products"
                   method="post"
@@ -1414,7 +1504,12 @@ export default async function AdminPage({ searchParams }) {
                   <input type="hidden" name="frete_texto" value={produto.frete_texto || ''} />
                   <input type="hidden" name="stock_quantity" value={produto.stock_quantity || 0} />
                   <input type="hidden" name="min_stock" value={produto.min_stock || 0} />
+                  <input type="hidden" name="replenishment_days" value={produto.replenishment_days || 7} />
+                  <input type="hidden" name="safety_days" value={produto.safety_days || 3} />
                   {produto.track_stock ? <input type="hidden" name="track_stock" value="on" /> : null}
+                  {produto.auto_calculate_min_stock !== false ? (
+                    <input type="hidden" name="auto_calculate_min_stock" value="on" />
+                  ) : null}
                   {produto.show_when_out_of_stock !== false ? (
                     <input type="hidden" name="show_when_out_of_stock" value="on" />
                   ) : null}
@@ -1548,6 +1643,37 @@ export default async function AdminPage({ searchParams }) {
                         />
                       </label>
 
+                      <label>
+                        Dias para reposicao
+                        <input
+                          name="replenishment_days"
+                          type="number"
+                          min="1"
+                          step="1"
+                          defaultValue={produto.replenishment_days || 7}
+                        />
+                      </label>
+
+                      <label>
+                        Dias de seguranca
+                        <input
+                          name="safety_days"
+                          type="number"
+                          min="0"
+                          step="1"
+                          defaultValue={produto.safety_days || 3}
+                        />
+                      </label>
+
+                      <label className="checkbox-field">
+                        <input
+                          name="auto_calculate_min_stock"
+                          type="checkbox"
+                          defaultChecked={produto.auto_calculate_min_stock !== false}
+                        />
+                        Calcular minimo inteligente
+                      </label>
+
                       <label className="checkbox-field">
                         <input
                           name="show_when_out_of_stock"
@@ -1556,6 +1682,37 @@ export default async function AdminPage({ searchParams }) {
                         />
                         Mostrar produto quando esgotado
                       </label>
+                    </div>
+
+                    <div className="full-span smart-stock-summary">
+                      <div className="smart-stock-status">
+                        <span className={`stock-dot stock-${produto.stock_status || 'SEM_CONTROLE'}`} />
+                        <strong>{rotuloEstoque(produto.stock_status)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Estoque atual</span>
+                        <strong>{numeroEstoque(produto.stock_quantity)} un.</strong>
+                      </div>
+
+                      <div>
+                        <span>Minimo recomendado</span>
+                        <strong>{numeroEstoque(produto.stock_minimum_calculated)} un.</strong>
+                      </div>
+
+                      <div>
+                        <span>Media diaria</span>
+                        <strong>{numeroEstoque(produto.average_daily_sales, 2)} un./dia</strong>
+                      </div>
+
+                      <div>
+                        <span>Dias restantes</span>
+                        <strong>
+                          {produto.days_remaining === null || produto.days_remaining === undefined
+                            ? 'Sem historico'
+                            : `${numeroEstoque(produto.days_remaining, 1)} dias`}
+                        </strong>
+                      </div>
                     </div>
 
                     <label className="full-span">

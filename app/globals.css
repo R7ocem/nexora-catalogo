@@ -391,9 +391,14 @@ input[type="checkbox"] {
   .inventory-fields {
     grid-template-columns: 1fr;
   }
+
+  .smart-stock-summary {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .admin-product-edit-wrap {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
@@ -1483,6 +1488,77 @@ input[type="checkbox"] {
 .product-variation-groups {
   display: grid;
   gap: 12px;
+}
+
+.stock-card-dot,
+.stock-dot {
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  display: inline-block;
+  flex: 0 0 auto;
+  background: #d1d5db;
+}
+
+.stock-card-dot {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.stock-NORMAL {
+  background: #22c55e;
+}
+
+.stock-ATENCAO {
+  background: #facc15;
+}
+
+.stock-CRITICO {
+  background: #ef4444;
+}
+
+.stock-ESGOTADO {
+  background: #3f3f46;
+}
+
+.stock-SEM_CONTROLE {
+  background: #d1d5db;
+}
+
+.smart-stock-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(33, 31, 28, 0.08);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.smart-stock-summary > div {
+  display: grid;
+  gap: 3px;
+}
+
+.smart-stock-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.smart-stock-summary strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.smart-stock-status {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
 }
 
 .product-detail-quantity {

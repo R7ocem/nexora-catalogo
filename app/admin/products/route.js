@@ -208,6 +208,9 @@ export async function POST(request) {
   const trackStock = formData.get('track_stock') === 'on';
   const stockQuantity = inteiroNaoNegativo(formData.get('stock_quantity'));
   const minStock = inteiroNaoNegativo(formData.get('min_stock'));
+  const replenishmentDays = Math.max(1, inteiroNaoNegativo(formData.get('replenishment_days')) || 7);
+  const safetyDays = inteiroNaoNegativo(formData.get('safety_days'));
+  const autoCalculateMinStock = formData.get('auto_calculate_min_stock') === 'on';
   const showWhenOutOfStock = formData.get('show_when_out_of_stock') === 'on';
   const isAvailable = formData.get('is_available') !== 'off';
   const apelidos = texto(formData.get('apelidos'));
@@ -264,7 +267,10 @@ export async function POST(request) {
          min_stock = $18,
          track_stock = $19,
          show_when_out_of_stock = $20,
-         is_available = $21
+         is_available = $21,
+         replenishment_days = $22,
+         safety_days = $23,
+         auto_calculate_min_stock = $24
        WHERE id = $1
          AND empresa_id = $2`,
       [
@@ -288,7 +294,10 @@ export async function POST(request) {
         minStock,
         trackStock,
         showWhenOutOfStock,
-        isAvailable
+        isAvailable,
+        replenishmentDays,
+        safetyDays,
+        autoCalculateMinStock
       ]
     );
   } else {
@@ -313,9 +322,12 @@ export async function POST(request) {
          min_stock,
          track_stock,
          show_when_out_of_stock,
-         is_available
+         is_available,
+         replenishment_days,
+         safety_days,
+         auto_calculate_min_stock
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17, $18, $19, $20)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
       [
         empresaId,
         categoriaId,
@@ -336,7 +348,10 @@ export async function POST(request) {
         minStock,
         trackStock,
         showWhenOutOfStock,
-        isAvailable
+        isAvailable,
+        replenishmentDays,
+        safetyDays,
+        autoCalculateMinStock
       ]
     );
   }
