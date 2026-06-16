@@ -1973,6 +1973,7 @@ input[type="checkbox"] {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  line-height: normal;
 }
 
 .catalog-item-card:focus-visible {
@@ -1982,7 +1983,7 @@ input[type="checkbox"] {
 
 .catalog-category-block .product-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 10px;
 }
 
@@ -2048,8 +2049,31 @@ input[type="checkbox"] {
   line-height: 1.1;
 }
 
+.product-shipping-line,
+.product-detail-shipping {
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.product-detail-shipping {
+  font-size: 15px;
+}
+
 .highlight-card.catalog-item-card {
   border-radius: 8px;
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+
+.highlight-card.catalog-item-card .highlight-image {
+  margin: 0;
+}
+
+.highlight-card.catalog-item-card .highlight-info {
+  margin: 0;
 }
 
 .highlight-card.catalog-item-card .highlight-info span,
@@ -2072,5 +2096,12 @@ input[type="checkbox"] {
 
   .catalog-category-block .product-price-line strong {
     font-size: 21px;
+  }
+}
+
+@media (max-width: 720px) {
+  .catalog-category-block .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 }

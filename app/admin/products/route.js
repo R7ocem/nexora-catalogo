@@ -200,6 +200,7 @@ export async function POST(request) {
 
   const descricao = texto(formData.get('descricao'));
   const variacoes = variacoesDoTexto(formData.get('variacoes_texto'));
+  const freteTexto = texto(formData.get('frete_texto'));
   const apelidos = texto(formData.get('apelidos'));
   const ativo = formData.get('ativo') === 'on';
   const destaque = formData.get('destaque') === 'on';
@@ -248,7 +249,8 @@ export async function POST(request) {
          ativo = $12,
          destaque = $13,
          destaque_ordem = $14,
-         variacoes = $15::jsonb
+         variacoes = $15::jsonb,
+         frete_texto = $16
        WHERE id = $1
          AND empresa_id = $2`,
       [
@@ -266,7 +268,8 @@ export async function POST(request) {
         ativo,
         destaque,
         destaqueOrdem,
-        JSON.stringify(variacoes)
+        JSON.stringify(variacoes),
+        freteTexto
       ]
     );
   } else {
@@ -285,9 +288,10 @@ export async function POST(request) {
          ativo,
          destaque,
          destaque_ordem,
-         variacoes
+         variacoes,
+         frete_texto
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15)`,
       [
         empresaId,
         categoriaId,
@@ -302,7 +306,8 @@ export async function POST(request) {
         ativo,
         destaque,
         destaqueOrdem,
-        JSON.stringify(variacoes)
+        JSON.stringify(variacoes),
+        freteTexto
       ]
     );
   }
