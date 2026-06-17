@@ -524,7 +524,8 @@ export default async function AdminPage({ searchParams }) {
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const companyDraft = getCompanyDraft(searchParams);
   const painelPedidosAberto = searchParams?.painel === 'pedidos';
-  const filtrosPedidos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
+  const filtrosPedidosAtivos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
+  const filtrosPedidos = [...filtrosPedidosAtivos, 'finalizado'];
   const filtroSolicitado = String(searchParams?.pedidos || 'novo');
   const filtroPedidos = filtrosPedidos.includes(filtroSolicitado) ? filtroSolicitado : 'novo';
   const pedidosFiltrados = pedidos.filter((pedido) => statusPedido(pedido) === filtroPedidos);
@@ -532,7 +533,7 @@ export default async function AdminPage({ searchParams }) {
     acc[status] = pedidos.filter((pedido) => statusPedido(pedido) === status).length;
     return acc;
   }, {});
-  const totalPedidosEmAndamento = filtrosPedidos.reduce(
+  const totalPedidosEmAndamento = filtrosPedidosAtivos.reduce(
     (total, status) => total + (contagemPedidos[status] || 0),
     0
   );
@@ -681,7 +682,7 @@ export default async function AdminPage({ searchParams }) {
                         <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
                         <input type="hidden" name="acao" value="aceitar" />
                         <input type="hidden" name="filtro" value={filtroPedidos} />
-                        <button className="primary-button" type="submit">Aceitar</button>
+                        <button className="order-action-button action-accept" type="submit">Aceitar pedido</button>
                       </form>
                     ) : null}
 
@@ -691,7 +692,7 @@ export default async function AdminPage({ searchParams }) {
                         <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
                         <input type="hidden" name="acao" value="pronto" />
                         <input type="hidden" name="filtro" value={filtroPedidos} />
-                        <button className="secondary-button" type="submit">Pronto</button>
+                        <button className="order-action-button action-ready" type="submit">Pedido pronto</button>
                       </form>
                     ) : null}
 
@@ -701,7 +702,7 @@ export default async function AdminPage({ searchParams }) {
                         <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
                         <input type="hidden" name="acao" value="saiu" />
                         <input type="hidden" name="filtro" value={filtroPedidos} />
-                        <button className="secondary-button" type="submit">Saiu</button>
+                        <button className="order-action-button action-delivery" type="submit">Saiu para entrega</button>
                       </form>
                     ) : null}
 
@@ -711,7 +712,7 @@ export default async function AdminPage({ searchParams }) {
                         <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
                         <input type="hidden" name="acao" value="finalizar" />
                         <input type="hidden" name="filtro" value={filtroPedidos} />
-                        <button className="secondary-button" type="submit">Finalizar</button>
+                        <button className="order-action-button action-finish" type="submit">Finalizar</button>
                       </form>
                     ) : null}
                   </div>
