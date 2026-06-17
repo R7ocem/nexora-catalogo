@@ -256,6 +256,7 @@ input[type="checkbox"] {
 .admin-products {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .admin-product-row {
@@ -293,11 +294,40 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   .menu-header-inner,
   .admin-header-panel {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .menu-header-inner {
     padding: 14px 0;
+  }
+
+  .admin-header-panel {
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .admin-header-panel h1 {
+    margin-bottom: 10px;
+    font-size: clamp(30px, 8vw, 42px);
+    line-height: 1.08;
+  }
+
+  .admin-header-panel p {
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .admin-header-panel .secondary-button {
+    width: fit-content;
+    min-width: 82px;
   }
 
   .hero-section h2 {
@@ -312,6 +342,23 @@ input[type="checkbox"] {
   .admin-product-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .shell,
+  .panel,
+  .admin-products,
+  .admin-product-edit-wrap,
+  .admin-product-edit,
+  .photo-form,
+  .product-form,
+  .edit-grid,
+  .inventory-fields {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .panel {
+    padding-inline: 14px;
   }
 }
 
@@ -357,6 +404,7 @@ input[type="checkbox"] {
   border-radius: 8px;
   padding: 16px;
   background: #fbfaf7;
+  min-width: 0;
 }
 
 .edit-grid {
@@ -422,6 +470,15 @@ input[type="checkbox"] {
   .smart-stock-status {
     justify-content: flex-start !important;
   }
+
+  .photo-actions {
+    flex-wrap: wrap;
+  }
+
+  .photo-actions .photo-button,
+  .photo-actions .danger-button {
+    flex: 1 1 150px;
+  }
 }
 
 .admin-product-edit-wrap {
@@ -432,6 +489,9 @@ input[type="checkbox"] {
   background: #fffdfa;
   display: grid;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .admin-product-edit {
@@ -2311,5 +2371,44 @@ input[type="checkbox"] {
   .catalog-category-block .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .smart-stock-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .smart-stock-summary > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .smart-stock-summary span,
+  .smart-stock-summary strong {
+    min-width: 0;
+    line-height: 1.25;
+  }
+
+  .smart-stock-summary span {
+    max-width: 58%;
+    white-space: normal;
+  }
+
+  .smart-stock-summary strong {
+    max-width: 42%;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .smart-stock-status {
+    justify-content: flex-start !important;
   }
 }

@@ -213,14 +213,11 @@ export async function POST(request) {
   const autoCalculateMinStock = formData.get('auto_calculate_min_stock') === 'on';
   const showWhenOutOfStock = formData.get('show_when_out_of_stock') === 'on';
   const isAvailable = formData.get('is_available') !== 'off';
-  const apelidos = texto(formData.get('apelidos'));
+  const apelidosDigitados = texto(formData.get('apelidos'));
+  const apelidos = apelidosDigitados || nome;
   const ativo = formData.get('ativo') === 'on';
   const destaque = formData.get('destaque') === 'on';
   const destaqueOrdem = Math.min(6, Math.max(0, Math.round(numero(formData.get('destaque_ordem')))));
-
-  if (!apelidos) {
-    redirect(`/admin?slug=${empresaAtual.slug}&erro=apelidos`);
-  }
 
   let imagemUrl = texto(formData.get('imagem_url'));
   const imagemAnterior = imagemUrl;

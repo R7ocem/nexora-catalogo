@@ -1313,12 +1313,6 @@ export default async function AdminPage({ searchParams }) {
          </p>
         ) : null}
 
-        {searchParams?.erro === 'apelidos' ? (
-          <p className="error-text">
-            Informe os apelidos para o bot encontrar este item.
-          </p>
-        ) : null}
-
           <form action="/admin/products" method="post" className="admin-form product-form" encType="multipart/form-data">
           <input type="hidden" name="empresa_id" value={empresa.id} />
 
@@ -1441,7 +1435,7 @@ export default async function AdminPage({ searchParams }) {
 
           <label className="full-span">
             Apelidos para o bot
-            <input name="apelidos" placeholder="produtos ou serviços do bot" required />
+            <input name="apelidos" placeholder="Opcional. Se vazio, usa o nome do item" />
           </label>
 
            <label>
@@ -1734,7 +1728,7 @@ export default async function AdminPage({ searchParams }) {
       
                     <label className="full-span">
                       Apelidos para o bot
-                      <input name="apelidos" defaultValue={produto.apelidos || ''} required />
+                      <input name="apelidos" defaultValue={produto.apelidos || produto.nome || ''} placeholder="Opcional. Se vazio, usa o nome do item" />
                     </label>
       
                     <label>
