@@ -154,6 +154,48 @@ function numeroEstoque(valor, casas = 0) {
   return Number.isFinite(numero) ? numero.toFixed(casas).replace('.', ',') : '0';
 }
 
+function statusPedido(pedido) {
+  const status = String(pedido?.status_preparo || '').trim();
+
+  if (status) return status;
+  if (pedido?.status === 'finalizado') return 'finalizado';
+  return 'novo';
+}
+
+function rotuloStatusPedido(status) {
+  const rotulos = {
+    novo: 'Novo',
+    em_preparo: 'Em preparo',
+    pronto: 'Pronto',
+    saiu_entrega: 'Saiu',
+    finalizado: 'Finalizado'
+  };
+
+  return rotulos[status] || 'Novo';
+}
+
+function numeroPedido(pedido) {
+  return pedido?.numero_dia
+    ? String(pedido.numero_dia).padStart(2, '0')
+    : '--';
+}
+
+function textoEntregaPedido(pedido) {
+  return pedido?.entrega_retirada === 'entrega' ? 'Entrega' : 'Retirada';
+}
+
+function mapaPedidoUrl(pedido) {
+  if (!pedido?.latitude_entrega || !pedido?.longitude_entrega) return null;
+
+  return `https://www.google.com/maps?q=${pedido.latitude_entrega},${pedido.longitude_entrega}`;
+}
+
+function wazePedidoUrl(pedido) {
+  if (!pedido?.latitude_entrega || !pedido?.longitude_entrega) return null;
+
+  return `https://waze.com/ul?ll=${pedido.latitude_entrega}%2C${pedido.longitude_entrega}&navigate=yes`;
+}
+
 async function getAdminData(user, selectedSlug) {
   const empresasResult = await query(
     `SELECT
@@ -314,12 +356,74 @@ async function getAdminData(user, selectedSlug) {
     )
     : { rows: [] };
 
+  const pedidos = await query(
+    `SELECT
+       p.pedido_id,
+       p.numero_dia,
+       p.session_id,
+       p.company,
+       p.cliente,
+       p.telefone,
+       p.status,
+       p.status_preparo,
+       p.total,
+       p.entrega_retirada,
+       p.endereco,
+       p.pagamento,
+       p.tempo_preparo_minutos,
+       p.confirmado_em,
+       p.criado_em,
+       p.atualizado_em,
+       p.latitude_entrega,
+       p.longitude_entrega,
+       COALESCE(
+         jsonb_agg(
+           jsonb_build_object(
+             'produto', i.produto,
+             'quantidade', i.quantidade,
+             'preco_unitario', i.preco_unitario,
+             'subtotal', i.subtotal
+           )
+           ORDER BY i.id
+         ) FILTER (WHERE i.id IS NOT NULL),
+         '[]'::jsonb
+       ) AS itens
+     FROM pedidos p
+     LEFT JOIN pedido_itens i ON i.pedido_id = p.pedido_id
+     WHERE p.company = $1
+       AND COALESCE(p.status, 'rascunho') <> 'rascunho'
+       AND COALESCE(p.data_pedido, CURRENT_DATE) >= CURRENT_DATE - INTERVAL '7 days'
+     GROUP BY
+       p.pedido_id,
+       p.numero_dia,
+       p.session_id,
+       p.company,
+       p.cliente,
+       p.telefone,
+       p.status,
+       p.status_preparo,
+       p.total,
+       p.entrega_retirada,
+       p.endereco,
+       p.pagamento,
+       p.tempo_preparo_minutos,
+       p.confirmado_em,
+       p.criado_em,
+       p.atualizado_em,
+       p.latitude_entrega,
+       p.longitude_entrega
+     ORDER BY COALESCE(p.confirmado_em, p.criado_em, p.atualizado_em) DESC
+     LIMIT 80`,
+    [empresa.slug]
+  );
+
   return {
     empresas,
     empresa,
     categorias: categorias.rows,
     produtos: produtos.rows,
-    usuarios: usuarios.rows
+    usuarios: usuarios.rows,
+    pedidos: pedidos.rows
   };
 }
 
@@ -387,7 +491,7 @@ export default async function AdminPage({ searchParams }) {
 
   const selectedSlug = user.papel === 'nexora_admin' ? searchParams?.slug : null;
 
-  const { empresas, empresa, categorias, produtos, usuarios } = await getAdminData(
+  const { empresas, empresa, categorias, produtos, usuarios, pedidos } = await getAdminData(
     user,
     selectedSlug
   );
@@ -419,6 +523,13 @@ export default async function AdminPage({ searchParams }) {
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const companyDraft = getCompanyDraft(searchParams);
+  const filtroPedidos = String(searchParams?.pedidos || 'novo');
+  const filtrosPedidos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega', 'finalizado'];
+  const pedidosFiltrados = pedidos.filter((pedido) => statusPedido(pedido) === filtroPedidos);
+  const contagemPedidos = filtrosPedidos.reduce((acc, status) => {
+    acc[status] = pedidos.filter((pedido) => statusPedido(pedido) === status).length;
+    return acc;
+  }, {});
 
   return (
     <main className="shell admin-shell">
@@ -445,6 +556,152 @@ export default async function AdminPage({ searchParams }) {
     </button>
   </form>
 </section>
+
+      <section className="panel orders-panel" id="pedidos">
+        <div className="section-title-row orders-title-row">
+          <div>
+            <h2>Pedidos</h2>
+            <p>Receba, acompanhe e avance os pedidos sem digitar comandos no WhatsApp.</p>
+          </div>
+        </div>
+
+        <div className="orders-filters" aria-label="Filtrar pedidos por status">
+          {filtrosPedidos.map((status) => (
+            <a
+              key={status}
+              className={filtroPedidos === status ? 'orders-filter active' : 'orders-filter'}
+              href={`/admin?slug=${empresa.slug}&pedidos=${status}#pedidos`}
+            >
+              {rotuloStatusPedido(status)}
+              <span>{contagemPedidos[status] || 0}</span>
+            </a>
+          ))}
+        </div>
+
+        {pedidosFiltrados.length === 0 ? (
+          <p className="muted">Nenhum pedido neste status agora.</p>
+        ) : (
+          <div className="orders-list">
+            {pedidosFiltrados.map((pedido) => {
+              const status = statusPedido(pedido);
+              const itensPedido = Array.isArray(pedido.itens) ? pedido.itens : [];
+              const mapsUrl = mapaPedidoUrl(pedido);
+              const wazeUrl = wazePedidoUrl(pedido);
+              const isEntrega = pedido.entrega_retirada === 'entrega';
+
+              return (
+                <article key={pedido.pedido_id} className={`order-card order-${status}`}>
+                  <div className="order-card-header">
+                    <div>
+                      <span className="order-number">#{numeroPedido(pedido)}</span>
+                      <h3>{pedido.cliente || 'Cliente'}</h3>
+                      <p>{pedido.telefone || 'Telefone nao informado'}</p>
+                    </div>
+
+                    <span className={`order-status-pill status-${status}`}>
+                      {rotuloStatusPedido(status)}
+                    </span>
+                  </div>
+
+                  <div className="order-meta-grid">
+                    <div>
+                      <span>Total</span>
+                      <strong>{money(pedido.total || 0)}</strong>
+                    </div>
+                    <div>
+                      <span>Recebimento</span>
+                      <strong>{textoEntregaPedido(pedido)}</strong>
+                    </div>
+                    <div>
+                      <span>Pagamento</span>
+                      <strong>{pedido.pagamento || 'Nao informado'}</strong>
+                    </div>
+                  </div>
+
+                  <div className="order-items">
+                    <strong>Resumo</strong>
+                    {itensPedido.length > 0 ? (
+                      <ul>
+                        {itensPedido.map((item, index) => (
+                          <li key={`${pedido.pedido_id}-${index}`}>
+                            <span>{item.quantidade || 1}x {item.produto || 'Produto'}</span>
+                            <strong>{money(item.subtotal || 0)}</strong>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="muted">Itens nao encontrados.</p>
+                    )}
+                  </div>
+
+                  {isEntrega ? (
+                    <div className="order-address">
+                      <strong>Endereco</strong>
+                      <p>{pedido.endereco || 'Endereco nao informado'}</p>
+
+                      <div className="order-map-actions">
+                        {mapsUrl ? (
+                          <a href={mapsUrl} target="_blank" rel="noreferrer">
+                            Abrir Maps
+                          </a>
+                        ) : null}
+                        {wazeUrl ? (
+                          <a href={wazeUrl} target="_blank" rel="noreferrer">
+                            Abrir Waze
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="order-actions">
+                    {status === 'novo' ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="aceitar" />
+                        <input type="hidden" name="filtro" value={filtroPedidos} />
+                        <button className="primary-button" type="submit">Aceitar</button>
+                      </form>
+                    ) : null}
+
+                    {status === 'em_preparo' ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="pronto" />
+                        <input type="hidden" name="filtro" value={filtroPedidos} />
+                        <button className="secondary-button" type="submit">Pronto</button>
+                      </form>
+                    ) : null}
+
+                    {status === 'pronto' && isEntrega ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="saiu" />
+                        <input type="hidden" name="filtro" value={filtroPedidos} />
+                        <button className="secondary-button" type="submit">Saiu</button>
+                      </form>
+                    ) : null}
+
+                    {['pronto', 'saiu_entrega'].includes(status) ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="finalizar" />
+                        <input type="hidden" name="filtro" value={filtroPedidos} />
+                        <button className="secondary-button" type="submit">Finalizar</button>
+                      </form>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <section className="panel">
         <h2>Minha senha</h2>
 
