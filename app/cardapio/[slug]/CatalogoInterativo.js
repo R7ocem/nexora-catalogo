@@ -945,12 +945,15 @@ function WhatsAppIcon() {
 
       <footer className="catalog-footer">
         {whatsapp ? (
-          <a className="catalog-help-whatsapp" href={whatsappAjudaUrl} target="_blank" rel="noreferrer">
-            <span className="whatsapp-mark" aria-hidden="true">
-              <WhatsAppIcon />
-            </span>
-            Preciso de ajuda para pedir
-          </a>
+          <div className="catalog-help-card">
+            <span>Teve dificuldade para finalizar?</span>
+            <a className="catalog-help-whatsapp" href={whatsappAjudaUrl} target="_blank" rel="noreferrer">
+              <span className="whatsapp-mark" aria-hidden="true">
+                <WhatsAppIcon />
+              </span>
+              <span>Chamar a loja no WhatsApp</span>
+            </a>
+          </div>
         ) : null}
 
         <span className="catalog-created-by">
