@@ -523,16 +523,22 @@ export default async function AdminPage({ searchParams }) {
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const companyDraft = getCompanyDraft(searchParams);
-  const filtroPedidos = String(searchParams?.pedidos || 'novo');
-  const filtrosPedidos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega', 'finalizado'];
+  const painelPedidosAberto = searchParams?.painel === 'pedidos';
+  const filtrosPedidos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
+  const filtroSolicitado = String(searchParams?.pedidos || 'novo');
+  const filtroPedidos = filtrosPedidos.includes(filtroSolicitado) ? filtroSolicitado : 'novo';
   const pedidosFiltrados = pedidos.filter((pedido) => statusPedido(pedido) === filtroPedidos);
   const contagemPedidos = filtrosPedidos.reduce((acc, status) => {
     acc[status] = pedidos.filter((pedido) => statusPedido(pedido) === status).length;
     return acc;
   }, {});
+  const totalPedidosEmAndamento = filtrosPedidos.reduce(
+    (total, status) => total + (contagemPedidos[status] || 0),
+    0
+  );
 
   return (
-    <main className="shell admin-shell">
+    <main className={`shell admin-shell${painelPedidosAberto ? ' orders-mode' : ''}`}>
       <section className="panel admin-header-panel">
   <div>
     <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
@@ -550,13 +556,27 @@ export default async function AdminPage({ searchParams }) {
     ) : null}
   </div>
 
-  <form action="/admin/logout" method="post">
-    <button className="secondary-button" type="submit">
-      Sair
-    </button>
-  </form>
+  <div className="admin-header-actions">
+    {painelPedidosAberto ? (
+      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
+        Fechar pedidos
+      </a>
+    ) : (
+      <a className="primary-button orders-open-button" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
+        Administrar pedidos
+        <span>{totalPedidosEmAndamento}</span>
+      </a>
+    )}
+
+    <form action="/admin/logout" method="post">
+      <button className="secondary-button" type="submit">
+        Sair
+      </button>
+    </form>
+  </div>
 </section>
 
+      {painelPedidosAberto ? (
       <section className="panel orders-panel" id="pedidos">
         <div className="section-title-row orders-title-row">
           <div>
@@ -570,7 +590,7 @@ export default async function AdminPage({ searchParams }) {
             <a
               key={status}
               className={filtroPedidos === status ? 'orders-filter active' : 'orders-filter'}
-              href={`/admin?slug=${empresa.slug}&pedidos=${status}#pedidos`}
+              href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=${status}#pedidos`}
             >
               {rotuloStatusPedido(status)}
               <span>{contagemPedidos[status] || 0}</span>
@@ -701,6 +721,7 @@ export default async function AdminPage({ searchParams }) {
           </div>
         )}
       </section>
+      ) : null}
 
       <section className="panel">
         <h2>Minha senha</h2>
