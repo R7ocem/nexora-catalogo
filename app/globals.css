@@ -393,7 +393,34 @@ input[type="checkbox"] {
   }
 
   .smart-stock-summary {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .smart-stock-summary > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .smart-stock-summary span,
+  .smart-stock-summary strong {
+    min-width: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .smart-stock-summary span {
+    max-width: 58%;
+  }
+
+  .smart-stock-summary strong {
+    text-align: right;
+  }
+
+  .smart-stock-status {
+    justify-content: flex-start !important;
   }
 }
 
@@ -1531,7 +1558,7 @@ input[type="checkbox"] {
 
 .smart-stock-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
   gap: 10px;
   padding: 12px;
   border: 1px solid rgba(33, 31, 28, 0.08);
@@ -1548,11 +1575,13 @@ input[type="checkbox"] {
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .smart-stock-summary strong {
   color: var(--text);
   font-size: 14px;
+  line-height: 1.25;
 }
 
 .smart-stock-status {
