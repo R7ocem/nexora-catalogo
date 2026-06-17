@@ -557,11 +557,39 @@
 
 .catalog-footer {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 8px;
   padding: 28px 16px 44px;
   color: var(--muted);
+}
+
+.catalog-help-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #16a34a;
+  color: #fff;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 14px 28px rgba(22, 163, 74, 0.22);
+}
+
+.catalog-help-whatsapp .whatsapp-mark {
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.catalog-created-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nexora-wordmark {

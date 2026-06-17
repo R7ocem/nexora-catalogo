@@ -408,6 +408,12 @@ function WhatsAppIcon() {
   const whatsappUrl = whatsapp && carrinho.length > 0
     ? `https://wa.me/${whatsapp}?text=${mensagem}`
     : '#';
+  const mensagemAjuda = encodeURIComponent(
+    `Olá! Não estou conseguindo finalizar meu pedido pelo catálogo ${empresa.titulo_publico || empresa.nome}. Pode me ajudar?`
+  );
+  const whatsappAjudaUrl = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${mensagemAjuda}`
+    : '#';
 
   function renderProduto(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
@@ -938,8 +944,18 @@ function WhatsAppIcon() {
       </button>
 
       <footer className="catalog-footer">
-        <span>Criado por</span>
-        <strong className="nexora-wordmark">Nexora</strong>
+        {whatsapp ? (
+          <a className="catalog-help-whatsapp" href={whatsappAjudaUrl} target="_blank" rel="noreferrer">
+            <span className="whatsapp-mark" aria-hidden="true">
+              <WhatsAppIcon />
+            </span>
+            Preciso de ajuda para pedir
+          </a>
+        ) : null}
+
+        <span className="catalog-created-by">
+          Criado por <strong className="nexora-wordmark">Nexora</strong>
+        </span>
       </footer>
     </div>
   );
