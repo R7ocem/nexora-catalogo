@@ -706,6 +706,26 @@ export default async function AdminPage({ searchParams }) {
                       </form>
                     ) : null}
 
+                    {status === 'pronto' ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="voltar_preparo" />
+                        <input type="hidden" name="filtro" value="em_preparo" />
+                        <button className="order-action-button action-back" type="submit">Voltar para preparo</button>
+                      </form>
+                    ) : null}
+
+                    {status === 'saiu_entrega' ? (
+                      <form action="/admin/orders/status" method="post">
+                        <input type="hidden" name="empresa_id" value={empresa.id} />
+                        <input type="hidden" name="pedido_id" value={pedido.pedido_id} />
+                        <input type="hidden" name="acao" value="voltar_pronto" />
+                        <input type="hidden" name="filtro" value="pronto" />
+                        <button className="order-action-button action-back" type="submit">Voltar para pronto</button>
+                      </form>
+                    ) : null}
+
                     {['pronto', 'saiu_entrega'].includes(status) ? (
                       <form action="/admin/orders/status" method="post">
                         <input type="hidden" name="empresa_id" value={empresa.id} />

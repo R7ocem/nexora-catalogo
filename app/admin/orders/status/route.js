@@ -18,6 +18,18 @@ const acoes = {
     campoData: 'saiu_entrega_em',
     statusPedido: 'confirmado'
   },
+  voltar_preparo: {
+    statusPreparo: 'em_preparo',
+    campoData: null,
+    statusPedido: 'confirmado',
+    reversao: true
+  },
+  voltar_pronto: {
+    statusPreparo: 'pronto',
+    campoData: null,
+    statusPedido: 'confirmado',
+    reversao: true
+  },
   finalizar: {
     statusPreparo: 'finalizado',
     campoData: 'finalizado_em',
@@ -193,19 +205,34 @@ export async function POST(request) {
     redirect(`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=${filtro}#pedidos`);
   }
 
-  await query(
-    `UPDATE pedidos
-     SET
-       status = $3,
-       status_preparo = $4,
-       ${config.campoData} = COALESCE(${config.campoData}, NOW()),
-       atualizado_em = NOW()
-     WHERE pedido_id = $1
-       AND company = $2`,
-    [pedidoId, empresa.slug, config.statusPedido, config.statusPreparo]
-  );
+  if (config.campoData) {
+    await query(
+      `UPDATE pedidos
+       SET
+         status = $3,
+         status_preparo = $4,
+         ${config.campoData} = COALESCE(${config.campoData}, NOW()),
+         atualizado_em = NOW()
+       WHERE pedido_id = $1
+         AND company = $2`,
+      [pedidoId, empresa.slug, config.statusPedido, config.statusPreparo]
+    );
+  } else {
+    await query(
+      `UPDATE pedidos
+       SET
+         status = $3,
+         status_preparo = $4,
+         atualizado_em = NOW()
+       WHERE pedido_id = $1
+         AND company = $2`,
+      [pedidoId, empresa.slug, config.statusPedido, config.statusPreparo]
+    );
+  }
 
-  await enviarWhatsApp(empresa, pedido, mensagemCliente(acao, pedido));
+  if (!config.reversao) {
+    await enviarWhatsApp(empresa, pedido, mensagemCliente(acao, pedido));
+  }
 
   const params = new URLSearchParams();
   params.set('slug', empresa.slug);

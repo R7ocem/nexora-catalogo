@@ -782,6 +782,10 @@ input[type="checkbox"] {
   background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
 }
 
+.action-back {
+  background: linear-gradient(135deg, #6b7280 0%, #334155 100%);
+}
+
 .action-finish {
   background: linear-gradient(135deg, #1f2937 0%, #64748b 100%);
 }
