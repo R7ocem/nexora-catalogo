@@ -560,36 +560,83 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 28px 16px 44px;
+  gap: 18px;
+  padding: 34px 16px 56px;
   color: var(--muted);
 }
 
+.catalog-help-card {
+  display: inline-grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: min(420px, 100%);
+  border: 1px solid rgba(22, 163, 74, 0.14);
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 251, 246, 0.92) 100%);
+  box-shadow: 0 18px 44px rgba(22, 163, 74, 0.1);
+  text-align: center;
+}
+
+.catalog-bg-escuro .catalog-help-card {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.96) 0%, rgba(10, 35, 24, 0.92) 100%);
+}
+
+.catalog-help-card > span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.catalog-bg-escuro .catalog-help-card > span {
+  color: #fff;
+}
+
 .catalog-help-whatsapp {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 42px;
+  min-height: 48px;
   border-radius: 999px;
-  padding: 10px 16px;
-  background: #16a34a;
+  padding: 12px 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f8a43 0%, #16a34a 52%, #22c55e 100%);
   color: #fff;
   font-weight: 900;
   text-decoration: none;
-  box-shadow: 0 14px 28px rgba(22, 163, 74, 0.22);
+  box-shadow: 0 16px 34px rgba(22, 163, 74, 0.28);
+}
+
+.catalog-help-whatsapp::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0));
+  pointer-events: none;
 }
 
 .catalog-help-whatsapp .whatsapp-mark {
-  width: 22px;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.18);
+  position: relative;
+  width: 26px;
+  height: 26px;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.catalog-help-whatsapp .whatsapp-mark + * {
+  position: relative;
 }
 
 .catalog-created-by {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  margin-top: 10px;
 }
 
 .nexora-wordmark {
