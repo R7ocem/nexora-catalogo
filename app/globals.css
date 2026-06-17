@@ -191,6 +191,31 @@ a {
   margin: 0 0 8px;
 }
 
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.orders-open-button {
+  gap: 10px;
+}
+
+.orders-open-button span {
+  min-width: 24px;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 12px;
+  text-align: center;
+}
+
+.admin-shell.orders-mode > .panel:not(.admin-header-panel):not(.orders-panel) {
+  display: none;
+}
+
 .admin-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -328,6 +353,16 @@ input[type="checkbox"] {
   .admin-header-panel .secondary-button {
     width: fit-content;
     min-width: 82px;
+  }
+
+  .admin-header-actions {
+    justify-content: stretch;
+  }
+
+  .admin-header-actions a,
+  .admin-header-actions form,
+  .admin-header-actions button {
+    width: 100%;
   }
 
   .hero-section h2 {
@@ -718,15 +753,37 @@ input[type="checkbox"] {
 
 @media (max-width: 720px) {
   .orders-panel {
-    gap: 14px;
+    gap: 12px;
   }
 
   .orders-title-row h2 {
     font-size: 30px;
   }
 
+  .orders-title-row p {
+    display: none;
+  }
+
+  .orders-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
   .orders-filter {
+    justify-content: center;
     min-height: 42px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    font-size: 15px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .orders-filter:last-child {
+    grid-column: 1 / -1;
   }
 
   .order-card {

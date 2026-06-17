@@ -190,7 +190,7 @@ export async function POST(request) {
   const pedido = pedidoResult.rows[0];
 
   if (!pedido) {
-    redirect(`/admin?slug=${empresa.slug}&pedidos=${filtro}#pedidos`);
+    redirect(`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=${filtro}#pedidos`);
   }
 
   await query(
@@ -209,6 +209,7 @@ export async function POST(request) {
 
   const params = new URLSearchParams();
   params.set('slug', empresa.slug);
+  params.set('painel', 'pedidos');
   params.set('pedidos', filtro || config.statusPreparo);
 
   redirect(`/admin?${params.toString()}#pedidos`);
