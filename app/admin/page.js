@@ -588,49 +588,49 @@ export default async function AdminPage({ searchParams }) {
       <section className="panel admin-menu-panel">
         <div className="section-title-row">
           <div>
-            <h2>O que deseja administrar?</h2>
-            <p>Escolha uma area para editar sem deixar a tela carregada de informacoes.</p>
+            <h2>Central de gestao</h2>
+            <p>Acesse rapidamente as areas principais do catalogo.</p>
           </div>
         </div>
 
         <div className="admin-menu-grid">
           <a className="admin-menu-card primary-menu-card" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
-            <span>Administrar pedidos</span>
+            <span>Pedidos da loja</span>
             <strong>{totalPedidosEmAndamento}</strong>
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
-            Empresa
-          </a>
-
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
-            Tela promocional
-          </a>
-
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
-            Categorias
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=itens#itens`}>
+            Produtos e servicos
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
-            Novo item
+            Novo produto
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=itens#itens`}>
-            Itens cadastrados
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
+            Categorias do catalogo
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
+            Campanhas e avisos
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
+            Dados da empresa
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-            Minha senha
+            Seguranca da conta
           </a>
 
           {isNexoraAdmin ? (
             <>
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
-                Acessos da empresa
+                Usuarios e acessos
               </a>
 
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
-                Criar empresa
+                Nova empresa
               </a>
             </>
           ) : null}
