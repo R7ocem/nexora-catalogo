@@ -526,7 +526,17 @@ export default async function AdminPage({ searchParams }) {
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const companyDraft = getCompanyDraft(searchParams);
-  const painelPedidosAberto = searchParams?.painel === 'pedidos';
+  const painelAtivo = String(searchParams?.painel || '');
+  const painelInicialAberto = !painelAtivo;
+  const painelPedidosAberto = painelAtivo === 'pedidos';
+  const painelPromocionalAberto = painelAtivo === 'promocional';
+  const painelSenhaAberto = painelAtivo === 'senha';
+  const painelEmpresaAberto = painelAtivo === 'empresa';
+  const painelCategoriasAberto = painelAtivo === 'categorias';
+  const painelNovoItemAberto = painelAtivo === 'novo-item';
+  const painelItensAberto = painelAtivo === 'itens';
+  const painelAcessosAberto = painelAtivo === 'acessos';
+  const painelCriarEmpresaAberto = painelAtivo === 'criar-empresa';
   const filtrosPedidosAtivos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
   const filtrosPedidos = [...filtrosPedidosAtivos, 'finalizado'];
   const filtroSolicitado = String(searchParams?.pedidos || 'novo');
@@ -542,7 +552,7 @@ export default async function AdminPage({ searchParams }) {
   );
 
   return (
-    <main className={`shell admin-shell${painelPedidosAberto ? ' orders-mode' : ''}`}>
+    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
       <section className="panel admin-header-panel">
   <div>
     <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
@@ -561,16 +571,11 @@ export default async function AdminPage({ searchParams }) {
   </div>
 
   <div className="admin-header-actions">
-    {painelPedidosAberto ? (
+    {!painelInicialAberto ? (
       <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Fechar pedidos
+        Voltar ao painel
       </a>
-    ) : (
-      <a className="primary-button orders-open-button" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
-        Administrar pedidos
-        <span>{totalPedidosEmAndamento}</span>
-      </a>
-    )}
+    ) : null}
 
     <form action="/admin/logout" method="post">
       <button className="secondary-button" type="submit">
@@ -579,6 +584,154 @@ export default async function AdminPage({ searchParams }) {
     </form>
   </div>
 </section>
+
+      <section className="panel admin-menu-panel">
+        <div className="section-title-row">
+          <div>
+            <h2>Central de gestao</h2>
+            <p>Acesse rapidamente as areas principais do catalogo.</p>
+          </div>
+        </div>
+
+        <div className="admin-menu-grid">
+          <a className="admin-menu-card primary-menu-card" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
+            <span>Pedidos da loja</span>
+            <strong>{totalPedidosEmAndamento}</strong>
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=itens#itens`}>
+            Produtos e servicos
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
+            Novo produto
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
+            Categorias do catalogo
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
+            Campanhas e avisos
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
+            Dados da empresa
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
+            Seguranca da conta
+          </a>
+
+          {isNexoraAdmin ? (
+            <>
+              <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
+                Usuarios e acessos
+              </a>
+
+              <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
+                Nova empresa
+              </a>
+            </>
+          ) : null}
+        </div>
+      </section>
+
+      {painelPromocionalAberto ? (
+        <section className="panel promotion-panel" id="promocional">
+          <div className="section-title-row">
+            <div>
+              <h2>Painel promocional</h2>
+              <p>Configure a tela inicial do catalogo para avisos, campanhas e datas especiais.</p>
+            </div>
+          </div>
+
+          <div className="catalog-welcome-editor">
+            <div>
+              <span className="field-title">Tela inicial do catalogo</span>
+              <small className="media-hint">
+                Se deixar vazio, o cliente ve a instrucao padrao de uso. Se preencher, vira um aviso promocional.
+              </small>
+            </div>
+
+            <label>
+              Titulo do aviso
+              <input
+                name="aviso_titulo"
+                form={`company-edit-form-${empresa.id}`}
+                defaultValue={empresa.aviso_titulo || ''}
+                placeholder="Ex: Semana dos Namorados"
+              />
+            </label>
+
+            <label>
+              Texto do aviso
+              <textarea
+                name="aviso_texto"
+                form={`company-edit-form-${empresa.id}`}
+                defaultValue={empresa.aviso_texto || ''}
+                placeholder={"Ex: Escolha sua cesta, personalize as opcoes e envie seu pedido pelo WhatsApp."}
+              />
+            </label>
+
+            <div className="welcome-image-control">
+              <div>
+                <span className="field-title">Imagem do aviso</span>
+                <small className="media-hint">
+                  Use para promocoes, eventos ou datas especiais. Se deixar vazio, o catalogo usa o banner principal.
+                </small>
+              </div>
+
+              {empresa.aviso_imagem_url ? (
+                <img
+                  className="welcome-image-preview"
+                  src={empresa.aviso_imagem_url}
+                  alt={`Imagem do aviso ${empresa.nome}`}
+                />
+              ) : (
+                <span className="muted">Nenhuma imagem de aviso cadastrada.</span>
+              )}
+
+              <div className="photo-actions">
+                <label className="secondary-button photo-button">
+                  {empresa.aviso_imagem_url ? 'Escolher nova imagem' : 'Escolher imagem'}
+                  <input
+                    className="file-hidden welcome-image-input"
+                    type="file"
+                    name="foto"
+                    accept="image/*"
+                    form={`company-aviso-form-${empresa.id}`}
+                  />
+                </label>
+
+                <button
+                  className="primary-button"
+                  type="submit"
+                  form={`company-aviso-form-${empresa.id}`}
+                >
+                  Salvar imagem
+                </button>
+
+                {empresa.aviso_imagem_url ? (
+                  <button
+                    className="danger-button"
+                    type="submit"
+                    form={`company-aviso-delete-form-${empresa.id}`}
+                  >
+                    Excluir imagem
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="admin-actions-row">
+              <button className="primary-button" type="submit" form={`company-edit-form-${empresa.id}`}>
+                Salvar aviso
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {painelPedidosAberto ? (
       <section className="panel orders-panel" id="pedidos">
@@ -747,7 +900,8 @@ export default async function AdminPage({ searchParams }) {
       </section>
       ) : null}
 
-      <section className="panel">
+      {painelSenhaAberto ? (
+      <section className="panel password-panel" id="senha">
         <h2>Minha senha</h2>
 
         {searchParams?.erro === 'senha' ? (
@@ -795,9 +949,10 @@ export default async function AdminPage({ searchParams }) {
           </button>
         </form>
       </section>
+      ) : null}
 
       {isNexoraAdmin ? (
-        <section className="panel">
+        <section className="panel access-panel" id="acessos">
           <h2>Acessos da empresa</h2>
           <p className="muted">
             As senhas não podem ser visualizadas. Para ajudar um cliente, defina uma senha temporária.
@@ -879,7 +1034,7 @@ export default async function AdminPage({ searchParams }) {
       ) : null}
       
       {isNexoraAdmin ? (
-        <section className="panel">
+        <section className="panel create-company-panel" id="criar-empresa">
           <h2>Criar nova empresa</h2>
 
           {searchParams?.erro === 'email' ? (
@@ -996,7 +1151,7 @@ export default async function AdminPage({ searchParams }) {
         </section>
       ) : null}
 
-     <section className="panel" id="empresa">
+     <section className="panel company-panel" id="empresa">
         <h2>Empresa</h2>
     
       {isNexoraAdmin ? (
@@ -1192,84 +1347,6 @@ export default async function AdminPage({ searchParams }) {
             placeholder="Conte um pouco sobre a empresa, história, diferenciais ou informações importantes para o cliente."
           />
         </label>
-    
-        <div className="full-span catalog-welcome-editor">
-          <div>
-            <span className="field-title">Tela inicial do cat&aacute;logo</span>
-            <small className="media-hint">
-              Deixe em branco para mostrar a instru&ccedil;&atilde;o padr&atilde;o de uso. Preencha para divulgar promo&ccedil;&otilde;es, eventos ou avisos.
-            </small>
-          </div>
-
-          <label>
-            T&iacute;tulo do aviso
-            <input
-              name="aviso_titulo"
-              defaultValue={empresa.aviso_titulo || ''}
-              placeholder="Ex: Semana dos Namorados"
-            />
-          </label>
-
-          <label>
-            Texto do aviso
-            <textarea
-              name="aviso_texto"
-              defaultValue={empresa.aviso_texto || ''}
-              placeholder={"Ex: Escolha sua cesta, personalize as op\u00e7\u00f5es e envie seu pedido pelo WhatsApp."}
-            />
-          </label>
-
-          <div className="welcome-image-control">
-            <div>
-              <span className="field-title">Imagem do aviso</span>
-              <small className="media-hint">
-                Use para promocoes, eventos ou datas especiais. Se deixar vazio, o catalogo usa o banner principal.
-              </small>
-            </div>
-
-            {empresa.aviso_imagem_url ? (
-              <img
-                className="welcome-image-preview"
-                src={empresa.aviso_imagem_url}
-                alt={`Imagem do aviso ${empresa.nome}`}
-              />
-            ) : (
-              <span className="muted">Nenhuma imagem de aviso cadastrada.</span>
-            )}
-
-            <div className="photo-actions">
-              <label className="secondary-button photo-button">
-                {empresa.aviso_imagem_url ? 'Escolher nova imagem' : 'Escolher imagem'}
-                <input
-                  className="file-hidden"
-                  type="file"
-                  name="foto"
-                  accept="image/*"
-                  form={`company-aviso-form-${empresa.id}`}
-                />
-              </label>
-
-              <button
-                className="primary-button"
-                type="submit"
-                form={`company-aviso-form-${empresa.id}`}
-              >
-                Salvar imagem
-              </button>
-
-              {empresa.aviso_imagem_url ? (
-                <button
-                  className="danger-button"
-                  type="submit"
-                  form={`company-aviso-delete-form-${empresa.id}`}
-                >
-                  Excluir imagem
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
         <div className="full-span theme-builder">
           <div>
             <span className="field-title">Sistema de cores</span>
@@ -1595,7 +1672,7 @@ export default async function AdminPage({ searchParams }) {
         </section>
 
         {isNexoraAdmin && empresa.bloqueado ? (
-          <section className="panel">
+          <section className="panel company-panel">
             <h2>Excluir empresa</h2>
             <p className="muted">
               Use somente quando a empresa nao for mais cliente. A exclusao remove empresa, usuarios, categorias, itens e imagens.
@@ -1616,7 +1693,7 @@ export default async function AdminPage({ searchParams }) {
           </section>
         ) : null}
       
-        <section className="panel" id="categorias">
+        <section className="panel categories-panel" id="categorias">
          <h2>Categorias</h2>
 
   {searchParams?.erro === 'categoria' ? (
@@ -1694,7 +1771,7 @@ export default async function AdminPage({ searchParams }) {
   )}
 </section>
 
-      <section className="panel" id="novo-item">
+      <section className="panel new-item-panel" id="novo-item">
         <h2>Novo item</h2>
 
         {searchParams?.erro === 'preco' ? (
@@ -1857,7 +1934,7 @@ export default async function AdminPage({ searchParams }) {
         </form>
       </section>
 
-     <section className="panel" id="itens">
+     <section className="panel items-panel" id="itens">
         <h2>Itens cadastrados</h2>
       
         {produtos.length === 0 ? (
@@ -2319,6 +2396,34 @@ export default async function AdminPage({ searchParams }) {
               }
             });
           });                    
+
+          document.querySelectorAll('.welcome-image-input').forEach(function (input) {
+            input.addEventListener('change', function () {
+              if (!input.files || input.files.length === 0) return;
+
+              var file = input.files[0];
+              var control = input.closest('.welcome-image-control');
+
+              if (!control || !file.type.startsWith('image/')) return;
+
+              var preview = control.querySelector('.welcome-image-preview');
+              var emptyText = control.querySelector('.muted');
+              var url = URL.createObjectURL(file);
+
+              if (!preview) {
+                preview = document.createElement('img');
+                preview.className = 'welcome-image-preview';
+                preview.alt = 'Previa da imagem do aviso';
+                control.insertBefore(preview, control.querySelector('.photo-actions'));
+              }
+
+              preview.src = url;
+
+              if (emptyText) {
+                emptyText.style.display = 'none';
+              }
+            });
+          });
          `
        }}
       />

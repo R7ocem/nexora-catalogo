@@ -212,7 +212,83 @@ a {
   text-align: center;
 }
 
+.admin-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.admin-menu-card {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: linear-gradient(180deg, #fffdfa 0%, #f5efe6 100%);
+  color: var(--text);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(33, 31, 28, 0.06);
+}
+
+.admin-menu-card:hover {
+  transform: translateY(-1px);
+}
+
+.primary-menu-card {
+  border-color: rgba(15, 118, 110, 0.18);
+  background: linear-gradient(135deg, var(--primary), #116d65);
+  color: #fff;
+}
+
+.primary-menu-card strong {
+  min-width: 32px;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.22);
+  text-align: center;
+}
+
+.admin-shell.menu-mode > .panel:not(.admin-header-panel):not(.admin-menu-panel) {
+  display: none;
+}
+
 .admin-shell.orders-mode > .panel:not(.admin-header-panel):not(.orders-panel) {
+  display: none;
+}
+
+.admin-shell.promotion-mode > .panel:not(.admin-header-panel):not(.promotion-panel) {
+  display: none;
+}
+
+.admin-shell.password-mode > .panel:not(.admin-header-panel):not(.password-panel) {
+  display: none;
+}
+
+.admin-shell.company-mode > .panel:not(.admin-header-panel):not(.company-panel) {
+  display: none;
+}
+
+.admin-shell.categories-mode > .panel:not(.admin-header-panel):not(.categories-panel) {
+  display: none;
+}
+
+.admin-shell.new-item-mode > .panel:not(.admin-header-panel):not(.new-item-panel) {
+  display: none;
+}
+
+.admin-shell.items-mode > .panel:not(.admin-header-panel):not(.items-panel) {
+  display: none;
+}
+
+.admin-shell.access-mode > .panel:not(.admin-header-panel):not(.access-panel) {
+  display: none;
+}
+
+.admin-shell.create-company-mode > .panel:not(.admin-header-panel):not(.create-company-panel) {
   display: none;
 }
 
@@ -241,6 +317,10 @@ a {
   border-radius: 10px;
   object-fit: contain;
   background: #fff;
+}
+
+.promotion-panel .catalog-welcome-editor {
+  max-width: 760px;
 }
 
 .admin-form {
