@@ -194,33 +194,150 @@ a {
 }
 
 .admin-header-panel {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
+  gap: 24px;
   border-color: rgba(15, 118, 110, 0.16);
   background:
+    radial-gradient(circle at 94% 16%, rgba(212, 181, 63, 0.28), transparent 25%),
+    radial-gradient(circle at 8% 0%, rgba(15, 118, 110, 0.18), transparent 28%),
     linear-gradient(135deg, rgba(15, 118, 110, 0.1), rgba(212, 181, 63, 0.1)),
     linear-gradient(180deg, #ffffff 0%, #fffaf1 100%);
   box-shadow: 0 24px 70px rgba(33, 31, 28, 0.09);
+  overflow: hidden;
+}
+
+.admin-header-panel::after {
+  position: absolute;
+  right: -58px;
+  bottom: -76px;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  content: "";
+}
+
+.admin-header-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.admin-eyebrow {
+  width: fit-content;
+  border: 1px solid rgba(15, 118, 110, 0.15);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--brand-dark);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.admin-brand-mark {
+  display: inline-grid;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  place-items: center;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(212, 181, 63, 0.16)),
+    #fff;
+  color: var(--brand-dark);
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: 0 16px 34px rgba(33, 31, 28, 0.1);
+  overflow: hidden;
+}
+
+.admin-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .admin-header-panel h1 {
-  margin: 0 0 8px;
+  margin: 0;
+  font-size: clamp(32px, 4vw, 48px);
+  line-height: 1;
   letter-spacing: 0;
 }
 
 .admin-header-panel p {
+  margin: 8px 0 0;
   max-width: 560px;
   color: var(--muted);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.admin-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 900;
+}
+
+.admin-state-pill::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
+}
+
+.admin-state-pill.blocked {
+  background: #fee2e2;
+  color: var(--danger);
 }
 
 .admin-header-actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.admin-header-actions .secondary-button {
+  border: 1px solid rgba(15, 118, 110, 0.11);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 12px 28px rgba(33, 31, 28, 0.08);
+}
+
+.admin-preview-button {
+  color: var(--brand-dark);
 }
 
 .orders-open-button {
@@ -234,6 +351,173 @@ a {
   background: rgba(255, 255, 255, 0.22);
   font-size: 12px;
   text-align: center;
+}
+
+.reports-panel {
+  border-color: rgba(15, 118, 110, 0.12);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.05), rgba(212, 181, 63, 0.07)),
+    #fffdf9;
+  box-shadow: 0 22px 60px rgba(33, 31, 28, 0.08);
+}
+
+.report-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.report-filter {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(15, 118, 110, 0.13);
+  border-radius: 999px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(33, 31, 28, 0.06);
+}
+
+.report-filter.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #0f766e, #0c8f7e);
+  color: #fff;
+}
+
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.report-summary-card,
+.report-box {
+  border: 1px solid rgba(15, 118, 110, 0.11);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 16px 38px rgba(33, 31, 28, 0.07);
+}
+
+.report-summary-card {
+  display: grid;
+  gap: 8px;
+  min-height: 124px;
+  padding: 18px;
+}
+
+.report-summary-card span,
+.report-summary-card small,
+.report-list span,
+.time-report-grid span,
+.time-report-grid small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.report-summary-card strong {
+  color: var(--text);
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1;
+}
+
+.report-summary-card.highlight {
+  background: linear-gradient(135deg, #0f766e, #0c8f7e 52%, #d4b53f 130%);
+  color: #fff;
+}
+
+.report-summary-card.highlight span,
+.report-summary-card.highlight small,
+.report-summary-card.highlight strong {
+  color: #fff;
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.report-box {
+  padding: 18px;
+}
+
+.report-box.wide {
+  grid-column: 1 / -1;
+}
+
+.report-box h3 {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+.report-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(222, 214, 202, 0.7);
+  padding-bottom: 10px;
+}
+
+.report-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.report-list strong {
+  flex: 0 0 auto;
+  color: var(--brand-dark);
+  text-align: right;
+}
+
+.report-list.compact li {
+  padding-bottom: 8px;
+}
+
+.report-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.report-columns > div > strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.time-report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.time-report-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, #fff, #fbf7ef);
+}
+
+.time-report-grid strong {
+  color: var(--brand-dark);
+  font-size: 30px;
+  line-height: 1;
 }
 
 .admin-menu-grid {
@@ -389,6 +673,10 @@ a {
 }
 
 .admin-shell.orders-mode > .panel:not(.admin-header-panel):not(.orders-panel) {
+  display: none;
+}
+
+.admin-shell.reports-mode > .panel:not(.admin-header-panel):not(.reports-panel) {
   display: none;
 }
 
@@ -578,24 +866,78 @@ input[type="checkbox"] {
     padding: 22px;
   }
 
+  .admin-brand-row {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-brand-mark {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+    border-radius: 18px;
+    font-size: 22px;
+  }
+
   .admin-header-panel h1 {
-    margin-bottom: 10px;
-    font-size: clamp(30px, 8vw, 42px);
+    font-size: clamp(30px, 8vw, 40px);
     line-height: 1.08;
   }
 
   .admin-header-panel p {
-    margin: 0;
+    margin-top: 7px;
+    font-size: 15px;
     line-height: 1.35;
   }
 
+  .admin-header-meta {
+    gap: 8px;
+  }
+
   .admin-header-panel .secondary-button {
-    width: fit-content;
-    min-width: 82px;
+    width: 100%;
+    min-width: 0;
   }
 
   .admin-menu-panel {
     padding: 18px;
+  }
+
+  .report-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .report-filter {
+    min-height: 40px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .report-summary-grid,
+  .reports-grid,
+  .report-columns,
+  .time-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-summary-card {
+    min-height: 106px;
+    padding: 16px;
+  }
+
+  .report-box {
+    padding: 16px;
+  }
+
+  .report-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .report-list strong {
+    text-align: left;
   }
 
   .admin-menu-grid {

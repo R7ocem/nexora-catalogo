@@ -184,6 +184,132 @@ function textoEntregaPedido(pedido) {
   return pedido?.entrega_retirada === 'entrega' ? 'Entrega' : 'Retirada';
 }
 
+function dataPedido(pedido) {
+  const valor = pedido?.confirmado_em || pedido?.criado_em || pedido?.atualizado_em;
+  const data = valor ? new Date(valor) : null;
+
+  return data && !Number.isNaN(data.getTime()) ? data : null;
+}
+
+function inicioPeriodoRelatorio(periodo) {
+  const agora = new Date();
+  const inicio = new Date(agora);
+
+  inicio.setHours(0, 0, 0, 0);
+
+  if (periodo === 'semana') {
+    const dia = inicio.getDay();
+    const distanciaSegunda = dia === 0 ? 6 : dia - 1;
+    inicio.setDate(inicio.getDate() - distanciaSegunda);
+  }
+
+  if (periodo === 'mes') {
+    inicio.setDate(1);
+  }
+
+  return inicio;
+}
+
+function periodoLabel(periodo) {
+  const labels = {
+    hoje: 'Hoje',
+    semana: 'Esta semana',
+    mes: 'Este mês'
+  };
+
+  return labels[periodo] || 'Hoje';
+}
+
+function periodoUrl(slug, periodo) {
+  return `/admin?slug=${slug}&painel=relatorios&periodo=${periodo}#relatorios`;
+}
+
+function faixaHorario(data) {
+  const hora = data?.getHours?.() ?? 0;
+
+  if (hora < 12) return 'Manhã';
+  if (hora < 18) return 'Tarde';
+  return 'Noite';
+}
+
+function criarRelatorioPedidos(pedidos, periodo) {
+  const inicio = inicioPeriodoRelatorio(periodo);
+  const pedidosPeriodo = pedidos.filter((pedido) => {
+    const data = dataPedido(pedido);
+
+    return data && data >= inicio;
+  });
+
+  const totalVendido = pedidosPeriodo.reduce((total, pedido) => total + Number(pedido.total || 0), 0);
+  const totalPedidos = pedidosPeriodo.length;
+  const totalItens = pedidosPeriodo.reduce((total, pedido) => {
+    const itens = Array.isArray(pedido.itens) ? pedido.itens : [];
+
+    return total + itens.reduce((soma, item) => soma + Number(item.quantidade || 0), 0);
+  }, 0);
+
+  const porProduto = new Map();
+  const porStatus = {};
+  const porTipo = {};
+  const porPagamento = {};
+  const porHorario = {
+    'Manhã': 0,
+    Tarde: 0,
+    Noite: 0
+  };
+
+  pedidosPeriodo.forEach((pedido) => {
+    const status = rotuloStatusPedido(statusPedido(pedido));
+    const tipo = textoEntregaPedido(pedido);
+    const pagamento = pedido.pagamento || 'Não informado';
+    const data = dataPedido(pedido);
+
+    porStatus[status] = (porStatus[status] || 0) + 1;
+    porTipo[tipo] = (porTipo[tipo] || 0) + 1;
+    porPagamento[pagamento] = (porPagamento[pagamento] || 0) + 1;
+    porHorario[faixaHorario(data)] = (porHorario[faixaHorario(data)] || 0) + 1;
+
+    const itens = Array.isArray(pedido.itens) ? pedido.itens : [];
+
+    itens.forEach((item) => {
+      const nome = item.produto || 'Produto sem nome';
+      const atual = porProduto.get(nome) || {
+        nome,
+        quantidade: 0,
+        receita: 0
+      };
+
+      atual.quantidade += Number(item.quantidade || 0);
+      atual.receita += Number(item.subtotal || 0);
+      porProduto.set(nome, atual);
+    });
+  });
+
+  const produtos = Array.from(porProduto.values());
+  const produtosMaisVendidos = [...produtos].sort((a, b) => b.quantidade - a.quantidade).slice(0, 6);
+  const produtosMenorSaida = [...produtos]
+    .filter((produto) => produto.quantidade > 0)
+    .sort((a, b) => a.quantidade - b.quantidade)
+    .slice(0, 6);
+
+  return {
+    periodo,
+    inicio,
+    pedidos: pedidosPeriodo,
+    totalVendido,
+    totalPedidos,
+    totalItens,
+    ticketMedio: totalPedidos > 0 ? totalVendido / totalPedidos : 0,
+    valorMedioItem: totalItens > 0 ? totalVendido / totalItens : 0,
+    produtosMaisVendidos,
+    produtosMenorSaida,
+    porStatus,
+    porTipo,
+    porPagamento,
+    porHorario
+  };
+}
+
 function mapaPedidoUrl(pedido) {
   if (!pedido?.latitude_entrega || !pedido?.longitude_entrega) return null;
 
@@ -395,7 +521,7 @@ async function getAdminData(user, selectedSlug) {
      LEFT JOIN pedido_itens i ON i.pedido_id = p.pedido_id
      WHERE p.company = $1
        AND COALESCE(p.status, 'rascunho') <> 'rascunho'
-       AND COALESCE(p.data_pedido, CURRENT_DATE) >= CURRENT_DATE - INTERVAL '7 days'
+       AND COALESCE(p.data_pedido, CURRENT_DATE) >= CURRENT_DATE - INTERVAL '40 days'
      GROUP BY
        p.pedido_id,
        p.numero_dia,
@@ -529,6 +655,7 @@ export default async function AdminPage({ searchParams }) {
   const painelAtivo = String(searchParams?.painel || '');
   const painelInicialAberto = !painelAtivo;
   const painelPedidosAberto = painelAtivo === 'pedidos';
+  const painelRelatoriosAberto = painelAtivo === 'relatorios';
   const painelPromocionalAberto = painelAtivo === 'promocional';
   const painelSenhaAberto = painelAtivo === 'senha';
   const painelEmpresaAberto = painelAtivo === 'empresa';
@@ -550,40 +677,71 @@ export default async function AdminPage({ searchParams }) {
     (total, status) => total + (contagemPedidos[status] || 0),
     0
   );
+  const periodoRelatorioSolicitado = String(searchParams?.periodo || 'hoje');
+  const periodosRelatorio = ['hoje', 'semana', 'mes'];
+  const periodoRelatorio = periodosRelatorio.includes(periodoRelatorioSolicitado)
+    ? periodoRelatorioSolicitado
+    : 'hoje';
+  const relatorio = criarRelatorioPedidos(pedidos, periodoRelatorio);
 
   return (
-    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
+    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelRelatoriosAberto ? ' reports-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
       <section className="panel admin-header-panel">
-  <div>
-    <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
+        <div className="admin-header-content">
+          <span className="admin-eyebrow">Central de gestão</span>
 
-    <p className="muted">
-      {isNexoraAdmin
-        ? 'Gerencie os catálogos das empresas clientes.'
-        : 'Gerencie itens, fotos, preços e disponibilidade.'}
-    </p>
+          <div className="admin-brand-row">
+            <span className="admin-brand-mark">
+              {empresa.logo_url ? (
+                <img src={empresa.logo_url} alt={`Logo ${nomePublico}`} />
+              ) : (
+                nomePublico.slice(0, 1)
+              )}
+            </span>
 
-    {empresa.bloqueado ? (
-      <p className="warning-text">
-        Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
-      </p>
-    ) : null}
-  </div>
+            <div>
+              <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : nomePublico}</h1>
 
-  <div className="admin-header-actions">
-    {!painelInicialAberto ? (
-      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Voltar ao painel
-      </a>
-    ) : null}
+              <p className="muted">
+                {isNexoraAdmin
+                  ? 'Gerencie empresas, acessos, produtos e pedidos em um só lugar.'
+                  : 'Controle produtos, pedidos, campanhas e disponibilidade da sua loja.'}
+              </p>
+            </div>
+          </div>
 
-    <form action="/admin/logout" method="post">
-      <button className="secondary-button" type="submit">
-        Sair
-      </button>
-    </form>
-  </div>
-</section>
+          <div className="admin-header-meta">
+            <span className={`admin-state-pill${empresa.bloqueado ? ' blocked' : ''}`}>
+              {empresa.bloqueado ? 'Bloqueado' : 'Ativo'}
+            </span>
+            <span>{isNexoraAdmin ? 'Nexora Admin' : 'Painel da loja'}</span>
+          </div>
+
+          {empresa.bloqueado ? (
+            <p className="warning-text">
+              Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="admin-header-actions">
+          {!painelInicialAberto ? (
+            <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
+              Voltar ao painel
+            </a>
+          ) : null}
+
+          <a className="secondary-button admin-preview-button" href={linkPublico} target="_blank" rel="noreferrer">
+            Ver catálogo
+          </a>
+
+          <form action="/admin/logout" method="post">
+            <button className="secondary-button" type="submit">
+              Sair
+            </button>
+          </form>
+        </div>
+      </section>
 
       <section className="panel admin-menu-panel">
         <div className="section-title-row">
@@ -611,8 +769,16 @@ export default async function AdminPage({ searchParams }) {
             </span>
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=relatorios&periodo=hoje#relatorios`}>
             <span className="menu-icon">03</span>
+            <span className="menu-copy">
+              <strong>Relatórios</strong>
+              <small>Vendas, produtos e horários</small>
+            </span>
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
+            <span className="menu-icon">04</span>
             <span className="menu-copy">
               <strong>Novo produto</strong>
               <small>Cadastre uma nova oferta</small>
@@ -620,7 +786,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
-            <span className="menu-icon">04</span>
+            <span className="menu-icon">05</span>
             <span className="menu-copy">
               <strong>Categorias do catalogo</strong>
               <small>Organize a vitrine</small>
@@ -628,7 +794,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
-            <span className="menu-icon">05</span>
+            <span className="menu-icon">06</span>
             <span className="menu-copy">
               <strong>Campanhas e avisos</strong>
               <small>Configure a tela inicial</small>
@@ -636,7 +802,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
-            <span className="menu-icon">06</span>
+            <span className="menu-icon">07</span>
             <span className="menu-copy">
               <strong>Dados da empresa</strong>
               <small>Marca, horarios e atendimento</small>
@@ -644,7 +810,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-            <span className="menu-icon">07</span>
+            <span className="menu-icon">08</span>
             <span className="menu-copy">
               <strong>Seguranca da conta</strong>
               <small>Altere sua senha</small>
@@ -654,7 +820,7 @@ export default async function AdminPage({ searchParams }) {
           {isNexoraAdmin ? (
             <>
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
-                <span className="menu-icon">08</span>
+                <span className="menu-icon">09</span>
                 <span className="menu-copy">
                   <strong>Usuarios e acessos</strong>
                   <small>Gerencie login do cliente</small>
@@ -662,7 +828,7 @@ export default async function AdminPage({ searchParams }) {
               </a>
 
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
-                <span className="menu-icon">09</span>
+                <span className="menu-icon">10</span>
                 <span className="menu-copy">
                   <strong>Nova empresa</strong>
                   <small>Cadastre um novo cliente</small>
@@ -672,6 +838,164 @@ export default async function AdminPage({ searchParams }) {
           ) : null}
         </div>
       </section>
+
+      {painelRelatoriosAberto ? (
+        <section className="panel reports-panel" id="relatorios">
+          <div className="section-title-row reports-title-row">
+            <div>
+              <h2>Relatórios</h2>
+              <p>Acompanhe vendas, produtos e horários usando dados reais dos pedidos.</p>
+            </div>
+          </div>
+
+          <div className="report-filters" aria-label="Filtrar relatórios por período">
+            {periodosRelatorio.map((periodo) => (
+              <a
+                key={periodo}
+                className={periodoRelatorio === periodo ? 'report-filter active' : 'report-filter'}
+                href={periodoUrl(empresa.slug, periodo)}
+              >
+                {periodoLabel(periodo)}
+              </a>
+            ))}
+          </div>
+
+          <div className="report-summary-grid">
+            <div className="report-summary-card highlight">
+              <span>Total vendido</span>
+              <strong>{money(relatorio.totalVendido)}</strong>
+              <small>{periodoLabel(periodoRelatorio)}</small>
+            </div>
+
+            <div className="report-summary-card">
+              <span>Pedidos</span>
+              <strong>{relatorio.totalPedidos}</strong>
+              <small>Pedidos recebidos</small>
+            </div>
+
+            <div className="report-summary-card">
+              <span>Ticket médio</span>
+              <strong>{money(relatorio.ticketMedio)}</strong>
+              <small>Valor médio por pedido</small>
+            </div>
+
+            <div className="report-summary-card">
+              <span>Valor por item</span>
+              <strong>{relatorio.totalItens > 0 ? money(relatorio.valorMedioItem) : '-'}</strong>
+              <small>{relatorio.totalItens > 0 ? `${relatorio.totalItens} itens vendidos` : 'Sem itens no período'}</small>
+            </div>
+          </div>
+
+          <div className="reports-grid">
+            <div className="report-box">
+              <h3>Produtos mais vendidos</h3>
+              {relatorio.produtosMaisVendidos.length > 0 ? (
+                <ul className="report-list">
+                  {relatorio.produtosMaisVendidos.map((produto) => (
+                    <li key={`mais-${produto.nome}`}>
+                      <span>{produto.nome}</span>
+                      <strong>{produto.quantidade} un. · {money(produto.receita)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">Sem produtos vendidos neste período.</p>
+              )}
+            </div>
+
+            <div className="report-box">
+              <h3>Produtos com menor saída</h3>
+              {relatorio.produtosMenorSaida.length > 0 ? (
+                <ul className="report-list">
+                  {relatorio.produtosMenorSaida.map((produto) => (
+                    <li key={`menos-${produto.nome}`}>
+                      <span>{produto.nome}</span>
+                      <strong>{produto.quantidade} un. · {money(produto.receita)}</strong>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">Ainda não há comparação suficiente neste período.</p>
+              )}
+            </div>
+
+            <div className="report-box">
+              <h3>Pedidos por status</h3>
+              <ul className="report-list compact">
+                {Object.entries(relatorio.porStatus).length > 0 ? (
+                  Object.entries(relatorio.porStatus).map(([status, total]) => (
+                    <li key={status}>
+                      <span>{status}</span>
+                      <strong>{total}</strong>
+                    </li>
+                  ))
+                ) : (
+                  <li>
+                    <span>Nenhum pedido</span>
+                    <strong>0</strong>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="report-box">
+              <h3>Recebimento e pagamento</h3>
+              <div className="report-columns">
+                <div>
+                  <strong>Tipo</strong>
+                  <ul className="report-list compact">
+                    {Object.entries(relatorio.porTipo).length > 0 ? (
+                      Object.entries(relatorio.porTipo).map(([tipo, total]) => (
+                        <li key={tipo}>
+                          <span>{tipo}</span>
+                          <strong>{total}</strong>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <span>Nenhum pedido</span>
+                        <strong>0</strong>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <strong>Pagamento</strong>
+                  <ul className="report-list compact">
+                    {Object.entries(relatorio.porPagamento).length > 0 ? (
+                      Object.entries(relatorio.porPagamento).map(([pagamento, total]) => (
+                        <li key={pagamento}>
+                          <span>{pagamento}</span>
+                          <strong>{total}</strong>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <span>Nenhum pedido</span>
+                        <strong>0</strong>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="report-box wide">
+              <h3>Horários com mais pedidos</h3>
+              <div className="time-report-grid">
+                {Object.entries(relatorio.porHorario).map(([periodo, total]) => (
+                  <div key={periodo}>
+                    <span>{periodo}</span>
+                    <strong>{total}</strong>
+                    <small>pedidos</small>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {painelPromocionalAberto ? (
         <section className="panel promotion-panel" id="promocional">
