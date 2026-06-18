@@ -18,6 +18,7 @@ async function getCardapio(slug) {
      descricao_publica,
      aviso_titulo,
      aviso_texto,
+     aviso_imagem_url,
      tema_cor,
      tema_cor_secundaria,
      usar_gradiente,

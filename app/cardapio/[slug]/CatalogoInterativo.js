@@ -261,6 +261,7 @@ function WhatsAppIcon() {
   const avisoPersonalizado = Boolean(String(empresa.aviso_titulo || empresa.aviso_texto || '').trim());
   const tituloBoasVindas = empresa.aviso_titulo || `Como pedir na ${nomeEmpresa}`;
   const textoBoasVindas = empresa.aviso_texto || `Escolha seus produtos, adicione ao carrinho e envie seu pedido pelo WhatsApp em poucos segundos.`;
+  const imagemBoasVindas = empresa.aviso_imagem_url || empresa.banner_url;
 
   const categoriasVisiveis = [
     ...categorias.filter((categoria) => categoria.produtos.length > 0),
@@ -552,8 +553,8 @@ function WhatsAppIcon() {
         <div className="catalog-welcome-overlay" role="dialog" aria-modal="true" aria-label={tituloBoasVindas}>
           <div className="catalog-welcome-card">
             <div className="catalog-welcome-visual">
-              {empresa.banner_url ? (
-                <img src={empresa.banner_url} alt="" />
+              {imagemBoasVindas ? (
+                <img src={imagemBoasVindas} alt="" />
               ) : (
                 <div className="catalog-welcome-gradient">
                   <span>{avisoPersonalizado ? 'Aviso' : 'Guia rapido'}</span>
