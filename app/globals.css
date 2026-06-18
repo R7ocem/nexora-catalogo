@@ -216,6 +216,10 @@ a {
   display: none;
 }
 
+.admin-shell.promotion-mode > .panel:not(.admin-header-panel):not(.promotion-panel) {
+  display: none;
+}
+
 .catalog-welcome-editor {
   display: grid;
   gap: 12px;
@@ -241,6 +245,10 @@ a {
   border-radius: 10px;
   object-fit: contain;
   background: #fff;
+}
+
+.promotion-panel .catalog-welcome-editor {
+  max-width: 760px;
 }
 
 .admin-form {
