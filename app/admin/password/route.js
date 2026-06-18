@@ -24,7 +24,7 @@ export async function POST(request) {
   const confirmarSenha = texto(formData.get('confirmar_senha'));
 
   if (!senhaAtual || !senhaNova || senhaNova.length < 8 || senhaNova !== confirmarSenha) {
-    redirect('/admin?erro=senha');
+    redirect('/admin?painel=senha&erro=senha#senha');
   }
 
   const usuarios = await query(
@@ -38,7 +38,7 @@ export async function POST(request) {
   const usuarioAtual = usuarios.rows[0];
 
   if (!usuarioAtual || !verifyPassword(senhaAtual, usuarioAtual.senha_hash)) {
-    redirect('/admin?erro=senha_atual');
+    redirect('/admin?painel=senha&erro=senha_atual#senha');
   }
 
   const senhaHash = hashPassword(senhaNova);
@@ -50,5 +50,5 @@ export async function POST(request) {
     [user.id, senhaHash]
   );
 
-  redirect('/admin?senha=alterada');
+  redirect('/admin?painel=senha&senha=alterada#senha');
 }

@@ -220,6 +220,10 @@ a {
   display: none;
 }
 
+.admin-shell.password-mode > .panel:not(.admin-header-panel):not(.password-panel) {
+  display: none;
+}
+
 .catalog-welcome-editor {
   display: grid;
   gap: 12px;

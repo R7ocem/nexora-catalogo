@@ -528,6 +528,7 @@ export default async function AdminPage({ searchParams }) {
   const companyDraft = getCompanyDraft(searchParams);
   const painelPedidosAberto = searchParams?.painel === 'pedidos';
   const painelPromocionalAberto = searchParams?.painel === 'promocional';
+  const painelSenhaAberto = searchParams?.painel === 'senha';
   const filtrosPedidosAtivos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
   const filtrosPedidos = [...filtrosPedidosAtivos, 'finalizado'];
   const filtroSolicitado = String(searchParams?.pedidos || 'novo');
@@ -543,7 +544,7 @@ export default async function AdminPage({ searchParams }) {
   );
 
   return (
-    <main className={`shell admin-shell${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}`}>
+    <main className={`shell admin-shell${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}`}>
       <section className="panel admin-header-panel">
   <div>
     <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
@@ -570,8 +571,16 @@ export default async function AdminPage({ searchParams }) {
       <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
         Fechar promocional
       </a>
+    ) : painelSenhaAberto ? (
+      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
+        Fechar senha
+      </a>
     ) : (
       <>
+        <a className="secondary-button" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
+          Minha senha
+        </a>
+
         <a className="secondary-button promotion-open-button" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
           Painel promocional
         </a>
@@ -854,7 +863,8 @@ export default async function AdminPage({ searchParams }) {
       </section>
       ) : null}
 
-      <section className="panel">
+      {painelSenhaAberto ? (
+      <section className="panel password-panel" id="senha">
         <h2>Minha senha</h2>
 
         {searchParams?.erro === 'senha' ? (
@@ -902,6 +912,7 @@ export default async function AdminPage({ searchParams }) {
           </button>
         </form>
       </section>
+      ) : null}
 
       {isNexoraAdmin ? (
         <section className="panel">
