@@ -57,7 +57,7 @@ export async function POST(request) {
   const confirmar = String(formData.get('confirmar') || '').trim().toUpperCase();
 
   if (!empresaId || confirmar !== 'EXCLUIR') {
-    redirect('/admin?erro=excluir_empresa');
+    redirect('/admin?painel=empresa&erro=excluir_empresa#empresa');
   }
 
   const empresa = await query(
@@ -71,7 +71,7 @@ export async function POST(request) {
   const empresaAtual = empresa.rows[0];
 
   if (!empresaAtual || empresaAtual.bloqueado !== true) {
-    redirect('/admin?erro=excluir_empresa');
+    redirect('/admin?painel=empresa&erro=excluir_empresa#empresa');
   }
 
   const produtos = await query(
@@ -99,5 +99,5 @@ export async function POST(request) {
 
   await Promise.all(urls.map((url) => excluirArquivoDoR2(url)));
 
-  redirect('/admin?empresa=excluida');
+  redirect('/admin?empresa=excluida&painel=empresa#empresa');
 }

@@ -199,7 +199,7 @@ export async function POST(request) {
   const preco = tipoPreco === 'sob_consulta' ? 0 : numero(formData.get('preco'));
 
   if (tipoPreco !== 'sob_consulta' && preco <= 0) {
-    redirect(`/admin?slug=${empresaAtual.slug}&erro=preco`);
+    redirect(`/admin?slug=${empresaAtual.slug}&painel=novo-item&erro=preco#novo-item`);
   }
 
   const descricao = texto(formData.get('descricao'));
@@ -353,5 +353,5 @@ export async function POST(request) {
     );
   }
 
-  redirect(`/admin?slug=${empresaAtual.slug}#itens`);
+  redirect(`/admin?slug=${empresaAtual.slug}&painel=itens#itens`);
 }

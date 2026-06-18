@@ -78,6 +78,10 @@ export async function POST(request) {
   const formData = await request.formData();
 
   const empresaId = Number(formData.get('empresa_id'));
+  const painelRetorno = texto(formData.get('painel_retorno')) === 'promocional'
+    ? 'promocional'
+    : 'empresa';
+  const ancoraRetorno = painelRetorno === 'promocional' ? 'promocional' : 'empresa';
   const nome = texto(formData.get('nome'));
   const emailEmpresa = normalizarEmail(formData.get('email_empresa'));
   const proprietarioNome = texto(formData.get('proprietario_nome'));
@@ -111,15 +115,15 @@ export async function POST(request) {
   }
 
   if (!whatsapp) {
-    redirect('/admin?erro=whatsapp');
+    redirect('/admin?painel=empresa&erro=whatsapp#empresa');
   }
 
   if (emailEmpresa && !emailValido(emailEmpresa)) {
-    redirect('/admin?erro=email_invalido');
+    redirect('/admin?painel=empresa&erro=email_invalido#empresa');
   }
 
   if (cpfCnpj && !documentoValido(cpfCnpj)) {
-    redirect('/admin?erro=documento');
+    redirect('/admin?painel=empresa&erro=documento#empresa');
   }
 
   if (user.papel !== 'nexora_admin' && user.empresa_id !== empresaId) {
@@ -229,5 +233,5 @@ export async function POST(request) {
 
   const slug = empresa.rows[0]?.slug;
 
-  redirect(slug ? `/admin?slug=${slug}` : '/admin');
+  redirect(slug ? `/admin?slug=${slug}&painel=${painelRetorno}#${ancoraRetorno}` : `/admin?painel=${painelRetorno}#${ancoraRetorno}`);
 }

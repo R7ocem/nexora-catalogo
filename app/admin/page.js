@@ -1214,6 +1214,7 @@ export default async function AdminPage({ searchParams }) {
     
       <form id={`company-edit-form-${empresa.id}`} action="/admin/company" method="post" className="admin-form company-edit-form">
         <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="painel_retorno" value={painelPromocionalAberto ? 'promocional' : 'empresa'} />
 
         {isNexoraAdmin ? (
           <>
@@ -2245,6 +2246,22 @@ export default async function AdminPage({ searchParams }) {
           </div>
         )}
       </section>
+
+      <footer className="admin-footer">
+        <a
+          className="admin-support-button"
+          href="https://wa.me/5562992867272?text=Ola%2C%20preciso%20de%20ajuda%20com%20o%20painel%20Nexora."
+          target="_blank"
+          rel="noreferrer"
+        >
+          Fale conosco
+        </a>
+
+        <span>
+          Criado por <strong>Nexora</strong>
+        </span>
+      </footer>
+
                 <script
         dangerouslySetInnerHTML={{
           __html: `

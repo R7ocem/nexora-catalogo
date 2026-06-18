@@ -26,7 +26,7 @@ async function getEmpresaPermitida(user, empresaId) {
 
 async function voltar(user, empresaId) {
   const empresa = await getEmpresaPermitida(user, empresaId);
-  redirect(empresa?.slug ? `/admin?slug=${empresa.slug}` : '/admin');
+  redirect(empresa?.slug ? `/admin?slug=${empresa.slug}&painel=categorias#categorias` : '/admin?painel=categorias#categorias');
 }
 
 export async function POST(request) {
@@ -55,7 +55,7 @@ export async function POST(request) {
 
   if (acao === 'criar') {
     if (!nome) {
-      redirect(`/admin?slug=${empresa.slug}&erro=categoria#categorias`);
+      redirect(`/admin?slug=${empresa.slug}&painel=categorias&erro=categoria#categorias`);
     }
 
     const ordem = await query(
@@ -71,12 +71,12 @@ export async function POST(request) {
       [empresaId, nome, ordem.rows[0].proxima_ordem]
     );
 
-    redirect(`/admin?slug=${empresa.slug}#categorias`);
+    redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
   }
 
   if (acao === 'renomear') {
     if (!categoriaId || !nome) {
-     redirect(`/admin?slug=${empresa.slug}&erro=categoria#categorias`);
+     redirect(`/admin?slug=${empresa.slug}&painel=categorias&erro=categoria#categorias`);
     }
 
     await query(
@@ -87,12 +87,12 @@ export async function POST(request) {
       [categoriaId, empresaId, nome]
     );
 
-    redirect(`/admin?slug=${empresa.slug}#categorias`);
+    redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
   }
 
   if (acao === 'excluir') {
     if (!categoriaId) {
-     redirect(`/admin?slug=${empresa.slug}#categorias`);
+     redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
     }
 
     await query(
@@ -102,12 +102,12 @@ export async function POST(request) {
       [categoriaId, empresaId]
     );
 
-    redirect(`/admin?slug=${empresa.slug}#categorias`);
+    redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
   }
 
   if (acao === 'subir' || acao === 'descer') {
     if (!categoriaId) {
-      redirect(`/admin?slug=${empresa.slug}#categorias`);
+      redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
     }
 
     const categorias = await query(
@@ -137,7 +137,7 @@ export async function POST(request) {
       );
     }
 
-    redirect(`/admin?slug=${empresa.slug}#categorias`);
+    redirect(`/admin?slug=${empresa.slug}&painel=categorias#categorias`);
   }
 
   await voltar(user, empresaId);

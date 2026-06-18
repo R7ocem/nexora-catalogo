@@ -58,7 +58,7 @@ function limparRascunhoEmpresa() {
 
 function redirecionarComErro(erro, dados) {
   salvarRascunhoEmpresa(dados);
-  redirect(`/admin?erro=${erro}`);
+  redirect(`/admin?painel=criar-empresa&erro=${erro}#criar-empresa`);
 }
 
 export async function POST(request) {
@@ -223,5 +223,5 @@ export async function POST(request) {
   );
 
   limparRascunhoEmpresa();
-  redirect(`/admin?slug=${empresa.slug}`);
+  redirect(`/admin?slug=${empresa.slug}&painel=empresa#empresa`);
 }
