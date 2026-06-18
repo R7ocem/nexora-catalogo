@@ -100,18 +100,35 @@ a {
 }
 
 .primary-button {
-  background: var(--brand);
+  background: linear-gradient(135deg, var(--brand), #0f8f84);
   color: white;
+  box-shadow: 0 14px 30px rgba(15, 118, 110, 0.18);
 }
 
 .secondary-button {
-  background: #ece4d8;
+  background: linear-gradient(180deg, #fffdfa, #ece4d8);
   color: var(--text);
+  border: 1px solid rgba(33, 31, 28, 0.07);
 }
 
 .danger-button {
-  background: var(--danger);
+  background: linear-gradient(135deg, var(--danger), #d92d20);
   color: white;
+  box-shadow: 0 14px 30px rgba(180, 35, 24, 0.16);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.danger-button:hover,
+.photo-primary-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.photo-primary-button {
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
 .product-list {
@@ -567,6 +584,12 @@ a {
   box-shadow: 0 22px 60px rgba(33, 31, 28, 0.08);
 }
 
+.admin-menu-intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .admin-menu-card {
   position: relative;
   display: flex;
@@ -757,17 +780,18 @@ a {
 .welcome-image-control {
   display: grid;
   gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 14px 32px rgba(33, 31, 28, 0.05);
 }
 
 .welcome-image-preview {
   width: min(360px, 100%);
   aspect-ratio: 16 / 7;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  border-radius: 14px;
   object-fit: contain;
   background: #fff;
 }
@@ -799,6 +823,11 @@ label {
   font-weight: 700;
 }
 
+.admin-form label,
+.edit-grid label {
+  min-width: 0;
+}
+
 input,
 select,
 textarea {
@@ -809,6 +838,14 @@ textarea {
   background: white;
   color: var(--text);
   font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 0;
+  border-color: rgba(15, 118, 110, 0.45);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.09);
 }
 
 textarea {
@@ -836,6 +873,13 @@ input[type="checkbox"] {
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 16px;
+  align-items: center;
+}
+
+.admin-actions-row .primary-button,
+.admin-actions-row .secondary-button,
+.admin-actions-row .danger-button {
+  min-width: 170px;
 }
 
 .admin-products {
@@ -866,7 +910,7 @@ input[type="checkbox"] {
 .status-pill {
   flex: 0 0 auto;
   border-radius: 999px;
-  padding: 6px 10px;
+  padding: 8px 14px;
   background: #f3dedb;
   color: var(--danger);
   font-weight: 800;
@@ -1101,9 +1145,10 @@ input[type="checkbox"] {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fbfaf7;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .inventory-fields .checkbox-field {
@@ -1114,9 +1159,45 @@ input[type="checkbox"] {
   min-height: 74px;
 }
 
+.password-panel,
+.promotion-panel,
+.company-panel,
+.categories-panel,
+.new-item-panel,
+.items-panel,
+.access-panel,
+.create-company-panel,
+.orders-panel {
+  border-color: rgba(15, 118, 110, 0.12);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(250, 246, 238, 0.9)),
+    #fffdfa;
+  box-shadow: 0 18px 48px rgba(33, 31, 28, 0.07);
+}
+
+.password-panel > h2,
+.promotion-panel h2,
+.company-panel > h2,
+.categories-panel > h2,
+.new-item-panel > h2,
+.items-panel > h2,
+.access-panel > h2,
+.create-company-panel > h2,
+.orders-panel h2 {
+  margin-top: 0;
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
 @media (max-width: 720px) {
   .edit-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-product-edit-wrap {
+    padding: 14px;
+    border-radius: 16px;
   }
 
   .inventory-fields {
@@ -1162,16 +1243,33 @@ input[type="checkbox"] {
   .photo-actions .danger-button {
     flex: 1 1 150px;
   }
+
+  .product-edit-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .product-edit-actions .status-pill {
+    width: 100%;
+  }
+
+  .admin-image-preview {
+    width: min(240px, 100%);
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
 }
 
 .admin-product-edit-wrap {
   position: relative;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 16px;
-  background: #fffdfa;
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  border-radius: 18px;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(250, 246, 238, 0.92)),
+    #fffdfa;
+  box-shadow: 0 18px 44px rgba(33, 31, 28, 0.08);
   display: grid;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -1183,13 +1281,41 @@ input[type="checkbox"] {
   background: transparent;
 }
 
+.photo-form {
+  min-width: 0;
+}
+
+.admin-product-edit-wrap > .photo-form {
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(33, 31, 28, 0.08);
+}
+
 .delete-product-form {
-  margin-top: -4px;
-  justify-content: flex-end;
+  margin: 0;
 }
 
 .delete-product-form .danger-button {
-  min-width: 130px;
+  min-width: 150px;
+}
+
+.product-edit-actions {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(150px, auto);
+  gap: 12px;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.product-edit-actions .primary-button,
+.product-edit-actions .danger-button {
+  width: 100%;
+}
+
+.product-edit-actions .status-pill {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .orders-panel {
@@ -1497,7 +1623,7 @@ input[type="checkbox"] {
 
 .category-admin-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .category-admin-item {
@@ -1505,10 +1631,11 @@ input[type="checkbox"] {
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  background: #fffdfa;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 12px 28px rgba(33, 31, 28, 0.05);
 }
 
 .category-admin-name {
@@ -1524,6 +1651,11 @@ input[type="checkbox"] {
   flex-wrap: wrap;
 }
 
+.category-admin-actions .secondary-button,
+.category-admin-actions .danger-button {
+  min-width: 92px;
+}
+
 @media (max-width: 720px) {
   .category-admin-item,
   .category-admin-name {
@@ -1531,18 +1663,23 @@ input[type="checkbox"] {
   }
 }
 .admin-image-preview {
-  width: 180px;
-  height: 135px;
+  width: 220px;
+  height: 150px;
   object-fit: cover;
   display: block;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #eee;
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(33, 31, 28, 0.08);
 }
 
 .photo-editor {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.68);
 }
 
 .field-title {
@@ -1554,6 +1691,7 @@ input[type="checkbox"] {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .photo-button {
@@ -1571,13 +1709,14 @@ input[type="checkbox"] {
   width: fit-content;
   min-height: 42px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 10px 14px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
   font-weight: 800;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
 }
 
 .photo-primary-button:hover {
@@ -1586,6 +1725,25 @@ input[type="checkbox"] {
 
 .photo-file-name {
   align-self: center;
+}
+
+@media (max-width: 720px) {
+  .product-edit-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .product-edit-actions .status-pill,
+  .product-edit-actions .delete-product-form,
+  .product-edit-actions .danger-button,
+  .product-edit-actions .primary-button {
+    width: 100%;
+  }
+
+  .admin-image-preview {
+    width: min(240px, 100%);
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
 }
 
 .catalog-page {
