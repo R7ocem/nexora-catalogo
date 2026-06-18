@@ -231,6 +231,7 @@ async function getAdminData(user, selectedSlug) {
        descricao_publica,
        aviso_titulo,
        aviso_texto,
+       aviso_imagem_url,
        horario_funcionamento,
        opcoes_pedido
      FROM catalogo_empresas
@@ -1217,6 +1218,56 @@ export default async function AdminPage({ searchParams }) {
               placeholder={"Ex: Escolha sua cesta, personalize as op\u00e7\u00f5es e envie seu pedido pelo WhatsApp."}
             />
           </label>
+
+          <div className="welcome-image-control">
+            <div>
+              <span className="field-title">Imagem do aviso</span>
+              <small className="media-hint">
+                Use para promocoes, eventos ou datas especiais. Se deixar vazio, o catalogo usa o banner principal.
+              </small>
+            </div>
+
+            {empresa.aviso_imagem_url ? (
+              <img
+                className="welcome-image-preview"
+                src={empresa.aviso_imagem_url}
+                alt={`Imagem do aviso ${empresa.nome}`}
+              />
+            ) : (
+              <span className="muted">Nenhuma imagem de aviso cadastrada.</span>
+            )}
+
+            <div className="photo-actions">
+              <label className="secondary-button photo-button">
+                {empresa.aviso_imagem_url ? 'Escolher nova imagem' : 'Escolher imagem'}
+                <input
+                  className="file-hidden"
+                  type="file"
+                  name="foto"
+                  accept="image/*"
+                  form={`company-aviso-form-${empresa.id}`}
+                />
+              </label>
+
+              <button
+                className="primary-button"
+                type="submit"
+                form={`company-aviso-form-${empresa.id}`}
+              >
+                Salvar imagem
+              </button>
+
+              {empresa.aviso_imagem_url ? (
+                <button
+                  className="danger-button"
+                  type="submit"
+                  form={`company-aviso-delete-form-${empresa.id}`}
+                >
+                  Excluir imagem
+                </button>
+              ) : null}
+            </div>
+          </div>
         </div>
 
         <div className="full-span theme-builder">
@@ -1501,6 +1552,17 @@ export default async function AdminPage({ searchParams }) {
        <form id={`company-banner-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
         <input type="hidden" name="empresa_id" value={empresa.id} />
         <input type="hidden" name="tipo" value="banner" />
+        <input type="hidden" name="acao" value="excluir" />
+      </form>
+
+       <form id={`company-aviso-form-${empresa.id}`} action="/admin/company-media" method="post" encType="multipart/form-data">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="aviso" />
+      </form>
+
+       <form id={`company-aviso-delete-form-${empresa.id}`} action="/admin/company-media" method="post">
+        <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="tipo" value="aviso" />
         <input type="hidden" name="acao" value="excluir" />
       </form>
           

@@ -105,7 +105,7 @@ export async function POST(request) {
   const tipo = String(formData.get('tipo') || '');
   const acao = String(formData.get('acao') || 'enviar');
 
-  if (!empresaId || !['logo', 'banner'].includes(tipo)) {
+  if (!empresaId || !['logo', 'banner', 'aviso'].includes(tipo)) {
     redirect('/admin');
   }
 
@@ -114,7 +114,7 @@ export async function POST(request) {
   }
 
   const empresaResult = await query(
-    `SELECT id, slug, logo_url, banner_url
+    `SELECT id, slug, logo_url, banner_url, aviso_imagem_url
      FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
@@ -127,11 +127,23 @@ export async function POST(request) {
     redirect('/admin');
   }
 
-  const campo = tipo === 'banner' ? 'banner_url' : 'logo_url';
-  const campoPosicao = tipo === 'banner' ? 'banner_posicao' : 'logo_posicao';
-  const campoZoom = tipo === 'banner' ? 'banner_zoom' : 'logo_zoom';
+  const campo = tipo === 'aviso'
+    ? 'aviso_imagem_url'
+    : tipo === 'banner'
+      ? 'banner_url'
+      : 'logo_url';
+  const campoPosicao = tipo === 'aviso'
+    ? null
+    : tipo === 'banner'
+      ? 'banner_posicao'
+      : 'logo_posicao';
+  const campoZoom = tipo === 'aviso'
+    ? null
+    : tipo === 'banner'
+      ? 'banner_zoom'
+      : 'logo_zoom';
   const posicao = '50% 50%';
-  const zoom = Math.min(2, Math.max(1, numero(formData.get(campoZoom), 1)));
+  const zoom = campoZoom ? Math.min(2, Math.max(1, numero(formData.get(campoZoom), 1))) : 1;
   const imagemAnterior = empresa[campo];
 
   if (acao === 'excluir') {
@@ -152,7 +164,18 @@ export async function POST(request) {
   const foto = formData.get('foto');
   const novaUrl = await enviarImagemParaR2(foto, empresaId, tipo);
 
-  if (novaUrl) {
+  if (novaUrl && tipo === 'aviso') {
+    await query(
+      `UPDATE catalogo_empresas
+       SET ${campo} = $2
+       WHERE id = $1`,
+      [empresaId, novaUrl]
+    );
+
+    if (imagemAnterior) {
+      await excluirDoR2(imagemAnterior);
+    }
+  } else if (novaUrl) {
     await query(
       `UPDATE catalogo_empresas
        SET ${campo} = $2,
@@ -165,7 +188,7 @@ export async function POST(request) {
     if (imagemAnterior) {
       await excluirDoR2(imagemAnterior);
     }
-  } else {
+  } else if (campoPosicao && campoZoom) {
     await query(
       `UPDATE catalogo_empresas
        SET ${campoPosicao} = $2,

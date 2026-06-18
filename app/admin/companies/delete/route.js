@@ -61,7 +61,7 @@ export async function POST(request) {
   }
 
   const empresa = await query(
-    `SELECT id, logo_url, banner_url, bloqueado
+    `SELECT id, logo_url, banner_url, aviso_imagem_url, bloqueado
      FROM catalogo_empresas
      WHERE id = $1
      LIMIT 1`,
@@ -86,6 +86,7 @@ export async function POST(request) {
   const urls = [
     empresaAtual.logo_url,
     empresaAtual.banner_url,
+    empresaAtual.aviso_imagem_url,
     ...produtos.rows.map((produto) => produto.imagem_url)
   ].filter(Boolean);
 
