@@ -587,15 +587,20 @@
 
 .catalog-welcome-visual {
   position: relative;
+  display: grid;
+  place-items: center;
   min-height: 190px;
-  background: var(--catalog-gradient);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.22)),
+    color-mix(in srgb, var(--catalog-brand) 12%, #f7f4ef);
 }
 
 .catalog-welcome-visual img {
   width: 100%;
-  height: 220px;
+  height: auto;
+  max-height: 220px;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
 }
 

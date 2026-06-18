@@ -260,7 +260,7 @@ function WhatsAppIcon() {
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const avisoPersonalizado = Boolean(String(empresa.aviso_titulo || empresa.aviso_texto || '').trim());
   const tituloBoasVindas = empresa.aviso_titulo || `Como pedir na ${nomeEmpresa}`;
-  const textoBoasVindas = empresa.aviso_texto || `Toque em um item para ver detalhes, escolha as opÃ§Ãµes, adicione ao pedido e finalize pelo WhatsApp.`;
+  const textoBoasVindas = empresa.aviso_texto || `Escolha seus produtos, adicione ao carrinho e envie seu pedido pelo WhatsApp em poucos segundos.`;
 
   const categoriasVisiveis = [
     ...categorias.filter((categoria) => categoria.produtos.length > 0),
@@ -569,7 +569,7 @@ function WhatsAppIcon() {
             <p>{textoBoasVindas}</p>
 
             {!avisoPersonalizado ? (
-              <div className="catalog-welcome-steps" aria-label="Como usar o catÃ¡logo">
+              <div className="catalog-welcome-steps" aria-label="Como usar o catalogo">
                 <span>1. Escolha</span>
                 <span>2. Adicione</span>
                 <span>3. Envie</span>
@@ -577,7 +577,7 @@ function WhatsAppIcon() {
             ) : null}
 
             <button className="catalog-welcome-button" type="button" onClick={() => setBoasVindasAberta(false)}>
-              Ok, abrir catÃ¡logo
+              Entendi, continuar
             </button>
           </div>
         </div>
