@@ -185,17 +185,91 @@ function textoEntregaPedido(pedido) {
 }
 
 function dataPedido(pedido) {
-  const valor = pedido?.confirmado_em || pedido?.criado_em || pedido?.atualizado_em;
+  const valor = pedido?.criado_em || pedido?.confirmado_em || pedido?.atualizado_em;
   const data = valor ? new Date(valor) : null;
 
   return data && !Number.isNaN(data.getTime()) ? data : null;
 }
 
-function inicioPeriodoRelatorio(periodo) {
+function dataInput(valor) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(valor || ''))
+    ? String(valor)
+    : '';
+}
+
+function parseDataInput(valor, fimDoDia = false) {
+  const limpa = dataInput(valor);
+  if (!limpa) return null;
+
+  const [ano, mes, dia] = limpa.split('-').map(Number);
+  const data = new Date(ano, mes - 1, dia);
+
+  if (fimDoDia) {
+    data.setHours(23, 59, 59, 999);
+  } else {
+    data.setHours(0, 0, 0, 0);
+  }
+
+  return data;
+}
+
+function formatarDataInput(data) {
+  if (!data) return '';
+
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function intervaloRelatorio(periodo, dataInicialParam, dataFinalParam) {
   const agora = new Date();
   const inicio = new Date(agora);
+  const fim = new Date(agora);
 
   inicio.setHours(0, 0, 0, 0);
+  fim.setHours(23, 59, 59, 999);
+
+  if (periodo === 'personalizado') {
+    const inicial = parseDataInput(dataInicialParam);
+    const final = parseDataInput(dataFinalParam, true);
+
+    if (!dataInicialParam && !dataFinalParam) {
+      return { inicio, fim, erro: null };
+    }
+
+    if (!inicial || !final) {
+      return {
+        inicio,
+        fim,
+        erro: 'Escolha a data inicial e a data final para aplicar o período.'
+      };
+    }
+
+    if (inicial > final) {
+      return {
+        inicio: inicial,
+        fim: final,
+        erro: 'A data inicial não pode ser maior que a data final.'
+      };
+    }
+
+    return { inicio: inicial, fim: final, erro: null };
+  }
+
+  if (periodo === 'ontem') {
+    inicio.setDate(inicio.getDate() - 1);
+    fim.setDate(fim.getDate() - 1);
+  }
+
+  if (periodo === 'ultimos7') {
+    inicio.setDate(inicio.getDate() - 6);
+  }
+
+  if (periodo === 'ultimos30') {
+    inicio.setDate(inicio.getDate() - 29);
+  }
 
   if (periodo === 'semana') {
     const dia = inicio.getDay();
@@ -207,21 +281,25 @@ function inicioPeriodoRelatorio(periodo) {
     inicio.setDate(1);
   }
 
-  return inicio;
+  return { inicio, fim, erro: null };
 }
 
 function periodoLabel(periodo) {
   const labels = {
     hoje: 'Hoje',
+    ontem: 'Ontem',
     semana: 'Esta semana',
-    mes: 'Este mês'
+    ultimos7: 'Últimos 7 dias',
+    mes: 'Este mês',
+    ultimos30: 'Últimos 30 dias',
+    personalizado: 'Período personalizado'
   };
 
   return labels[periodo] || 'Hoje';
 }
 
 function periodoUrl(slug, periodo) {
-  return `/admin?slug=${slug}&painel=relatorios&periodo=${periodo}#relatorios`;
+  return `/admin?slug=${slug}&painel=relatorios&periodo=${periodo}`;
 }
 
 function faixaHorario(data) {
@@ -232,12 +310,12 @@ function faixaHorario(data) {
   return 'Noite';
 }
 
-function criarRelatorioPedidos(pedidos, periodo) {
-  const inicio = inicioPeriodoRelatorio(periodo);
+function criarRelatorioPedidos(pedidos, periodo, dataInicialParam, dataFinalParam) {
+  const intervalo = intervaloRelatorio(periodo, dataInicialParam, dataFinalParam);
   const pedidosPeriodo = pedidos.filter((pedido) => {
     const data = dataPedido(pedido);
 
-    return data && data >= inicio;
+    return data && data >= intervalo.inicio && data <= intervalo.fim && !intervalo.erro;
   });
 
   const totalVendido = pedidosPeriodo.reduce((total, pedido) => total + Number(pedido.total || 0), 0);
@@ -294,7 +372,9 @@ function criarRelatorioPedidos(pedidos, periodo) {
 
   return {
     periodo,
-    inicio,
+    inicio: intervalo.inicio,
+    fim: intervalo.fim,
+    erro: intervalo.erro,
     pedidos: pedidosPeriodo,
     totalVendido,
     totalPedidos,
@@ -521,7 +601,7 @@ async function getAdminData(user, selectedSlug) {
      LEFT JOIN pedido_itens i ON i.pedido_id = p.pedido_id
      WHERE p.company = $1
        AND COALESCE(p.status, 'rascunho') <> 'rascunho'
-       AND COALESCE(p.data_pedido, CURRENT_DATE) >= CURRENT_DATE - INTERVAL '40 days'
+       AND COALESCE(p.data_pedido, CURRENT_DATE) >= CURRENT_DATE - INTERVAL '400 days'
      GROUP BY
        p.pedido_id,
        p.numero_dia,
@@ -542,7 +622,7 @@ async function getAdminData(user, selectedSlug) {
        p.latitude_entrega,
        p.longitude_entrega
      ORDER BY COALESCE(p.confirmado_em, p.criado_em, p.atualizado_em) DESC
-     LIMIT 80`,
+     LIMIT 1000`,
     [empresa.slug]
   );
 
@@ -678,11 +758,18 @@ export default async function AdminPage({ searchParams }) {
     0
   );
   const periodoRelatorioSolicitado = String(searchParams?.periodo || 'hoje');
-  const periodosRelatorio = ['hoje', 'semana', 'mes'];
+  const periodosRelatorio = ['hoje', 'ontem', 'semana', 'ultimos7', 'mes', 'ultimos30', 'personalizado'];
   const periodoRelatorio = periodosRelatorio.includes(periodoRelatorioSolicitado)
     ? periodoRelatorioSolicitado
     : 'hoje';
-  const relatorio = criarRelatorioPedidos(pedidos, periodoRelatorio);
+  const relatorioDataInicial = dataInput(searchParams?.inicio);
+  const relatorioDataFinal = dataInput(searchParams?.fim);
+  const relatorio = criarRelatorioPedidos(
+    pedidos,
+    periodoRelatorio,
+    relatorioDataInicial,
+    relatorioDataFinal
+  );
 
   return (
     <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelRelatoriosAberto ? ' reports-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
@@ -769,7 +856,7 @@ export default async function AdminPage({ searchParams }) {
             </span>
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=relatorios&periodo=hoje#relatorios`}>
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=relatorios&periodo=hoje`}>
             <span className="menu-icon">03</span>
             <span className="menu-copy">
               <strong>Relatórios</strong>
@@ -859,6 +946,44 @@ export default async function AdminPage({ searchParams }) {
               </a>
             ))}
           </div>
+
+          {periodoRelatorio === 'personalizado' ? (
+            <form className="custom-period-form" action="/admin" method="get">
+              <input type="hidden" name="slug" value={empresa.slug} />
+              <input type="hidden" name="painel" value="relatorios" />
+              <input type="hidden" name="periodo" value="personalizado" />
+
+              <label>
+                Data inicial
+                <input
+                  name="inicio"
+                  type="date"
+                  defaultValue={relatorioDataInicial || formatarDataInput(relatorio.inicio)}
+                />
+              </label>
+
+              <label>
+                Data final
+                <input
+                  name="fim"
+                  type="date"
+                  defaultValue={relatorioDataFinal || formatarDataInput(relatorio.fim)}
+                />
+              </label>
+
+              <button className="primary-button" type="submit">
+                Aplicar período
+              </button>
+            </form>
+          ) : null}
+
+          {relatorio.erro ? (
+            <p className="error-text">{relatorio.erro}</p>
+          ) : null}
+
+          {!relatorio.erro && relatorio.totalPedidos === 0 ? (
+            <p className="empty-report-message">Nenhum pedido encontrado neste período.</p>
+          ) : null}
 
           <div className="report-summary-grid">
             <div className="report-summary-card highlight">
