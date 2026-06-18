@@ -526,9 +526,17 @@ export default async function AdminPage({ searchParams }) {
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
   const companyDraft = getCompanyDraft(searchParams);
-  const painelPedidosAberto = searchParams?.painel === 'pedidos';
-  const painelPromocionalAberto = searchParams?.painel === 'promocional';
-  const painelSenhaAberto = searchParams?.painel === 'senha';
+  const painelAtivo = String(searchParams?.painel || '');
+  const painelInicialAberto = !painelAtivo;
+  const painelPedidosAberto = painelAtivo === 'pedidos';
+  const painelPromocionalAberto = painelAtivo === 'promocional';
+  const painelSenhaAberto = painelAtivo === 'senha';
+  const painelEmpresaAberto = painelAtivo === 'empresa';
+  const painelCategoriasAberto = painelAtivo === 'categorias';
+  const painelNovoItemAberto = painelAtivo === 'novo-item';
+  const painelItensAberto = painelAtivo === 'itens';
+  const painelAcessosAberto = painelAtivo === 'acessos';
+  const painelCriarEmpresaAberto = painelAtivo === 'criar-empresa';
   const filtrosPedidosAtivos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
   const filtrosPedidos = [...filtrosPedidosAtivos, 'finalizado'];
   const filtroSolicitado = String(searchParams?.pedidos || 'novo');
@@ -544,7 +552,7 @@ export default async function AdminPage({ searchParams }) {
   );
 
   return (
-    <main className={`shell admin-shell${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}`}>
+    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
       <section className="panel admin-header-panel">
   <div>
     <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
@@ -563,34 +571,11 @@ export default async function AdminPage({ searchParams }) {
   </div>
 
   <div className="admin-header-actions">
-    {painelPedidosAberto ? (
+    {!painelInicialAberto ? (
       <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Fechar pedidos
+        Voltar ao painel
       </a>
-    ) : painelPromocionalAberto ? (
-      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Fechar promocional
-      </a>
-    ) : painelSenhaAberto ? (
-      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Fechar senha
-      </a>
-    ) : (
-      <>
-        <a className="secondary-button" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-          Minha senha
-        </a>
-
-        <a className="secondary-button promotion-open-button" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
-          Painel promocional
-        </a>
-
-        <a className="primary-button orders-open-button" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
-          Administrar pedidos
-          <span>{totalPedidosEmAndamento}</span>
-        </a>
-      </>
-    )}
+    ) : null}
 
     <form action="/admin/logout" method="post">
       <button className="secondary-button" type="submit">
@@ -599,6 +584,58 @@ export default async function AdminPage({ searchParams }) {
     </form>
   </div>
 </section>
+
+      <section className="panel admin-menu-panel">
+        <div className="section-title-row">
+          <div>
+            <h2>O que deseja administrar?</h2>
+            <p>Escolha uma area para editar sem deixar a tela carregada de informacoes.</p>
+          </div>
+        </div>
+
+        <div className="admin-menu-grid">
+          <a className="admin-menu-card primary-menu-card" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
+            <span>Administrar pedidos</span>
+            <strong>{totalPedidosEmAndamento}</strong>
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
+            Empresa
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
+            Tela promocional
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
+            Categorias
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
+            Novo item
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=itens#itens`}>
+            Itens cadastrados
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
+            Minha senha
+          </a>
+
+          {isNexoraAdmin ? (
+            <>
+              <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
+                Acessos da empresa
+              </a>
+
+              <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
+                Criar empresa
+              </a>
+            </>
+          ) : null}
+        </div>
+      </section>
 
       {painelPromocionalAberto ? (
         <section className="panel promotion-panel" id="promocional">
@@ -915,7 +952,7 @@ export default async function AdminPage({ searchParams }) {
       ) : null}
 
       {isNexoraAdmin ? (
-        <section className="panel">
+        <section className="panel access-panel" id="acessos">
           <h2>Acessos da empresa</h2>
           <p className="muted">
             As senhas não podem ser visualizadas. Para ajudar um cliente, defina uma senha temporária.
@@ -997,7 +1034,7 @@ export default async function AdminPage({ searchParams }) {
       ) : null}
       
       {isNexoraAdmin ? (
-        <section className="panel">
+        <section className="panel create-company-panel" id="criar-empresa">
           <h2>Criar nova empresa</h2>
 
           {searchParams?.erro === 'email' ? (
@@ -1114,7 +1151,7 @@ export default async function AdminPage({ searchParams }) {
         </section>
       ) : null}
 
-     <section className="panel" id="empresa">
+     <section className="panel company-panel" id="empresa">
         <h2>Empresa</h2>
     
       {isNexoraAdmin ? (
@@ -1635,7 +1672,7 @@ export default async function AdminPage({ searchParams }) {
         </section>
 
         {isNexoraAdmin && empresa.bloqueado ? (
-          <section className="panel">
+          <section className="panel company-panel">
             <h2>Excluir empresa</h2>
             <p className="muted">
               Use somente quando a empresa nao for mais cliente. A exclusao remove empresa, usuarios, categorias, itens e imagens.
@@ -1656,7 +1693,7 @@ export default async function AdminPage({ searchParams }) {
           </section>
         ) : null}
       
-        <section className="panel" id="categorias">
+        <section className="panel categories-panel" id="categorias">
          <h2>Categorias</h2>
 
   {searchParams?.erro === 'categoria' ? (
@@ -1734,7 +1771,7 @@ export default async function AdminPage({ searchParams }) {
   )}
 </section>
 
-      <section className="panel" id="novo-item">
+      <section className="panel new-item-panel" id="novo-item">
         <h2>Novo item</h2>
 
         {searchParams?.erro === 'preco' ? (
@@ -1897,7 +1934,7 @@ export default async function AdminPage({ searchParams }) {
         </form>
       </section>
 
-     <section className="panel" id="itens">
+     <section className="panel items-panel" id="itens">
         <h2>Itens cadastrados</h2>
       
         {produtos.length === 0 ? (
