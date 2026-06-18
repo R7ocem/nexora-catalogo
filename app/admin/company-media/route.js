@@ -132,6 +132,9 @@ export async function POST(request) {
     : tipo === 'banner'
       ? 'banner_url'
       : 'logo_url';
+  const destino = tipo === 'aviso'
+    ? `/admin?slug=${empresa.slug}&painel=promocional#promocional`
+    : `/admin?slug=${empresa.slug}&painel=empresa#empresa`;
   const campoPosicao = tipo === 'aviso'
     ? null
     : tipo === 'banner'
@@ -158,7 +161,7 @@ export async function POST(request) {
       await excluirDoR2(imagemAnterior);
     }
 
-    redirect(`/admin?slug=${empresa.slug}#empresa`);
+    redirect(destino);
   }
 
   const foto = formData.get('foto');
@@ -198,5 +201,5 @@ export async function POST(request) {
     );
   }
 
-  redirect(`/admin?slug=${empresa.slug}#empresa`);
+  redirect(destino);
 }

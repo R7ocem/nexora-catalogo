@@ -44,7 +44,7 @@ export async function POST(request) {
   }
 
   if (!emailValido(email)) {
-    redirect(`/admin?slug=${empresaAtual.slug}&erro=email_invalido`);
+    redirect(`/admin?slug=${empresaAtual.slug}&painel=acessos&erro=email_invalido#acessos`);
   }
 
   const emailExistente = await query(
@@ -56,7 +56,7 @@ export async function POST(request) {
   );
 
   if (emailExistente.rows.length > 0) {
-    redirect(`/admin?slug=${empresaAtual.slug}&erro=email`);
+    redirect(`/admin?slug=${empresaAtual.slug}&painel=acessos&erro=email#acessos`);
   }
 
   const senhaHash = hashPassword(senha);
@@ -79,5 +79,5 @@ export async function POST(request) {
     ]
   );
 
-  redirect(`/admin?slug=${empresaAtual.slug}`);
+  redirect(`/admin?slug=${empresaAtual.slug}&painel=acessos#acessos`);
 }

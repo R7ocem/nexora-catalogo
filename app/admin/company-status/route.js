@@ -60,5 +60,5 @@ export async function POST(request) {
     );
   }
 
-  redirect(`/admin?slug=${empresa.slug}`);
+  redirect(`/admin?slug=${empresa.slug}&painel=empresa#empresa`);
 }

@@ -101,5 +101,5 @@ export async function POST(request) {
     await excluirFotoDoR2(imagemUrl);
   }
 
-  redirect(`/admin?slug=${empresaAtual.slug}#itens`);
+  redirect(`/admin?slug=${empresaAtual.slug}&painel=itens#itens`);
 }

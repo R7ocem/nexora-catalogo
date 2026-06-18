@@ -595,42 +595,78 @@ export default async function AdminPage({ searchParams }) {
 
         <div className="admin-menu-grid">
           <a className="admin-menu-card primary-menu-card" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
-            <span>Pedidos da loja</span>
-            <strong>{totalPedidosEmAndamento}</strong>
+            <span className="menu-icon">01</span>
+            <span className="menu-copy">
+              <strong>Pedidos da loja</strong>
+              <small>Acompanhe e avance pedidos</small>
+            </span>
+            <em>{totalPedidosEmAndamento}</em>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=itens#itens`}>
-            Produtos e servicos
+            <span className="menu-icon">02</span>
+            <span className="menu-copy">
+              <strong>Produtos e servicos</strong>
+              <small>Edite itens, fotos e estoque</small>
+            </span>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
-            Novo produto
+            <span className="menu-icon">03</span>
+            <span className="menu-copy">
+              <strong>Novo produto</strong>
+              <small>Cadastre uma nova oferta</small>
+            </span>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
-            Categorias do catalogo
+            <span className="menu-icon">04</span>
+            <span className="menu-copy">
+              <strong>Categorias do catalogo</strong>
+              <small>Organize a vitrine</small>
+            </span>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
-            Campanhas e avisos
+            <span className="menu-icon">05</span>
+            <span className="menu-copy">
+              <strong>Campanhas e avisos</strong>
+              <small>Configure a tela inicial</small>
+            </span>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
-            Dados da empresa
+            <span className="menu-icon">06</span>
+            <span className="menu-copy">
+              <strong>Dados da empresa</strong>
+              <small>Marca, horarios e atendimento</small>
+            </span>
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-            Seguranca da conta
+            <span className="menu-icon">07</span>
+            <span className="menu-copy">
+              <strong>Seguranca da conta</strong>
+              <small>Altere sua senha</small>
+            </span>
           </a>
 
           {isNexoraAdmin ? (
             <>
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
-                Usuarios e acessos
+                <span className="menu-icon">08</span>
+                <span className="menu-copy">
+                  <strong>Usuarios e acessos</strong>
+                  <small>Gerencie login do cliente</small>
+                </span>
               </a>
 
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
-                Nova empresa
+                <span className="menu-icon">09</span>
+                <span className="menu-copy">
+                  <strong>Nova empresa</strong>
+                  <small>Cadastre um novo cliente</small>
+                </span>
               </a>
             </>
           ) : null}
@@ -1214,6 +1250,7 @@ export default async function AdminPage({ searchParams }) {
     
       <form id={`company-edit-form-${empresa.id}`} action="/admin/company" method="post" className="admin-form company-edit-form">
         <input type="hidden" name="empresa_id" value={empresa.id} />
+        <input type="hidden" name="painel_retorno" value={painelPromocionalAberto ? 'promocional' : 'empresa'} />
 
         {isNexoraAdmin ? (
           <>
@@ -2245,6 +2282,22 @@ export default async function AdminPage({ searchParams }) {
           </div>
         )}
       </section>
+
+      <footer className="admin-footer">
+        <a
+          className="admin-support-button"
+          href="https://wa.me/5562992867272?text=Ola%2C%20preciso%20de%20ajuda%20com%20o%20painel%20Nexora."
+          target="_blank"
+          rel="noreferrer"
+        >
+          Fale conosco
+        </a>
+
+        <span>
+          Criado por <strong>Nexora</strong>
+        </span>
+      </footer>
+
                 <script
         dangerouslySetInnerHTML={{
           __html: `
