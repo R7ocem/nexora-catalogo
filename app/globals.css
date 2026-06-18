@@ -216,6 +216,15 @@ a {
   display: none;
 }
 
+.catalog-welcome-editor {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(33, 31, 28, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  background: linear-gradient(180deg, #fffdfa 0%, #f8f4ed 100%);
+}
+
 .admin-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

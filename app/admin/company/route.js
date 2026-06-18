@@ -92,6 +92,8 @@ export async function POST(request) {
   const subtituloPublico = texto(formData.get('subtitulo_publico'));
   const instagramUrl = texto(formData.get('instagram_url'));
   const descricaoPublica = texto(formData.get('descricao_publica'));
+  const avisoTitulo = texto(formData.get('aviso_titulo'));
+  const avisoTexto = texto(formData.get('aviso_texto'));
   const temaCor = texto(formData.get('tema_cor')) || '#0f766e';
   const temaCorSecundaria = texto(formData.get('tema_cor_secundaria')) || '#14b8a6';
   const usarGradiente = formData.get('usar_gradiente') === 'on';
@@ -184,7 +186,9 @@ export async function POST(request) {
        cpf_cnpj = $23,
        endereco = $24,
        cidade = $25,
-       estado = $26
+       estado = $26,
+       aviso_titulo = $27,
+       aviso_texto = $28
       WHERE id = $1`,
     [
       empresaId,
@@ -212,7 +216,9 @@ export async function POST(request) {
       cpfCnpj || null,
       endereco || null,
       cidade || null,
-      estado || null
+      estado || null,
+      avisoTitulo || null,
+      avisoTexto || null
     ]
   );
 

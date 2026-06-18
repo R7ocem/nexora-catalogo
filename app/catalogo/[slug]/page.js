@@ -16,6 +16,8 @@ async function getCatalogo(slug) {
        titulo_publico,
        subtitulo_publico,
        descricao_publica,
+       aviso_titulo,
+       aviso_texto,
        tema_cor,
        tema_cor_secundaria,
        usar_gradiente,
