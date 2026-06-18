@@ -1,40 +1,41 @@
-# Nexora Catálogos
+# Nexora Catalogos
 
-Sistema de catálogo digital multiempresa da Nexora.
+Sistema de catalogo digital multiempresa da Nexora.
 
-O projeto permite cadastrar empresas de diferentes segmentos, configurar identidade visual, gerenciar produtos/serviços, destacar itens, controlar horários de funcionamento e receber pedidos pelo WhatsApp.
+O projeto permite cadastrar empresas de diferentes segmentos, configurar identidade visual, gerenciar produtos/servicos, destacar itens, controlar horarios de funcionamento e receber pedidos pelo WhatsApp.
 
 ## Rotas principais
 
 - `/admin`: painel administrativo
-- `/cardapio/slug-da-empresa`: catálogo público para empresas de alimentação
-- `/catalogo/slug-da-empresa`: catálogo público para outros segmentos
+- `/slug-da-empresa`: link publico principal para qualquer segmento
+- `/cardapio/slug-da-empresa`: link antigo de cardapio para empresas de alimentacao
+- `/catalogo/slug-da-empresa`: link antigo de catalogo para outros segmentos
 
 ## Recursos principais
 
-- Gestão de múltiplas empresas
-- Cadastro de produtos, serviços e categorias
+- Gestao de multiplas empresas
+- Cadastro de produtos, servicos e categorias
 - Itens em destaque com controle de ordem
 - Tema claro, escuro e cores personalizadas
 - Logo, banner e identidade visual por empresa
-- Status de aberto/fechado por horário de funcionamento
+- Status de aberto/fechado por horario de funcionamento
 - Pedido com retirada/entrega e forma de pagamento
 - Envio do pedido pelo WhatsApp
-- Acessos por empresa com senha temporária
-- Bloqueio, desbloqueio e exclusão de empresas
+- Acessos por empresa com senha temporaria
+- Bloqueio, desbloqueio e exclusao de empresas
 - Dados cadastrais da empresa no painel Nexora
 
-## Operação
+## Operacao
 
-Antes de rodar qualquer SQL novo, faça backup do banco.
+Antes de rodar qualquer SQL novo, faca backup do banco.
 
-Depois de cada alteração:
+Depois de cada alteracao:
 
 1. Abrir ou revisar o Pull Request no GitHub.
-2. Rodar o SQL necessário no servidor, quando houver.
+2. Rodar o SQL necessario no servidor, quando houver.
 3. Fazer merge do Pull Request.
 4. Fazer deploy no EasyPanel.
-5. Conferir o painel e pelo menos um catálogo público.
+5. Conferir o painel e pelo menos um catalogo publico.
 
 ## Banco de dados
 
@@ -51,13 +52,14 @@ Os scripts SQL ficam na pasta `sql/`.
 
 ## Deploy
 
-O deploy é feito pelo EasyPanel usando o repositório:
+O deploy e feito pelo EasyPanel usando o repositorio:
 
 - GitHub: `R7ocem/nexora-catalogo`
 - Branch: `main`
 - Caminho de build: `/`
 
-Variável pública principal:
+Variavel publica principal:
 
 ```env
 NEXT_PUBLIC_BASE_URL=https://catalogo.usenexora.com.br
+```
