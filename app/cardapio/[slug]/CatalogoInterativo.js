@@ -551,6 +551,16 @@ function WhatsAppIcon() {
       {boasVindasAberta ? (
         <div className="catalog-welcome-overlay" role="dialog" aria-modal="true" aria-label={tituloBoasVindas}>
           <div className="catalog-welcome-card">
+            <div className="catalog-welcome-visual">
+              {empresa.banner_url ? (
+                <img src={empresa.banner_url} alt="" />
+              ) : (
+                <div className="catalog-welcome-gradient">
+                  <span>{avisoPersonalizado ? 'Aviso' : 'Guia rapido'}</span>
+                  <strong>{nomeEmpresa}</strong>
+                </div>
+              )}
+            </div>
             <span className="catalog-welcome-orbit" aria-hidden="true" />
             <span className="catalog-welcome-kicker">
               {avisoPersonalizado ? 'Aviso da loja' : 'Guia rÃ¡pido'}
