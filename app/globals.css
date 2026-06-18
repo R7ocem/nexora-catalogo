@@ -567,6 +567,12 @@ a {
   box-shadow: 0 22px 60px rgba(33, 31, 28, 0.08);
 }
 
+.admin-menu-intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .admin-menu-card {
   position: relative;
   display: flex;

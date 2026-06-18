@@ -831,12 +831,7 @@ export default async function AdminPage({ searchParams }) {
       </section>
 
       <section className="panel admin-menu-panel">
-        <div className="section-title-row">
-          <div>
-            <h2>Central de gestao</h2>
-            <p>Acesse rapidamente as areas principais do catalogo.</p>
-          </div>
-        </div>
+        <p className="admin-menu-intro">Acesse rapidamente as areas principais do catalogo.</p>
 
         <div className="admin-menu-grid">
           <a className="admin-menu-card primary-menu-card" href={`/admin?slug=${empresa.slug}&painel=pedidos&pedidos=novo#pedidos`}>
