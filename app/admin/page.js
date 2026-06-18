@@ -229,6 +229,8 @@ async function getAdminData(user, selectedSlug) {
        titulo_publico,
        subtitulo_publico,
        descricao_publica,
+       aviso_titulo,
+       aviso_texto,
        horario_funcionamento,
        opcoes_pedido
      FROM catalogo_empresas
@@ -1190,6 +1192,33 @@ export default async function AdminPage({ searchParams }) {
           />
         </label>
     
+        <div className="full-span catalog-welcome-editor">
+          <div>
+            <span className="field-title">Tela inicial do catÃ¡logo</span>
+            <small className="media-hint">
+              Deixe em branco para mostrar a instruÃ§Ã£o padrÃ£o de como usar. Preencha para divulgar promoÃ§Ãµes, eventos ou avisos.
+            </small>
+          </div>
+
+          <label>
+            TÃ­tulo do aviso
+            <input
+              name="aviso_titulo"
+              defaultValue={empresa.aviso_titulo || ''}
+              placeholder="Ex: Semana dos Namorados"
+            />
+          </label>
+
+          <label>
+            Texto do aviso
+            <textarea
+              name="aviso_texto"
+              defaultValue={empresa.aviso_texto || ''}
+              placeholder="Ex: Escolha sua cesta, personalize as opÃ§Ãµes e envie seu pedido pelo WhatsApp."
+            />
+          </label>
+        </div>
+
         <div className="full-span theme-builder">
           <div>
             <span className="field-title">Sistema de cores</span>

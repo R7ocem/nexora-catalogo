@@ -237,6 +237,7 @@ function WhatsAppIcon() {
   const [quantidadeProdutoAberto, setQuantidadeProdutoAberto] = useState(1);
   const [tipoEntrega, setTipoEntrega] = useState('');
   const [pagamento, setPagamento] = useState('');
+  const [boasVindasAberta, setBoasVindasAberta] = useState(true);
   const categoriasRef = useRef(null);
   const destaquesRef = useRef(null);
 
@@ -257,6 +258,9 @@ function WhatsAppIcon() {
   const instagramUrl = normalizarInstagramUrl(empresa.instagram_url);
   const estabelecimentoAberto = estaAbertoAgora(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
+  const avisoPersonalizado = Boolean(String(empresa.aviso_titulo || empresa.aviso_texto || '').trim());
+  const tituloBoasVindas = empresa.aviso_titulo || `Como pedir na ${nomeEmpresa}`;
+  const textoBoasVindas = empresa.aviso_texto || `Toque em um item para ver detalhes, escolha as opÃ§Ãµes, adicione ao pedido e finalize pelo WhatsApp.`;
 
   const categoriasVisiveis = [
     ...categorias.filter((categoria) => categoria.produtos.length > 0),
@@ -544,6 +548,41 @@ function WhatsAppIcon() {
           : corPrincipal
       }}
     >
+      {boasVindasAberta ? (
+        <div className="catalog-welcome-overlay" role="dialog" aria-modal="true" aria-label={tituloBoasVindas}>
+          <div className="catalog-welcome-card">
+            <div className="catalog-welcome-visual">
+              {empresa.banner_url ? (
+                <img src={empresa.banner_url} alt="" />
+              ) : (
+                <div className="catalog-welcome-gradient">
+                  <span>{avisoPersonalizado ? 'Aviso' : 'Guia rapido'}</span>
+                  <strong>{nomeEmpresa}</strong>
+                </div>
+              )}
+            </div>
+            <span className="catalog-welcome-orbit" aria-hidden="true" />
+            <span className="catalog-welcome-kicker">
+              {avisoPersonalizado ? 'Aviso da loja' : 'Guia rÃ¡pido'}
+            </span>
+            <h2>{tituloBoasVindas}</h2>
+            <p>{textoBoasVindas}</p>
+
+            {!avisoPersonalizado ? (
+              <div className="catalog-welcome-steps" aria-label="Como usar o catÃ¡logo">
+                <span>1. Escolha</span>
+                <span>2. Adicione</span>
+                <span>3. Envie</span>
+              </div>
+            ) : null}
+
+            <button className="catalog-welcome-button" type="button" onClick={() => setBoasVindasAberta(false)}>
+              Ok, abrir catÃ¡logo
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <nav className="catalog-topbar catalog-topbar-compact">
         <div className="category-menu-wrap" ref={categoriasRef}>
           <button
