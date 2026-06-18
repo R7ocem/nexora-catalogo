@@ -2,85 +2,104 @@
 
 ## Visao geral
 
-O Nexora Catalogos e um sistema de catalogo digital multiempresa. Ele permite que a Nexora gerencie varias empresas clientes em um unico painel, com catalogos publicos separados por segmento, identidade visual, produtos, servicos, pedidos via WhatsApp e controles administrativos.
+O Nexora Catalogos e uma plataforma de catalogo digital multiempresa e multissegmento. O mesmo sistema atende alimentacao, festas, decoracao, beleza, moda, servicos e outros tipos de negocio.
 
-O sistema atende empresas de alimentacao e tambem outros segmentos, como festas, decoracao, moda, beleza, servicos e outros.
+A Nexora administra todas as empresas em um painel central. Cada empresa cliente tem seu proprio painel, identidade visual, produtos, campanhas, pedidos, relatorios e configuracoes.
+
+O objetivo do sistema e entregar uma experiencia simples para o lojista e pratica para o cliente final:
+
+- Cliente acessa o catalogo.
+- Escolhe produtos ou servicos.
+- Adiciona ao pedido.
+- Envia pelo WhatsApp.
+- Loja acompanha o pedido pelo painel ou pelo fluxo do n8n.
 
 ## Tecnologias principais
 
-- Next.js: aplicacao web, rotas publicas e painel administrativo.
-- React: componentes e telas do painel/catalogo.
-- PostgreSQL: banco de dados principal.
-- EasyPanel: deploy e gerenciamento do servico.
-- Traefik: roteamento dos dominios e HTTPS.
-- Docker: execucao dos servicos no servidor.
-- GitHub: versionamento e pull requests.
+- Next.js: aplicacao web, rotas publicas, APIs e painel administrativo.
+- React: telas interativas do catalogo e painel.
+- PostgreSQL: banco principal.
+- Docker: execucao dos servicos.
+- EasyPanel: deploy e gerenciamento do app.
+- Traefik: HTTPS e roteamento de dominios.
+- GitHub: versionamento, branches e pull requests.
+- n8n: automacoes de WhatsApp, vendedor, recuperacao de carrinho e alertas futuros.
+- Evolution API: envio e recebimento de mensagens WhatsApp.
 
-## Estrutura principal
+## Estrutura de pastas
 
 ```text
 app/
-  admin/                 Painel administrativo
-  cardapio/[slug]/       Catalogo publico para alimentacao
-  catalogo/[slug]/       Catalogo publico para outros segmentos
+  admin/                         Painel administrativo e acoes do painel
+  api/inventory/                 Endpoints para estoque e n8n
+  cardapio/[slug]/               Rota publica legada para alimentacao
+  catalogo/[slug]/               Rota publica legada para outros segmentos
+  [slug]/                        Rota publica curta principal
+  globals.css                    Estilos gerais do painel e catalogo
+  catalog-adjustments.css        Ajustes visuais especificos do catalogo
 
 lib/
-  auth.js                Sessao, senha, autenticacao e usuario logado
-  catalog.js             Regras de rotas e rotulos de catalogo/cardapio
-  db.js                  Conexao com PostgreSQL
-  format.js              Formatacao de valores
-  validation.js          Validacoes de email, WhatsApp e CPF/CNPJ
+  auth.js                        Login, sessao, senha e usuario
+  catalog.js                     Regras de segmento e rotas publicas
+  db.js                          Conexao com PostgreSQL
+  format.js                      Formatacoes reutilizaveis
+  inventoryAuth.js               Protecao dos endpoints de estoque
+  validation.js                  Validacoes de email, WhatsApp e CPF/CNPJ
 
 sql/
-  *.sql                  Scripts de criacao e evolucao do banco
+  001_setup.sql                  Base inicial
+  002_admin_users.sql            Usuarios administrativos
+  003_instagram_url.sql          Instagram
+  004_catalog_controls.sql       Destaques e opcoes do catalogo
+  005_visual_background_controls.sql
+  006_multiempresa_hardening.sql
+  007_company_email.sql
+  008_company_owner_data.sql
+  009_product_variations.sql
+  010_product_shipping_text.sql
+  011_inventory.sql
+  012_smart_inventory.sql
+  013_orders_panel.sql
+  014_catalog_welcome_notice.sql
+  015_catalog_welcome_image.sql
 ```
 
 ## Rotas publicas
 
-### `/cardapio/[slug]`
+### Rota curta principal
 
-Usada para empresas de alimentacao.
+```text
+https://catalogo.usenexora.com.br/slug-da-empresa
+```
 
-Exemplo:
+Essa e a rota recomendada para novos clientes, porque funciona para qualquer segmento e nao prende a loja ao termo "cardapio".
+
+### Rota de cardapio
 
 ```text
 https://catalogo.usenexora.com.br/cardapio/savore
 ```
 
-Mostra o catalogo da empresa com:
+Mantida para alimentacao e compatibilidade com links antigos.
 
-- Banner
-- Logo
-- Nome da empresa
-- Instagram
-- Status aberto/fechado
-- Destaques
-- Categorias
-- Produtos
-- Carrinho/pedido
-- Opcoes de recebimento e pagamento
-- Envio pelo WhatsApp
-
-### `/catalogo/[slug]`
-
-Usada para empresas de outros segmentos.
-
-Exemplo:
+### Rota de catalogo
 
 ```text
 https://catalogo.usenexora.com.br/catalogo/viva-festas
 ```
 
-Funciona como catalogo digital, com os mesmos recursos principais, mas usando a nomenclatura adequada para segmentos que nao sao alimentacao.
+Mantida para outros segmentos e compatibilidade com links antigos.
 
-### `/admin`
+### Painel
 
-Painel administrativo da Nexora e das empresas.
+```text
+https://catalogo.usenexora.com.br/admin
+```
 
-O acesso depende do usuario logado:
+O painel muda conforme o usuario:
 
-- `nexora_admin`: administra todas as empresas.
-- `empresa_admin`: administra apenas a propria empresa.
+- `nexora_admin`: gerencia todas as empresas.
+- `empresa_admin`: gerencia apenas a empresa vinculada.
 
 ## Banco de dados
 
@@ -88,260 +107,418 @@ As tabelas principais usam o prefixo `catalogo_`.
 
 ### `catalogo_empresas`
 
-Guarda as empresas clientes.
+Guarda cada empresa cliente.
 
-Principais campos:
+Principais grupos de dados:
 
-- Nome da empresa
-- Slug/link publico
-- WhatsApp
-- Email da empresa
-- Proprietario
-- CPF/CNPJ
-- Endereco
-- Cidade
-- Estado
-- Segmento
-- Tipo de oferta
-- Titulo e subtitulo publicos
-- Instagram
-- Logo e banner
-- Cores e tema
-- Fundo do catalogo
-- Horarios de funcionamento
-- Opcoes de pedido
-- Status ativo/bloqueado
+- Identificacao: nome, slug, segmento, tipo de oferta.
+- Contato: WhatsApp, email, Instagram.
+- Dados cadastrais: proprietario, CPF/CNPJ, endereco, cidade e estado.
+- Visual: logo, banner, cores, gradiente, tema e fundo.
+- Tela inicial: titulo, texto e imagem de aviso.
+- Funcionamento: dias e horarios.
+- Pedido: opcoes de retirada, entrega, Pix, dinheiro e cartao.
+- Controle interno: bloqueio, ativo/inativo e dados de acesso.
 
 ### `catalogo_usuarios`
 
 Guarda os acessos ao painel.
 
-Principais campos:
+- Empresa vinculada.
+- Nome do usuario.
+- Email de acesso.
+- Senha criptografada.
+- Papel do usuario.
+- Status ativo.
 
-- Empresa vinculada
-- Nome
-- Email
-- Senha criptografada
-- Papel do usuario
-- Status ativo
-
-As senhas nao ficam visiveis. Quando necessario, o admin Nexora define uma senha temporaria.
+As senhas nao podem ser visualizadas. A Nexora pode redefinir uma senha temporaria.
 
 ### `catalogo_categorias`
 
-Organiza os produtos/servicos por categoria.
+Organiza os itens da vitrine.
 
-Principais campos:
-
-- Empresa
-- Nome da categoria
-- Ordem
-- Status ativo
+- Empresa.
+- Nome.
+- Ordem.
+- Status ativo.
 
 ### `catalogo_produtos`
 
-Guarda produtos e servicos do catalogo.
+Guarda produtos e servicos.
 
 Principais campos:
 
-- Empresa
-- Categoria
-- Codigo
-- Nome
-- Descricao
-- Preco
-- Tipo do item
-- Tipo de preco
-- Imagem
-- Destaque
-- Ordem do destaque
-- Apelidos/aliases
-- Status ativo
+- Empresa.
+- Categoria.
+- Codigo.
+- Nome.
+- Descricao com quebras de linha preservadas.
+- Preco.
+- Tipo de item.
+- Tipo de preco.
+- Foto.
+- Variacoes.
+- Frete/entrega no card.
+- Destaque e posicao.
+- Apelidos para o bot.
+- Status ativo.
+- Controle de estoque.
+- Estoque inteligente.
 
-## Funcionalidades do painel Nexora
+### `pedidos` e `pedido_itens`
 
-### Gestao de empresas
+Guardam os pedidos recebidos pelo catalogo/n8n.
 
-O admin Nexora pode:
+Principais campos:
 
-- Criar nova empresa
-- Escolher empresa existente
-- Alterar dados da empresa
-- Preencher dados cadastrais
-- Definir segmento
-- Definir tipo de oferta
-- Configurar nome publico e subtitulo
-- Adicionar Instagram
-- Bloquear empresa
-- Desbloquear empresa
-- Excluir empresa bloqueada
+- Empresa.
+- Cliente.
+- Telefone.
+- Pedido.
+- Numero do dia.
+- Status.
+- Status de preparo.
+- Total.
+- Retirada ou entrega.
+- Endereco e localizacao.
+- Forma de pagamento.
+- Itens do pedido.
+- Datas de preparo, pronto, saiu para entrega e finalizado.
 
-### Dados cadastrais da empresa
+### `stock_movements`
 
-Campos disponiveis para controle interno:
+Guarda movimentacoes de estoque.
 
-- Proprietario
-- CPF/CNPJ
-- Endereco
-- Cidade
-- Estado
+Tipos previstos:
 
-Esses dados ajudam a Nexora a controlar clientes ja cadastrados e empresas antigas.
+- Entrada.
+- Saida.
+- Ajuste.
+- Cancelamento.
 
-### Acessos da empresa
+Essa tabela prepara o sistema para relatorios e automacoes de estoque.
 
-O admin Nexora pode:
+## Painel administrativo
 
-- Criar acesso para uma empresa sem usuario
-- Alterar nome do usuario
-- Alterar email de acesso
-- Definir nova senha temporaria
+O painel foi organizado em uma Central de Gestao com modulos.
 
-As senhas antigas nao podem ser visualizadas, apenas redefinidas.
+### Modulos principais
 
-### Identidade visual
+- Pedidos da loja.
+- Produtos e servicos.
+- Relatorios.
+- Novo produto.
+- Categorias do catalogo.
+- Campanhas e avisos.
+- Dados da empresa.
+- Seguranca da conta.
+- Usuarios e acessos, quando for Nexora Admin.
+- Nova empresa, quando for Nexora Admin.
 
-Cada empresa pode configurar:
+### Topo do painel
 
-- Logo
-- Banner
-- Zoom de logo/banner
-- Cor principal
-- Cor secundaria
-- Gradiente
-- Fundo claro, escuro ou personalizado
+Mostra:
 
-### Horario de funcionamento
+- Logo da empresa.
+- Nome da empresa.
+- Status ativo.
+- Botao Ver catalogo.
+- Botao Sair.
 
-O painel permite configurar dias e horarios de funcionamento.
+### Rodape do painel
 
-No catalogo publico aparece:
+Mostra:
 
-- Aberto
-- Fechado
+- Fale conosco via WhatsApp da Nexora.
+- Criado por Nexora.
 
-O status e calculado com base no horario configurado.
+## Pedidos da loja
 
-### Opcoes de pedido
+O painel de pedidos e uma evolucao visual do fluxo que antes dependia apenas de comandos no WhatsApp.
 
-O painel permite ativar/desativar:
+Ele usa a mesma logica de status:
 
-- Retirada
-- Entrega
-- Pix
-- Dinheiro
-- Cartao
+- Novo.
+- Em preparo.
+- Pronto.
+- Saiu.
+- Finalizado.
 
-Essas opcoes aparecem no carrinho antes do cliente enviar o pedido.
+Cada pedido aparece em card, com:
 
-### Produtos e servicos
+- Numero do pedido.
+- Cliente.
+- Telefone.
+- Total.
+- Recebimento.
+- Pagamento.
+- Itens.
+- Endereco, quando for entrega.
+- Botoes de Maps/Waze, quando houver localizacao.
+- Botoes para avancar status.
 
-O painel permite:
+### Fluxo de retirada
 
-- Cadastrar produto/servico
-- Editar produto/servico
-- Alterar categoria
-- Definir preco
-- Definir imagem
-- Definir tipo de item
-- Definir tipo de preco
-- Ativar/desativar
-- Excluir
+1. Novo.
+2. Aceitar pedido.
+3. Em preparo.
+4. Pedido pronto.
+5. Cliente retira.
+6. Finalizar.
 
-### Destaques
+### Fluxo de entrega
 
-O sistema permite marcar itens como destaque.
+1. Novo.
+2. Aceitar pedido.
+3. Em preparo.
+4. Pedido pronto.
+5. Saiu para entrega.
+6. Finalizar.
 
-Os destaques aparecem no topo do catalogo, com controle de ordem:
+### Reversao de status
 
-- Automatico
-- Primeiro
-- Segundo
-- Terceiro
-- Quarto
-- Quinto
-- Sexto
+O painel permite reverter os pontos mais criticos:
 
-## Funcionalidades do catalogo publico
+- De Pronto para Em preparo.
+- De Saiu para Pronto.
 
-O catalogo publico mostra:
+## Relatorios
 
-- Banner da empresa
-- Logo
-- Nome publico
-- Subtitulo
-- Botao do Instagram
-- Status aberto/fechado
-- Lista de destaques
-- Categorias
-- Produtos/servicos
-- Botao adicionar
-- Carrinho/pedido moderno
-- Total aproximado
-- Quantidade de itens
-- Remocao de itens
-- Forma de recebimento
-- Forma de pagamento
-- Envio para WhatsApp
+O modulo de Relatorios usa dados reais de pedidos salvos no banco.
 
-## Fluxo de pedido
+Filtros disponiveis:
 
-1. Cliente acessa o catalogo publico.
-2. Escolhe produtos/servicos.
-3. Clica em adicionar.
-4. Abre o carrinho em Ver pedido.
-5. Confere itens, quantidades e total.
-6. Escolhe retirada ou entrega.
-7. Escolhe forma de pagamento.
-8. Clica em Enviar pelo WhatsApp.
-9. O sistema monta a mensagem e abre o WhatsApp da empresa.
+- Hoje.
+- Ontem.
+- Esta semana.
+- Este mes.
+- Ultimos 7 dias.
+- Ultimos 30 dias.
+- Periodo personalizado.
 
-## Fluxo de criacao de empresa
+Indicadores:
 
-1. Admin Nexora entra no painel.
-2. Preenche Criar nova empresa:
-   - Nome da empresa
-   - Link do catalogo
-   - Nome do proprietario
-   - CPF/CNPJ
-   - Endereco
-   - Cidade
-   - Estado
-   - WhatsApp
-   - Email de acesso
-   - Senha temporaria
-3. Sistema valida email, WhatsApp, CPF/CNPJ e link.
-4. Empresa e acesso sao criados.
-5. Admin configura produtos, categorias, cores, banner, logo e horarios.
+- Total vendido.
+- Quantidade de pedidos.
+- Ticket medio.
+- Valor medio por item.
+- Produtos mais vendidos.
+- Produtos com menor saida.
+- Receita por produto.
+- Pedidos por status.
+- Pedidos por retirada/entrega.
+- Pedidos por forma de pagamento.
+- Horarios com mais pedidos.
 
-## Fluxo de deploy
+Se nao houver pedidos no periodo, o painel mostra aviso claro.
 
-O deploy atual e feito pelo EasyPanel.
+## Produtos e servicos
 
-Sequencia recomendada:
+O lojista pode:
 
-1. Fazer backup do banco antes de SQL novo.
-2. Rodar SQL necessario no servidor.
-3. Fazer merge do Pull Request no GitHub.
-4. Implantar no EasyPanel.
-5. Conferir se o deploy ficou verde.
-6. Testar painel e catalogo publico.
+- Cadastrar produto ou servico.
+- Editar foto.
+- Editar nome, codigo, categoria, preco e descricao.
+- Informar variacoes.
+- Informar texto de frete/entrega.
+- Marcar como destaque.
+- Definir posicao do destaque.
+- Ativar ou desativar.
+- Excluir.
 
-## Dominios e infraestrutura
+### Apelidos para o bot
 
-Dominio principal atual:
+O campo existe para ajudar o vendedor do n8n a reconhecer produtos por nomes alternativos.
+
+Direcao futura:
+
+- Reduzir preenchimento manual.
+- Usar o nome do produto como base automaticamente.
+- Fazer o vendedor buscar produtos direto do catalogo.
+
+## Variacoes de produtos
+
+As variacoes permitem vender um unico item com opcoes, sem cadastrar produtos repetidos.
+
+Exemplo:
+
+```text
+Cor: Vermelho, Azul, Dourado
+Tamanho: 06, 09, 12, 16, 26
+```
+
+No catalogo publico, o cliente escolhe as opcoes dentro da tela de detalhes do produto.
+
+## Estoque inteligente
+
+O estoque foi preparado para ir alem de um minimo manual.
+
+Campos principais:
+
+- Controlar estoque.
+- Quantidade em estoque.
+- Estoque minimo manual.
+- Dias para reposicao.
+- Dias de seguranca.
+- Calcular minimo inteligente.
+- Mostrar produto quando esgotado.
+
+### Calculo inicial
+
+O sistema usa media dos ultimos 14 dias.
+
+Formula:
+
+```text
+estoque minimo recomendado =
+media diaria de vendas x (dias de reposicao + dias de seguranca)
+```
+
+### Status de estoque
+
+- Normal: acima do minimo recomendado.
+- Atencao: abaixo ou igual ao minimo recomendado.
+- Critico: abaixo ou igual a 50% do minimo recomendado.
+- Esgotado: 0 unidades.
+
+O status aparece no painel e no catalogo.
+
+### Endpoints para n8n
+
+```text
+GET /api/inventory/low-stock
+GET /api/inventory/alerts
+POST /api/inventory/adjust
+```
+
+Esses endpoints sao protegidos por token:
+
+```env
+INVENTORY_CRON_TOKEN=
+```
+
+Uso futuro:
+
+- n8n consulta produtos em atencao, criticos ou esgotados.
+- n8n envia alerta no WhatsApp da loja.
+- Loja atualiza estoque pelo painel.
+
+## Catalogo publico
+
+O catalogo mostra:
+
+- Tela inicial animada.
+- Banner.
+- Logo centralizada em bloco arredondado.
+- Nome da empresa.
+- Instagram.
+- Status aberto/fechado.
+- Destaques.
+- Categorias.
+- Cards de produtos/servicos.
+- Frete/entrega no card, quando informado.
+- Variacoes.
+- Quantidade no detalhe do item.
+- Carrinho moderno.
+- Pedido pelo WhatsApp.
+- Botao de ajuda via WhatsApp.
+- Criado por Nexora.
+
+### Tela inicial
+
+Quando o cliente entra, aparece um aviso inicial.
+
+Se a loja nao configurar nada, aparece uma instrucao padrao:
+
+```text
+Escolha seus produtos, adicione ao carrinho e envie seu pedido pelo WhatsApp em poucos segundos.
+```
+
+Se a loja preencher titulo, texto ou imagem, a tela vira uma area de promocao/campanha.
+
+## Campanhas e avisos
+
+O modulo permite personalizar a tela inicial do catalogo:
+
+- Titulo do aviso.
+- Texto do aviso.
+- Imagem do aviso.
+
+Se a imagem do aviso ficar vazia, o catalogo usa o banner principal.
+
+## Fluxo de pedido pelo catalogo
+
+1. Cliente entra no catalogo.
+2. Ve a tela inicial e clica para continuar.
+3. Escolhe um item.
+4. Abre detalhes do item.
+5. Escolhe variacoes, quando houver.
+6. Escolhe quantidade.
+7. Adiciona ao carrinho.
+8. Abre Ver pedido.
+9. Confere total, itens e quantidades.
+10. Escolhe retirada ou entrega.
+11. Escolhe forma de pagamento.
+12. Envia pelo WhatsApp.
+
+## Integracao com n8n
+
+O n8n atualmente cuida de:
+
+- Vendedor WhatsApp.
+- Conversa inicial.
+- Pedido digitado pelo cliente.
+- Pedido vindo do catalogo.
+- Envio do pedido para a cozinha/loja.
+- Atualizacao de status por comando.
+- Recuperacao de carrinho abandonado.
+
+### Comandos atuais da loja
+
+O fluxo foi simplificado para evitar o uso de `#`.
+
+Exemplo com pedido `05`:
+
+- `05`: aceitar pedido.
+- `P05`: pedido pronto.
+- `S05`: saiu para entrega.
+- `F05`: finalizar pedido.
+
+### Pontos planejados para o n8n
+
+- Tornar o vendedor 100% multiempresa.
+- Fazer o vendedor consultar produtos/servicos direto do catalogo.
+- Se o cliente errar produto, enviar link do catalogo.
+- Recuperacao de carrinho multiempresa.
+- Trocar IP fixo da Evolution por nome interno/variavel.
+- Ajustar numero sequencial dos pedidos para comecar em 77.
+- Integrar alertas de estoque inteligente.
+
+## Seguranca
+
+Recursos atuais:
+
+- Login administrativo.
+- Senhas criptografadas.
+- Sessao por cookie.
+- Separacao entre Nexora Admin e empresa.
+- Validacao de email.
+- Validacao de WhatsApp.
+- Validacao de CPF/CNPJ.
+- Validacao de slug/link publico.
+- Protecao basica contra origem nao confiavel em formularios administrativos.
+- Limite de tentativas de login.
+- Endpoints de estoque protegidos por token.
+
+## Infraestrutura
+
+Dominio principal:
 
 ```text
 https://catalogo.usenexora.com.br
 ```
 
-Servico no EasyPanel:
-
-```text
-nexora-catalogo
-```
-
-Repositorio GitHub:
+Repositorio:
 
 ```text
 R7ocem/nexora-catalogo
@@ -353,7 +530,13 @@ Projeto EasyPanel:
 nexora01
 ```
 
-Servicos relacionados no servidor:
+Servico EasyPanel:
+
+```text
+nexora-catalogo
+```
+
+Servicos relacionados:
 
 - `nexora-catalogo`
 - `nexora-db`
@@ -363,25 +546,19 @@ Servicos relacionados no servidor:
 - `evolution`
 - `traefik`
 
-## Script de recuperacao do Traefik
+## Traefik e Bad Gateway
 
-Existe um script no servidor:
+Existe um script de correcao no servidor:
 
 ```bash
 /root/fix-traefik-nexora.sh
 ```
 
-Ele garante rotas internas do Traefik para:
+Ele confere/corrige rotas para:
 
 - `catalogo.usenexora.com.br`
 - `n8n.usenexora.com.br`
 - `metabase.usenexora.com.br`
-
-Quando houver Bad Gateway apos deploy ou instabilidade do Traefik, ele pode ser executado manualmente:
-
-```bash
-/root/fix-traefik-nexora.sh
-```
 
 Retorno esperado:
 
@@ -391,31 +568,47 @@ n8n.usenexora.com.br -> 200
 metabase.usenexora.com.br -> 200
 ```
 
-## Seguranca
+## Operacao recomendada
 
-Recursos ja existentes:
+Antes de qualquer SQL:
 
-- Login administrativo
-- Senhas criptografadas
-- Sessao por cookie seguro
-- Protecao basica contra origem nao confiavel em formularios administrativos
-- Limite de tentativas de login
-- Validacao de email
-- Validacao de WhatsApp
-- Validacao de CPF/CNPJ
-- Separacao de permissao entre admin Nexora e empresa
+1. Fazer backup do banco.
+2. Conferir se o SQL ja foi aplicado.
+3. Rodar somente o SQL necessario.
 
-## Pontos importantes de manutencao
+Depois de alterar codigo:
 
-- Sempre fazer backup antes de rodar SQL.
-- Nunca rodar SQL antigo sem conferir se ele ja foi aplicado.
-- Depois de cada deploy, testar `/admin` e pelo menos um catalogo publico.
-- Se o EasyPanel der Bad Gateway, executar o script do Traefik.
-- Ao criar empresa nova, conferir o link publico e o acesso da empresa.
-- Ao bloquear empresa, conferir se painel e catalogo ficam indisponiveis para o cliente.
+1. Abrir ou atualizar Pull Request.
+2. Conferir se nao ha conflito.
+3. Fazer merge.
+4. Fazer deploy no EasyPanel.
+5. Testar `/admin`.
+6. Testar pelo menos um catalogo publico.
+7. Se houver Bad Gateway, rodar o script do Traefik.
 
-## Estado atual do projeto
+## Estado atual
 
-O projeto esta organizado como Nexora Catalogos e preparado para multiempresa e multissegmento.
+O projeto esta preparado como plataforma multiempresa e multissegmento.
 
-O nome Food foi removido da identidade do projeto, do servico e das tabelas internas, mantendo rotas especiais de alimentacao em `/cardapio/[slug]` apenas por regra de negocio.
+O antigo conceito de Food foi removido da identidade do sistema. O foco atual e Nexora Catalogos, com suporte para cardapio em empresas de alimentacao e catalogo para os demais segmentos.
+
+As principais bases ja existentes sao:
+
+- Catalogo publico responsivo.
+- Painel administrativo modular.
+- Pedidos em cards.
+- Relatorios por periodo.
+- Estoque inteligente.
+- Tela promocional inicial.
+- Variacoes de produtos.
+- Integracao com WhatsApp/n8n em evolucao.
+
+## Proximas evolucoes importantes
+
+- Finalizar vendedor n8n multiempresa.
+- Integrar vendedor aos produtos reais do catalogo.
+- Melhorar recuperacao de carrinho por empresa.
+- Criar painel interno mais avancado de pedidos, se necessario.
+- Enviar alertas de estoque inteligente via WhatsApp.
+- Evoluir relatorios para comparativos e campanhas.
+- Criar historico mais completo de vendas e atendimento.
