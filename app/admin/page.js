@@ -2500,6 +2500,7 @@ export default async function AdminPage({ searchParams }) {
                 <form
                   action="/admin/products"
                   method="post"
+                  id={`product-edit-form-${produto.id}`}
                   className="admin-product-edit product-form"
                 >
                   <input type="hidden" name="produto_id" value={produto.id} />
@@ -2703,24 +2704,29 @@ export default async function AdminPage({ searchParams }) {
                     </label>
                   </div>
       
-                  <div className="admin-actions-row">
-                    <button className="primary-button" type="submit">
-                      Salvar alterações
-                    </button>
-      
-                    <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
-                      {produto.ativo ? 'Ativo' : 'Inativo'}
-                    </span>
-                  </div>
                 </form>
       
-                <form action="/admin/products/delete" method="post" className="delete-product-form admin-actions-row">
-                  <input type="hidden" name="produto_id" value={produto.id} />
-                  <input type="hidden" name="empresa_id" value={empresa.id} />
-                  <button className="danger-button" type="submit">
-                    Excluir item
+                <div className="product-edit-actions">
+                  <button
+                    className="primary-button"
+                    type="submit"
+                    form={`product-edit-form-${produto.id}`}
+                  >
+                    Salvar alterações
                   </button>
-                </form>
+
+                  <span className={produto.ativo ? 'status-pill active' : 'status-pill'}>
+                    {produto.ativo ? 'Ativo' : 'Inativo'}
+                  </span>
+
+                  <form action="/admin/products/delete" method="post" className="delete-product-form">
+                    <input type="hidden" name="produto_id" value={produto.id} />
+                    <input type="hidden" name="empresa_id" value={empresa.id} />
+                    <button className="danger-button" type="submit">
+                      Excluir item
+                    </button>
+                  </form>
+                </div>
               </div>
             ))}
           </div>
