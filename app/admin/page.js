@@ -1194,14 +1194,14 @@ export default async function AdminPage({ searchParams }) {
     
         <div className="full-span catalog-welcome-editor">
           <div>
-            <span className="field-title">Tela inicial do catÃ¡logo</span>
+            <span className="field-title">Tela inicial do cat&aacute;logo</span>
             <small className="media-hint">
-              Deixe em branco para mostrar a instruÃ§Ã£o padrÃ£o de como usar. Preencha para divulgar promoÃ§Ãµes, eventos ou avisos.
+              Deixe em branco para mostrar a instru&ccedil;&atilde;o padr&atilde;o de uso. Preencha para divulgar promo&ccedil;&otilde;es, eventos ou avisos.
             </small>
           </div>
 
           <label>
-            TÃ­tulo do aviso
+            T&iacute;tulo do aviso
             <input
               name="aviso_titulo"
               defaultValue={empresa.aviso_titulo || ''}
@@ -1214,7 +1214,7 @@ export default async function AdminPage({ searchParams }) {
             <textarea
               name="aviso_texto"
               defaultValue={empresa.aviso_texto || ''}
-              placeholder="Ex: Escolha sua cesta, personalize as opÃ§Ãµes e envie seu pedido pelo WhatsApp."
+              placeholder={"Ex: Escolha sua cesta, personalize as op\u00e7\u00f5es e envie seu pedido pelo WhatsApp."}
             />
           </label>
         </div>
