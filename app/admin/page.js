@@ -554,36 +554,61 @@ export default async function AdminPage({ searchParams }) {
   return (
     <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
       <section className="panel admin-header-panel">
-  <div>
-    <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : `Painel ${nomePublico}`}</h1>
+        <div className="admin-header-content">
+          <span className="admin-eyebrow">Central de gestão</span>
 
-    <p className="muted">
-      {isNexoraAdmin
-        ? 'Gerencie os catálogos das empresas clientes.'
-        : 'Gerencie itens, fotos, preços e disponibilidade.'}
-    </p>
+          <div className="admin-brand-row">
+            <span className="admin-brand-mark">
+              {empresa.logo_url ? (
+                <img src={empresa.logo_url} alt={`Logo ${nomePublico}`} />
+              ) : (
+                nomePublico.slice(0, 1)
+              )}
+            </span>
 
-    {empresa.bloqueado ? (
-      <p className="warning-text">
-        Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
-      </p>
-    ) : null}
-  </div>
+            <div>
+              <h1>{isNexoraAdmin ? 'Painel Nexora Catálogos' : nomePublico}</h1>
 
-  <div className="admin-header-actions">
-    {!painelInicialAberto ? (
-      <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
-        Voltar ao painel
-      </a>
-    ) : null}
+              <p className="muted">
+                {isNexoraAdmin
+                  ? 'Gerencie empresas, acessos, produtos e pedidos em um só lugar.'
+                  : 'Controle produtos, pedidos, campanhas e disponibilidade da sua loja.'}
+              </p>
+            </div>
+          </div>
 
-    <form action="/admin/logout" method="post">
-      <button className="secondary-button" type="submit">
-        Sair
-      </button>
-    </form>
-  </div>
-</section>
+          <div className="admin-header-meta">
+            <span className={`admin-state-pill${empresa.bloqueado ? ' blocked' : ''}`}>
+              {empresa.bloqueado ? 'Bloqueado' : 'Ativo'}
+            </span>
+            <span>{isNexoraAdmin ? 'Nexora Admin' : 'Painel da loja'}</span>
+          </div>
+
+          {empresa.bloqueado ? (
+            <p className="warning-text">
+              Empresa bloqueada. O catálogo público e o painel do cliente estão indisponíveis.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="admin-header-actions">
+          {!painelInicialAberto ? (
+            <a className="secondary-button" href={`/admin?slug=${empresa.slug}`}>
+              Voltar ao painel
+            </a>
+          ) : null}
+
+          <a className="secondary-button admin-preview-button" href={linkPublico} target="_blank" rel="noreferrer">
+            Ver catálogo
+          </a>
+
+          <form action="/admin/logout" method="post">
+            <button className="secondary-button" type="submit">
+              Sair
+            </button>
+          </form>
+        </div>
+      </section>
 
       <section className="panel admin-menu-panel">
         <div className="section-title-row">
