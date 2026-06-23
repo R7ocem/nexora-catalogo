@@ -740,6 +740,10 @@ a {
   display: none;
 }
 
+.admin-shell.automation-mode > .panel:not(.admin-header-panel):not(#automacao) {
+  display: none;
+}
+
 .admin-shell.password-mode > .panel:not(.admin-header-panel):not(.password-panel) {
   display: none;
 }
