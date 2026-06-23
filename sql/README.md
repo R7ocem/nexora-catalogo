@@ -34,3 +34,12 @@ docker exec -i edaacb5cf5cb psql -U nexora -d nexora < /root/backups-nexora/arqu
 
 Depois de colar um SQL no `psql`, confira se apareceram mensagens como `ALTER TABLE` e `CREATE INDEX`.
 Se aparecer `ERROR`, pare e revise antes do deploy.
+
+## Vendedor n8n multiempresa
+
+O arquivo `016_n8n_multiempresa_base.sql` prepara cada empresa para ter seu proprio
+atendimento no WhatsApp: instancia, mensagem inicial, menu, Pix, numero da loja e
+numeracao sequencial de pedidos a partir de 77.
+
+Ele tambem cria a base de solicitacoes de orcamento para itens marcados como "sob consulta".
+Rode este arquivo antes do deploy que adicionar a area **Atendimento automatico** no painel.
