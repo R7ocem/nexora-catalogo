@@ -602,6 +602,7 @@ As principais bases ja existentes sao:
 - Tela promocional inicial.
 - Variacoes de produtos.
 - Integracao com WhatsApp/n8n em evolucao.
+- Base de configuracao por empresa para o vendedor n8n: menu, Pix, WhatsApp da loja e numeracao sequencial.
 
 ## Proximas evolucoes importantes
 

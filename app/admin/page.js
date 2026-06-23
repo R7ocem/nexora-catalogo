@@ -111,6 +111,21 @@ function getOpcoesPedido(valor) {
   };
 }
 
+function getMenuAutomacao(valor) {
+  const menu = valor && typeof valor === 'object' ? valor : {};
+  const itens = Array.isArray(menu.items) ? menu.items : [];
+
+  function item(numero) {
+    return itens.find((opcao) => Number(opcao?.number) === numero) || {};
+  }
+
+  return {
+    dois: item(2),
+    tres: item(3),
+    quatro: item(4)
+  };
+}
+
 function variacoesParaTexto(valor) {
   let variacoes = Array.isArray(valor) ? valor : [];
 
@@ -439,7 +454,14 @@ async function getAdminData(user, selectedSlug) {
        aviso_texto,
        aviso_imagem_url,
        horario_funcionamento,
-       opcoes_pedido
+       opcoes_pedido,
+       n8n_instance,
+       n8n_greeting,
+       n8n_menu,
+       n8n_kitchen_whatsapp,
+       n8n_pix_key,
+       n8n_pix_holder,
+       n8n_next_order_number
      FROM catalogo_empresas
      WHERE ativo = true
      ORDER BY nome`
@@ -731,12 +753,14 @@ export default async function AdminPage({ searchParams }) {
   const linkPublico = caminhoCatalogo(empresa);
   const horariosFuncionamento = getHorariosFuncionamento(empresa.horario_funcionamento);
   const opcoesPedido = getOpcoesPedido(empresa.opcoes_pedido);
+  const menuAutomacao = getMenuAutomacao(empresa.n8n_menu);
   const companyDraft = getCompanyDraft(searchParams);
   const painelAtivo = String(searchParams?.painel || '');
   const painelInicialAberto = !painelAtivo;
   const painelPedidosAberto = painelAtivo === 'pedidos';
   const painelRelatoriosAberto = painelAtivo === 'relatorios';
   const painelPromocionalAberto = painelAtivo === 'promocional';
+  const painelAutomacaoAberto = painelAtivo === 'automacao';
   const painelSenhaAberto = painelAtivo === 'senha';
   const painelEmpresaAberto = painelAtivo === 'empresa';
   const painelCategoriasAberto = painelAtivo === 'categorias';
@@ -883,8 +907,16 @@ export default async function AdminPage({ searchParams }) {
             </span>
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=automacao#automacao`}>
             <span className="menu-icon">07</span>
+            <span className="menu-copy">
+              <strong>Atendimento automatico</strong>
+              <small>Menu, Pix e recebimento</small>
+            </span>
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
+            <span className="menu-icon">08</span>
             <span className="menu-copy">
               <strong>Dados da empresa</strong>
               <small>Marca, horarios e atendimento</small>
@@ -892,7 +924,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-            <span className="menu-icon">08</span>
+            <span className="menu-icon">09</span>
             <span className="menu-copy">
               <strong>Seguranca da conta</strong>
               <small>Altere sua senha</small>
@@ -902,7 +934,7 @@ export default async function AdminPage({ searchParams }) {
           {isNexoraAdmin ? (
             <>
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
-                <span className="menu-icon">09</span>
+                <span className="menu-icon">10</span>
                 <span className="menu-copy">
                   <strong>Usuarios e acessos</strong>
                   <small>Gerencie login do cliente</small>
@@ -910,7 +942,7 @@ export default async function AdminPage({ searchParams }) {
               </a>
 
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
-                <span className="menu-icon">10</span>
+                <span className="menu-icon">11</span>
                 <span className="menu-copy">
                   <strong>Nova empresa</strong>
                   <small>Cadastre um novo cliente</small>
@@ -1210,6 +1242,118 @@ export default async function AdminPage({ searchParams }) {
               </button>
             </div>
           </div>
+        </section>
+      ) : null}
+
+      {painelAutomacaoAberto ? (
+        <section className="panel" id="automacao">
+          <div className="section-title-row">
+            <div>
+              <h2>Atendimento automatico</h2>
+              <p>Configure como o vendedor responde no WhatsApp para esta empresa.</p>
+            </div>
+          </div>
+
+          {searchParams?.erro === 'instancia' ? (
+            <p className="error-text">Esta instancia do WhatsApp ja esta vinculada a outra empresa.</p>
+          ) : null}
+
+          {searchParams?.erro === 'whatsapp' ? (
+            <p className="error-text">Informe um WhatsApp valido com DDD ou deixe este campo vazio.</p>
+          ) : null}
+
+          {searchParams?.automacao === 'salva' ? (
+            <p className="warning-text">Configuracao de atendimento salva.</p>
+          ) : null}
+
+          <form action="/admin/automation" method="post" className="admin-form">
+            <input type="hidden" name="empresa_id" value={empresa.id} />
+
+            {isNexoraAdmin ? (
+              <label>
+                Instancia do WhatsApp
+                <input
+                  name="n8n_instance"
+                  defaultValue={empresa.n8n_instance || empresa.slug}
+                  placeholder="Ex: savore"
+                  required
+                />
+              </label>
+            ) : null}
+
+            <label>
+              Mensagem de boas-vindas
+              <textarea
+                name="n8n_greeting"
+                defaultValue={empresa.n8n_greeting || ''}
+                placeholder="Ex: Ola! Seja bem-vindo(a) a nossa loja. Como podemos ajudar?"
+              />
+            </label>
+
+            <label>
+              WhatsApp que recebe os pedidos
+              <input
+                name="n8n_kitchen_whatsapp"
+                defaultValue={empresa.n8n_kitchen_whatsapp || ''}
+                inputMode="numeric"
+                placeholder="DDD + numero. Ex: 61999999999"
+              />
+            </label>
+
+            <label>
+              Chave Pix
+              <input
+                name="n8n_pix_key"
+                defaultValue={empresa.n8n_pix_key || ''}
+                placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatoria"
+              />
+            </label>
+
+            <label>
+              Nome do recebedor Pix
+              <input
+                name="n8n_pix_holder"
+                defaultValue={empresa.n8n_pix_holder || ''}
+                placeholder="Ex: Nome ou razao social"
+              />
+            </label>
+
+            <div className="full-span admin-options-panel">
+              <span className="field-title">Menu do WhatsApp</span>
+              <small className="media-hint">A opcao 1, Fazer pedido, e padrao. Configure ate tres opcoes extras.</small>
+
+              {[2, 3, 4].map((numero) => {
+                const chave = numero === 2 ? 'dois' : numero === 3 ? 'tres' : 'quatro';
+                const item = menuAutomacao[chave] || {};
+
+                return (
+                  <div className="theme-grid" key={numero}>
+                    <label>
+                      Opcao {numero}
+                      <input
+                        name={`menu_${numero}_label`}
+                        defaultValue={item.label || ''}
+                        placeholder="Ex: Falar com atendimento"
+                      />
+                    </label>
+
+                    <label>
+                      Acao
+                      <select name={`menu_${numero}_action`} defaultValue={item.action || 'humano'}>
+                        <option value="humano">Falar com atendimento</option>
+                        <option value="catalogo">Abrir catalogo</option>
+                        <option value="orcamento">Solicitar orcamento</option>
+                      </select>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button className="primary-button" type="submit">
+              Salvar atendimento
+            </button>
+          </form>
         </section>
       ) : null}
 

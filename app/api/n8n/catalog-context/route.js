@@ -94,10 +94,13 @@ export async function GET(request) {
 
   const url = new URL(request.url);
   const slug = String(url.searchParams.get('slug') || '').trim();
+  const instance = String(url.searchParams.get('instance') || '')
+    .trim()
+    .toLowerCase();
 
-  if (!slug) {
+  if (!slug && !instance) {
     return Response.json(
-      { error: 'missing_slug' },
+      { error: 'missing_slug_or_instance' },
       { status: 400 }
     );
   }
@@ -116,12 +119,22 @@ export async function GET(request) {
        descricao_publica,
        horario_funcionamento,
        opcoes_pedido,
+       n8n_instance,
+       n8n_greeting,
+       n8n_menu,
+       n8n_kitchen_whatsapp,
+       n8n_pix_key,
+       n8n_pix_holder,
+       n8n_next_order_number,
+       print_config,
        ativo,
        bloqueado
      FROM catalogo_empresas
-     WHERE slug = $1
+     WHERE ($1 <> '' AND slug = $1)
+        OR ($2 <> '' AND n8n_instance = $2)
+     ORDER BY CASE WHEN slug = $1 THEN 0 ELSE 1 END
      LIMIT 1`,
-    [slug]
+    [slug, instance]
   );
 
   const empresa = empresas.rows[0];
@@ -242,6 +255,8 @@ export async function GET(request) {
   const publicPath = caminhoCatalogo(empresa);
   const publicType = tipoCatalogo(empresa.segmento);
   const opcoesPedido = jsonValue(empresa.opcoes_pedido, {});
+  const menuAutomacao = jsonValue(empresa.n8n_menu, { items: [] });
+  const configImpressao = jsonValue(empresa.print_config, {});
 
   const products = produtos.rows.map((produto) => {
     const aliases = aliasesProduto(produto);
@@ -290,6 +305,18 @@ export async function GET(request) {
       email: empresa.email_empresa || '',
       opening_hours: jsonValue(empresa.horario_funcionamento, {}),
       order_options: opcoesPedido
+    },
+    automation: {
+      instance: empresa.n8n_instance || empresa.slug,
+      greeting: empresa.n8n_greeting || '',
+      menu: menuAutomacao,
+      kitchen_whatsapp: empresa.n8n_kitchen_whatsapp || '',
+      pix: {
+        key: empresa.n8n_pix_key || '',
+        holder: empresa.n8n_pix_holder || ''
+      },
+      next_order_number: Number(empresa.n8n_next_order_number || 77),
+      print: configImpressao
     },
     catalog: {
       type: publicType,
