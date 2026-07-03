@@ -94,6 +94,7 @@ function LabelCard({ produto, empresa, modelo, opcoes, preview = false }) {
     <article
       className={[
         'label-preview-card',
+        `${modelo.kind}-label`,
         modelo.kind === 'promo' ? 'promo-label' : '',
         opcoes.showCutouts && modelo.hasCutouts ? 'with-cutouts' : '',
         preview ? 'is-preview' : ''
@@ -242,7 +243,7 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
         : '';
 
       return `
-        <article class="label ${modelo.kind === 'promo' ? 'promo' : ''} ${opcoes.showCutouts && modelo.hasCutouts ? 'with-cutouts' : ''}">
+        <article class="label ${modelo.kind} ${modelo.kind === 'promo' ? 'promo' : ''} ${opcoes.showCutouts && modelo.hasCutouts ? 'with-cutouts' : ''}">
           ${opcoes.showCutouts && modelo.hasCutouts ? '<span class="cutout top"></span><span class="cutout bottom"></span>' : ''}
           <div class="heading">
             ${opcoes.showLogo && empresa.logo_url ? `<img src="${escapeHtml(empresa.logo_url)}" alt="">` : `<span>${escapeHtml(texto(empresa.nome).slice(0, 1) || 'N')}</span>`}
@@ -296,6 +297,16 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
               background: #fffdf7;
               page-break-inside: avoid;
             }
+            .label.shelf {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr) 35mm;
+              grid-template-rows: auto minmax(0, 1fr) auto;
+              gap: 1mm 3mm;
+              border: 1px solid #1f1a10;
+              border-radius: 1.5mm;
+              padding: 3mm 4mm;
+              background: #ffd91f;
+            }
             .label.with-cutouts::before,
             .label.with-cutouts::after {
               position: absolute;
@@ -330,6 +341,91 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
             footer div { display: flex; align-items: end; gap: 1.5mm; }
             .barcode { width: 24mm; max-height: 9mm; object-fit: contain; }
             .qr { width: 10mm; height: 10mm; object-fit: contain; }
+            .label.shelf.with-cutouts::before,
+            .label.shelf.with-cutouts::after {
+              left: 50%;
+              width: 18mm;
+              height: 3mm;
+              border-color: #1f1a10;
+              background: white;
+            }
+            .label.shelf.with-cutouts::before { top: -1.5mm; border-radius: 0 0 3mm 3mm; }
+            .label.shelf.with-cutouts::after { bottom: -1.5mm; border-radius: 3mm 3mm 0 0; }
+            .label.shelf .heading {
+              grid-column: 1 / 2;
+              grid-row: 1;
+              min-height: 0;
+              align-items: flex-start;
+            }
+            .label.shelf .heading img,
+            .label.shelf .heading span {
+              width: 7mm;
+              height: 7mm;
+              border-radius: 1mm;
+            }
+            .label.shelf .heading small {
+              color: #211f1c;
+              font-size: 6.5pt;
+              font-weight: 900;
+            }
+            .label.shelf h2 {
+              grid-column: 1 / 2;
+              grid-row: 2;
+              min-height: 0;
+              margin: 1mm 0 0;
+              color: #111;
+              font-size: 10pt;
+              line-height: 1.05;
+              text-transform: uppercase;
+            }
+            .label.shelf .price {
+              grid-column: 2 / 3;
+              grid-row: 1 / 4;
+              align-self: center;
+              justify-items: end;
+              margin: 0;
+              color: #111;
+              text-align: right;
+            }
+            .label.shelf .price strong {
+              color: #111;
+              font-size: 28pt;
+              line-height: 0.9;
+            }
+            .label.shelf .price del {
+              color: #5f4b00;
+              font-size: 8pt;
+            }
+            .label.shelf .price span {
+              color: #111;
+              font-size: 6pt;
+            }
+            .label.shelf footer {
+              grid-column: 1 / 2;
+              grid-row: 3;
+              min-height: 7mm;
+              margin: 0;
+              align-items: end;
+            }
+            .label.shelf footer small {
+              color: #211f1c;
+              font-size: 6pt;
+              font-weight: 900;
+            }
+            .label.shelf footer div {
+              flex-direction: column;
+              gap: 0.5mm;
+              align-items: flex-start;
+            }
+            .label.shelf .barcode {
+              width: 30mm;
+              max-height: 6mm;
+              mix-blend-mode: multiply;
+            }
+            .label.shelf .qr {
+              width: 8mm;
+              height: 8mm;
+            }
             @media print {
               .sheet { break-inside: auto; }
               .label { break-inside: avoid; }
