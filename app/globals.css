@@ -3799,10 +3799,10 @@ input[type="checkbox"] {
 
 .label-preview-card.shelf-label {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 43%;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 8px 12px;
-  width: min(100%, 360px);
+  width: min(100%, 350px);
   min-height: 140px;
   border-color: rgba(31, 26, 16, 0.88);
   border-radius: 10px;
@@ -3975,7 +3975,8 @@ input[type="checkbox"] {
 
 .label-preview-card.shelf-label .label-price-box strong {
   color: #111;
-  font-size: clamp(38px, 5vw, 62px);
+  font-size: clamp(30px, 3.7vw, 46px);
+  white-space: nowrap;
 }
 
 .label-preview-card.shelf-label .label-price-box span {
@@ -4002,8 +4003,8 @@ input[type="checkbox"] {
 }
 
 .label-preview-card.shelf-label .label-barcode {
-  width: 112px;
-  max-height: 24px;
+  width: 118px;
+  max-height: 22px;
   mix-blend-mode: multiply;
 }
 
