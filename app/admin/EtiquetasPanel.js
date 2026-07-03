@@ -48,7 +48,15 @@ function produtoPrecoPromocional(produto) {
 }
 
 function produtoCodigoBarras(produto) {
-  return texto(produto.codigo_barras || produto.codigo_barra || produto.ean || produto.barcode || '');
+  return texto(
+    produto.codigo_barras ||
+    produto.codigo_barra ||
+    produto.ean ||
+    produto.barcode ||
+    produto.codigo ||
+    produto.sku ||
+    ''
+  );
 }
 
 function repetirProdutos(selecionados, produtos) {
@@ -275,7 +283,13 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
           <style>
             @page { size: A4 ${modelo.orientation}; margin: ${modelo.marginMm}mm; }
             * { box-sizing: border-box; }
-            body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #211f1c; }
+            body {
+              margin: 0;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #211f1c;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
             .sheet {
               display: grid;
               grid-template-columns: repeat(${modelo.columns}, ${modelo.widthMm}mm);
@@ -296,16 +310,25 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
               padding: 4mm;
               background: #fffdf7;
               page-break-inside: avoid;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
             .label.shelf {
               display: grid;
-              grid-template-columns: minmax(0, 1fr) 35mm;
+              grid-template-columns: minmax(0, 1fr) auto;
               grid-template-rows: auto minmax(0, 1fr) auto;
-              gap: 1mm 3mm;
+              gap: 0.8mm 3mm;
               border: 1px solid #1f1a10;
               border-radius: 1.5mm;
-              padding: 3mm 4mm;
+              padding: 3mm 3.5mm;
               background: #ffd91f;
+            }
+            .label.sticker {
+              display: grid;
+              grid-template-columns: minmax(0, 1fr) auto;
+              grid-template-rows: auto minmax(0, 1fr) auto;
+              gap: 1mm 2mm;
+              padding: 3mm;
             }
             .label.with-cutouts::before,
             .label.with-cutouts::after {
@@ -389,8 +412,9 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
             }
             .label.shelf .price strong {
               color: #111;
-              font-size: 28pt;
+              font-size: 23pt;
               line-height: 0.9;
+              white-space: nowrap;
             }
             .label.shelf .price del {
               color: #5f4b00;
@@ -418,13 +442,48 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
               align-items: flex-start;
             }
             .label.shelf .barcode {
-              width: 30mm;
+              width: 32mm;
               max-height: 6mm;
               mix-blend-mode: multiply;
             }
             .label.shelf .qr {
               width: 8mm;
               height: 8mm;
+            }
+            .label.sticker .heading {
+              min-height: 7mm;
+            }
+            .label.sticker .heading img,
+            .label.sticker .heading span {
+              width: 7mm;
+              height: 7mm;
+            }
+            .label.sticker h2 {
+              min-height: 0;
+              margin: 1mm 0 0;
+              font-size: 10pt;
+            }
+            .label.sticker .price {
+              grid-column: 1 / 2;
+              grid-row: 2;
+              align-self: center;
+              margin: 0;
+            }
+            .label.sticker .price strong {
+              font-size: 20pt;
+              white-space: nowrap;
+            }
+            .label.sticker .price span {
+              font-size: 6pt;
+            }
+            .label.sticker footer {
+              grid-column: 1 / 3;
+              min-height: 6mm;
+              margin-top: 0;
+            }
+            .label.sticker .barcode {
+              width: 22mm;
+              max-height: 6mm;
             }
             @media print {
               .sheet { break-inside: auto; }
@@ -434,7 +493,32 @@ export default function EtiquetasPanel({ empresa, categorias, produtos }) {
         </head>
         <body>
           <main class="sheet">${labelsHtml}</main>
-          <script>window.addEventListener('load', function () { window.print(); });</script>
+          <script>
+            window.addEventListener('load', function () {
+              var images = Array.from(document.images || []);
+              if (!images.length) {
+                window.print();
+                return;
+              }
+              var pending = images.filter(function (image) { return !image.complete; });
+              if (!pending.length) {
+                setTimeout(function () { window.print(); }, 250);
+                return;
+              }
+              var done = 0;
+              function finish() {
+                done += 1;
+                if (done >= pending.length) {
+                  setTimeout(function () { window.print(); }, 250);
+                }
+              }
+              pending.forEach(function (image) {
+                image.addEventListener('load', finish, { once: true });
+                image.addEventListener('error', finish, { once: true });
+              });
+              setTimeout(function () { window.print(); }, 1800);
+            });
+          </script>
         </body>
       </html>`;
   }
