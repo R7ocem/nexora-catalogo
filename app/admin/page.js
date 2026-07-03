@@ -3,6 +3,7 @@ import { money } from '../../lib/format';
 import { getCurrentUser } from '../../lib/auth';
 import { caminhoCatalogo } from '../../lib/catalog';
 import { cookies } from 'next/headers';
+import EtiquetasPanel from './EtiquetasPanel';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -766,6 +767,7 @@ export default async function AdminPage({ searchParams }) {
   const painelCategoriasAberto = painelAtivo === 'categorias';
   const painelNovoItemAberto = painelAtivo === 'novo-item';
   const painelItensAberto = painelAtivo === 'itens';
+  const painelEtiquetasAberto = painelAtivo === 'etiquetas';
   const painelAcessosAberto = painelAtivo === 'acessos';
   const painelCriarEmpresaAberto = painelAtivo === 'criar-empresa';
   const filtrosPedidosAtivos = ['novo', 'em_preparo', 'pronto', 'saiu_entrega'];
@@ -796,7 +798,7 @@ export default async function AdminPage({ searchParams }) {
   );
 
   return (
-    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelRelatoriosAberto ? ' reports-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelAutomacaoAberto ? ' automation-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
+    <main className={`shell admin-shell${painelInicialAberto ? ' menu-mode' : ''}${painelPedidosAberto ? ' orders-mode' : ''}${painelRelatoriosAberto ? ' reports-mode' : ''}${painelPromocionalAberto ? ' promotion-mode' : ''}${painelAutomacaoAberto ? ' automation-mode' : ''}${painelSenhaAberto ? ' password-mode' : ''}${painelEmpresaAberto ? ' company-mode' : ''}${painelCategoriasAberto ? ' categories-mode' : ''}${painelNovoItemAberto ? ' new-item-mode' : ''}${painelItensAberto ? ' items-mode' : ''}${painelEtiquetasAberto ? ' labels-mode' : ''}${painelAcessosAberto ? ' access-mode' : ''}${painelCriarEmpresaAberto ? ' create-company-mode' : ''}`}>
       <section className="panel admin-header-panel">
         <div className="admin-header-content">
           <span className="admin-eyebrow">Central de gestão</span>
@@ -875,8 +877,16 @@ export default async function AdminPage({ searchParams }) {
             </span>
           </a>
 
-          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=relatorios&periodo=hoje`}>
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=etiquetas#etiquetas`}>
             <span className="menu-icon">03</span>
+            <span className="menu-copy">
+              <strong>Etiquetas</strong>
+              <small>Imprima gondola e preco</small>
+            </span>
+          </a>
+
+          <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=relatorios&periodo=hoje`}>
+            <span className="menu-icon">04</span>
             <span className="menu-copy">
               <strong>Relatórios</strong>
               <small>Vendas, produtos e horários</small>
@@ -884,7 +894,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=novo-item#novo-item`}>
-            <span className="menu-icon">04</span>
+            <span className="menu-icon">05</span>
             <span className="menu-copy">
               <strong>Novo produto</strong>
               <small>Cadastre uma nova oferta</small>
@@ -892,7 +902,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=categorias#categorias`}>
-            <span className="menu-icon">05</span>
+            <span className="menu-icon">06</span>
             <span className="menu-copy">
               <strong>Categorias do catalogo</strong>
               <small>Organize a vitrine</small>
@@ -900,7 +910,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=promocional#promocional`}>
-            <span className="menu-icon">06</span>
+            <span className="menu-icon">07</span>
             <span className="menu-copy">
               <strong>Campanhas e avisos</strong>
               <small>Configure a tela inicial</small>
@@ -908,7 +918,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=automacao#automacao`}>
-            <span className="menu-icon">07</span>
+            <span className="menu-icon">08</span>
             <span className="menu-copy">
               <strong>Atendimento automatico</strong>
               <small>Menu, Pix e recebimento</small>
@@ -916,7 +926,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=empresa#empresa`}>
-            <span className="menu-icon">08</span>
+            <span className="menu-icon">09</span>
             <span className="menu-copy">
               <strong>Dados da empresa</strong>
               <small>Marca, horarios e atendimento</small>
@@ -924,7 +934,7 @@ export default async function AdminPage({ searchParams }) {
           </a>
 
           <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=senha#senha`}>
-            <span className="menu-icon">09</span>
+            <span className="menu-icon">10</span>
             <span className="menu-copy">
               <strong>Seguranca da conta</strong>
               <small>Altere sua senha</small>
@@ -934,7 +944,7 @@ export default async function AdminPage({ searchParams }) {
           {isNexoraAdmin ? (
             <>
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=acessos#acessos`}>
-                <span className="menu-icon">10</span>
+                <span className="menu-icon">11</span>
                 <span className="menu-copy">
                   <strong>Usuarios e acessos</strong>
                   <small>Gerencie login do cliente</small>
@@ -942,7 +952,7 @@ export default async function AdminPage({ searchParams }) {
               </a>
 
               <a className="admin-menu-card" href={`/admin?slug=${empresa.slug}&painel=criar-empresa#criar-empresa`}>
-                <span className="menu-icon">11</span>
+                <span className="menu-icon">12</span>
                 <span className="menu-copy">
                   <strong>Nova empresa</strong>
                   <small>Cadastre um novo cliente</small>
@@ -2395,6 +2405,29 @@ export default async function AdminPage({ searchParams }) {
     </div>
   )}
 </section>
+
+      <section className="panel labels-panel" id="etiquetas">
+        <div className="section-title-row">
+          <div>
+            <h2>Etiquetas</h2>
+            <p>Selecione produtos, escolha o modelo e gere uma folha A4 pronta para imprimir ou salvar em PDF.</p>
+          </div>
+        </div>
+
+        <EtiquetasPanel
+          empresa={{
+            id: empresa.id,
+            nome: nomePublico,
+            slug: empresa.slug,
+            logo_url: empresa.logo_url || ''
+          }}
+          categorias={categorias}
+          produtos={produtos.map((produto) => ({
+            ...produto,
+            preco: Number(produto.preco || 0)
+          }))}
+        />
+      </section>
 
       <section className="panel new-item-panel" id="novo-item">
         <h2>Novo item</h2>
