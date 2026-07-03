@@ -3797,6 +3797,37 @@ input[type="checkbox"] {
   border-radius: 18px 18px 0 0;
 }
 
+.label-preview-card.shelf-label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 43%;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  width: min(100%, 360px);
+  min-height: 140px;
+  border-color: rgba(31, 26, 16, 0.88);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #ffd91f;
+}
+
+.label-preview-card.shelf-label.with-cutouts::before,
+.label-preview-card.shelf-label.with-cutouts::after {
+  width: 72px;
+  height: 14px;
+  border-color: rgba(31, 26, 16, 0.72);
+  background: #fff;
+}
+
+.label-preview-card.shelf-label.with-cutouts::before {
+  top: -7px;
+  border-radius: 0 0 14px 14px;
+}
+
+.label-preview-card.shelf-label.with-cutouts::after {
+  bottom: -7px;
+  border-radius: 14px 14px 0 0;
+}
+
 .label-heading,
 .label-footer,
 .label-machine-fields {
@@ -3895,6 +3926,90 @@ input[type="checkbox"] {
   width: 34px;
   height: 34px;
   object-fit: contain;
+}
+
+.label-preview-card.shelf-label .label-heading {
+  grid-column: 1 / 2;
+  grid-row: 1;
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.label-preview-card.shelf-label .label-heading img,
+.label-preview-card.shelf-label .label-heading span {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  border-radius: 7px;
+}
+
+.label-preview-card.shelf-label .label-heading small {
+  color: #211f1c;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.label-preview-card.shelf-label h3 {
+  grid-column: 1 / 2;
+  grid-row: 2;
+  min-height: 0;
+  margin: 0;
+  color: #111;
+  font-size: clamp(15px, 2vw, 20px);
+  text-transform: uppercase;
+}
+
+.label-preview-card.shelf-label .label-price-box {
+  grid-column: 2 / 3;
+  grid-row: 1 / 4;
+  align-self: center;
+  justify-items: end;
+  margin: 0;
+  text-align: right;
+}
+
+.label-preview-card.shelf-label .label-price-box del {
+  color: #5f4b00;
+}
+
+.label-preview-card.shelf-label .label-price-box strong {
+  color: #111;
+  font-size: clamp(38px, 5vw, 62px);
+}
+
+.label-preview-card.shelf-label .label-price-box span {
+  color: #111;
+}
+
+.label-preview-card.shelf-label .label-footer {
+  grid-column: 1 / 2;
+  grid-row: 3;
+  min-height: 28px;
+  margin-top: 0;
+}
+
+.label-preview-card.shelf-label .label-footer small {
+  color: #211f1c;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.label-preview-card.shelf-label .label-machine-fields {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.label-preview-card.shelf-label .label-barcode {
+  width: 112px;
+  max-height: 24px;
+  mix-blend-mode: multiply;
+}
+
+.label-preview-card.shelf-label .label-qr {
+  width: 30px;
+  height: 30px;
 }
 
 @media (max-width: 860px) {
