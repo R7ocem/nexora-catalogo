@@ -1265,7 +1265,7 @@ export default async function AdminPage({ searchParams }) {
           </div>
 
           {searchParams?.erro === 'instancia' ? (
-            <p className="error-text">Esta instancia do WhatsApp ja esta vinculada a outra empresa.</p>
+            <p className="error-text">Esta instancia Evolution ja esta vinculada a outra empresa.</p>
           ) : null}
 
           {searchParams?.erro === 'whatsapp' ? (
@@ -1279,17 +1279,15 @@ export default async function AdminPage({ searchParams }) {
           <form action="/admin/automation" method="post" className="admin-form">
             <input type="hidden" name="empresa_id" value={empresa.id} />
 
-            {isNexoraAdmin ? (
-              <label>
-                Instancia do WhatsApp
-                <input
-                  name="n8n_instance"
-                  defaultValue={empresa.n8n_instance || empresa.slug}
-                  placeholder="Ex: savore"
-                  required
-                />
-              </label>
-            ) : null}
+            <label>
+              Instancia Evolution
+              <input
+                name="n8n_instance"
+                defaultValue={empresa.n8n_instance || empresa.slug}
+                placeholder="Ex: savoregourmet"
+                required
+              />
+            </label>
 
             <label>
               Mensagem de boas-vindas
@@ -1679,6 +1677,10 @@ export default async function AdminPage({ searchParams }) {
             <p className="error-text">Este link de catálogo já está em uso.</p>
           ) : null}
 
+          {searchParams?.erro === 'instancia' ? (
+            <p className="error-text">Esta instancia Evolution ja esta vinculada a outra empresa.</p>
+          ) : null}
+
           {searchParams?.erro === 'email_invalido' ? (
             <p className="error-text">Informe um email valido. Exemplo: cliente@email.com.</p>
           ) : null}
@@ -1704,6 +1706,11 @@ export default async function AdminPage({ searchParams }) {
             <label>
               Link do catalogo
               <input name="slug" defaultValue={companyDraft.slug || ''} placeholder="ex: viva-festas" />
+            </label>
+
+            <label>
+              Instancia Evolution
+              <input name="n8n_instance" defaultValue={companyDraft.n8n_instance || ''} placeholder="ex: vivafestas" />
             </label>
 
             <label>

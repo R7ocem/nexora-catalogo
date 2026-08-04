@@ -50,6 +50,15 @@ function normalizarTexto(value) {
     .trim();
 }
 
+function normalizarIdentificador(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_-]/g, '');
+}
+
 function aliasesProduto(produto) {
   const apelidos = String(produto.apelidos || '')
     .split(/[\n,;]/)
@@ -93,14 +102,14 @@ export async function GET(request) {
   }
 
   const url = new URL(request.url);
-  const slug = String(url.searchParams.get('slug') || '').trim();
-  const instance = String(url.searchParams.get('instance') || '')
-    .trim()
-    .toLowerCase();
+  const slug = normalizarIdentificador(url.searchParams.get('slug'));
+  const company = normalizarIdentificador(url.searchParams.get('company'));
+  const instance = normalizarIdentificador(url.searchParams.get('instance'));
+  const identificadores = Array.from(new Set([slug, company, instance].filter(Boolean)));
 
-  if (!slug && !instance) {
+  if (identificadores.length === 0) {
     return Response.json(
-      { error: 'missing_slug_or_instance' },
+      { error: 'missing_slug_company_or_instance' },
       { status: 400 }
     );
   }
@@ -130,11 +139,17 @@ export async function GET(request) {
        ativo,
        bloqueado
      FROM catalogo_empresas
-     WHERE ($1 <> '' AND slug = $1)
-        OR ($2 <> '' AND n8n_instance = $2)
-     ORDER BY CASE WHEN slug = $1 THEN 0 ELSE 1 END
+     WHERE slug = ANY($1::text[])
+        OR LOWER(COALESCE(n8n_instance, '')) = ANY($1::text[])
+     ORDER BY
+       CASE
+         WHEN $2 <> '' AND slug = $2 THEN 0
+         WHEN $3 <> '' AND LOWER(COALESCE(n8n_instance, '')) = $3 THEN 1
+         WHEN $4 <> '' AND (slug = $4 OR LOWER(COALESCE(n8n_instance, '')) = $4) THEN 2
+         ELSE 3
+       END
      LIMIT 1`,
-    [slug, instance]
+    [identificadores, slug, instance, company]
   );
 
   const empresa = empresas.rows[0];
@@ -257,6 +272,7 @@ export async function GET(request) {
   const opcoesPedido = jsonValue(empresa.opcoes_pedido, {});
   const menuAutomacao = jsonValue(empresa.n8n_menu, { items: [] });
   const configImpressao = jsonValue(empresa.print_config, {});
+  const evolutionInstance = empresa.n8n_instance || empresa.slug;
 
   const products = produtos.rows.map((produto) => {
     const aliases = aliasesProduto(produto);
@@ -307,7 +323,8 @@ export async function GET(request) {
       order_options: opcoesPedido
     },
     automation: {
-      instance: empresa.n8n_instance || empresa.slug,
+      instance: evolutionInstance,
+      evolution_instance: evolutionInstance,
       greeting: empresa.n8n_greeting || '',
       menu: menuAutomacao,
       kitchen_whatsapp: empresa.n8n_kitchen_whatsapp || '',
