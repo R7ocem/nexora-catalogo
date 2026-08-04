@@ -108,40 +108,135 @@ function inteiroNaoNegativo(valor) {
   return Math.max(0, Math.floor(numero(valor)));
 }
 
-function variacoesDoTexto(valor) {
+function normalizarChave(valor) {
   return texto(valor)
-    .split(/\r?\n/)
-    .map((linha) => linha.trim())
-    .filter(Boolean)
-    .map((linha) => {
-      const [nomeRaw, ...valoresRaw] = linha.split(':');
-      const nome = texto(nomeRaw);
-      const valores = valoresRaw
-        .join(':')
-        .split(',')
-        .map((opcao) => texto(opcao))
-        .filter(Boolean);
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_ -]/g, '')
+    .replace(/\s+/g, '_');
+}
 
-      return nome && valores.length > 0 ? { nome, valores } : null;
-    })
-    .filter(Boolean);
+function numeroOpcional(valor) {
+  const conteudo = texto(valor);
+  if (!conteudo) return null;
+
+  const numeroFinal = numero(conteudo);
+  return Number.isFinite(numeroFinal) ? numeroFinal : null;
+}
+
+function parseParChaveValor(segmento) {
+  const partes = String(segmento || '').split(/[:=]/);
+  if (partes.length < 2) return null;
+
+  return {
+    chave: texto(partes.shift()),
+    valor: texto(partes.join('='))
+  };
+}
+
+function variacoesDoTexto(valor) {
+  const grupos = [];
+  const combinacoes = [];
+
+  for (const linha of texto(valor).split(/\r?\n/).map((item) => item.trim()).filter(Boolean)) {
+    const ehCombinacao = /^combina[cç][aã]o\s*:/i.test(linha);
+
+    if (ehCombinacao) {
+      const conteudo = linha.replace(/^combina[cç][aã]o\s*:/i, '');
+      const partes = conteudo.split(';').map((item) => item.trim()).filter(Boolean);
+      const escolhas = {};
+      let sku = '';
+      let preco = null;
+      let estoque = null;
+
+      for (const parte of partes) {
+        const par = parseParChaveValor(parte);
+        if (!par) continue;
+
+        const chaveNormalizada = normalizarChave(par.chave);
+
+        if (['preco', 'preco_unitario', 'valor'].includes(chaveNormalizada)) {
+          preco = numeroOpcional(par.valor);
+        } else if (['estoque', 'stock', 'stock_quantity', 'quantidade'].includes(chaveNormalizada)) {
+          estoque = inteiroNaoNegativo(par.valor);
+        } else if (sku === '' && ['sku', 'codigo'].includes(chaveNormalizada)) {
+          sku = par.valor;
+        } else if (par.valor) {
+          escolhas[par.chave] = par.valor;
+        }
+      }
+
+      if (Object.keys(escolhas).length > 0) {
+        combinacoes.push({
+          escolhas,
+          sku: sku || null,
+          preco,
+          stock_quantity: estoque
+        });
+      }
+
+      continue;
+    }
+
+    const [nomeRaw, ...valoresRaw] = linha.split(':');
+    const nome = texto(nomeRaw);
+    const valores = valoresRaw
+      .join(':')
+      .split(',')
+      .map((opcao) => texto(opcao))
+      .filter(Boolean);
+
+    if (nome && valores.length > 0) {
+      grupos.push({ nome, valores });
+    }
+  }
+
+  if (combinacoes.length > 0) {
+    for (const combinacao of combinacoes) {
+      for (const [nome, valor] of Object.entries(combinacao.escolhas)) {
+        let grupo = grupos.find((item) => item.nome === nome);
+
+        if (!grupo) {
+          grupo = { nome, valores: [] };
+          grupos.push(grupo);
+        }
+
+        if (valor && !grupo.valores.includes(valor)) {
+          grupo.valores.push(valor);
+        }
+      }
+    }
+
+    return [
+      ...grupos,
+      {
+        tipo: 'combinacoes',
+        combinacoes
+      }
+    ];
+  }
+
+  return grupos;
 }
 
 export async function POST(request) {
-  if (!isTrustedAdminRequest(request)) {
-    redirect('/admin');
-  }
+  try {
+    if (!isTrustedAdminRequest(request)) {
+      redirect('/admin');
+    }
 
-  const user = await getCurrentUser();
+    const user = await getCurrentUser();
 
-  if (!user) {
-    redirect('/admin');
-  }
+    if (!user) {
+      redirect('/admin');
+    }
 
-  const formData = await request.formData();
+    const formData = await request.formData();
 
-  const produtoId = Number(formData.get('produto_id'));
-  const empresaId = Number(formData.get('empresa_id'));
+    const produtoId = Number(formData.get('produto_id'));
+    const empresaId = Number(formData.get('empresa_id'));
+    const aposSalvar = texto(formData.get('apos_salvar'));
 
   const codigo = texto(formData.get('codigo'))
     .toLowerCase()
@@ -198,9 +293,10 @@ export async function POST(request) {
   const tipoPreco = tiposPrecoPermitidos.includes(tipoPrecoRaw) ? tipoPrecoRaw : 'fixo';
   const preco = tipoPreco === 'sob_consulta' ? 0 : numero(formData.get('preco'));
 
-  if (tipoPreco !== 'sob_consulta' && preco <= 0) {
-    redirect(`/admin?slug=${empresaAtual.slug}&painel=novo-item&erro=preco#novo-item`);
-  }
+    if (tipoPreco !== 'sob_consulta' && preco <= 0) {
+      const painelErro = produtoId ? 'itens' : 'novo-item';
+      redirect(`/admin?slug=${empresaAtual.slug}&painel=${painelErro}&erro=preco#${painelErro}`);
+    }
 
   const descricao = texto(formData.get('descricao'));
   const variacoes = variacoesDoTexto(formData.get('variacoes_texto'));
@@ -242,7 +338,9 @@ export async function POST(request) {
     }
   }
 
-  if (produtoId) {
+    let produtoFinalId = produtoId;
+
+    if (produtoId) {
     await query(
       `UPDATE catalogo_produtos
        SET
@@ -297,8 +395,8 @@ export async function POST(request) {
         autoCalculateMinStock
       ]
     );
-  } else {
-    await query(
+    } else {
+      const produtoCriado = await query(
       `INSERT INTO catalogo_produtos (
          empresa_id,
          categoria_id,
@@ -324,7 +422,8 @@ export async function POST(request) {
          safety_days,
          auto_calculate_min_stock
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+       RETURNING id`,
       [
         empresaId,
         categoriaId,
@@ -350,8 +449,23 @@ export async function POST(request) {
         safetyDays,
         autoCalculateMinStock
       ]
-    );
-  }
+      );
 
-  redirect(`/admin?slug=${empresaAtual.slug}&painel=itens#itens`);
+      produtoFinalId = produtoCriado.rows[0]?.id;
+    }
+
+    if (!produtoId && aposSalvar !== 'visualizar') {
+      redirect(`/admin?slug=${empresaAtual.slug}&painel=novo-item&produto=salvo#novo-item`);
+    }
+
+    const ancora = produtoFinalId ? `produto-${produtoFinalId}` : 'itens';
+    redirect(`/admin?slug=${empresaAtual.slug}&painel=itens&produto=salvo#${ancora}`);
+  } catch (error) {
+    if (error?.digest?.startsWith?.('NEXT_REDIRECT')) {
+      throw error;
+    }
+
+    console.error('Erro ao salvar produto:', error);
+    redirect('/admin?painel=novo-item&erro=produto#novo-item');
+  }
 }

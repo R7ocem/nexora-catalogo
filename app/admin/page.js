@@ -4,6 +4,7 @@ import { getCurrentUser } from '../../lib/auth';
 import { caminhoCatalogo } from '../../lib/catalog';
 import { cookies } from 'next/headers';
 import EtiquetasPanel from './EtiquetasPanel';
+import OrdersAutoRefresh from './OrdersAutoRefresh';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -140,13 +141,36 @@ function variacoesParaTexto(valor) {
   }
 
   return variacoes
-    .map((grupo) => {
+    .flatMap((grupo) => {
+      if (grupo?.tipo === 'combinacoes' && Array.isArray(grupo.combinacoes)) {
+        return grupo.combinacoes.map((combinacao) => {
+          const escolhas = combinacao?.escolhas || {};
+          const partes = Object.entries(escolhas)
+            .filter(([, valor]) => valor)
+            .map(([nome, valor]) => `${nome}=${valor}`);
+
+          if (combinacao?.preco !== null && combinacao?.preco !== undefined) {
+            partes.push(`Preco=${combinacao.preco}`);
+          }
+
+          if (combinacao?.stock_quantity !== null && combinacao?.stock_quantity !== undefined) {
+            partes.push(`Estoque=${combinacao.stock_quantity}`);
+          }
+
+          if (combinacao?.sku) {
+            partes.push(`SKU=${combinacao.sku}`);
+          }
+
+          return partes.length > 0 ? `Combinacao: ${partes.join('; ')}` : '';
+        });
+      }
+
       const nome = String(grupo?.nome || '').trim();
       const valores = Array.isArray(grupo?.valores)
         ? grupo.valores.map((opcao) => String(opcao || '').trim()).filter(Boolean)
         : [];
 
-      return nome && valores.length > 0 ? `${nome}: ${valores.join(', ')}` : '';
+      return [nome && valores.length > 0 ? `${nome}: ${valores.join(', ')}` : ''];
     })
     .filter(Boolean)
     .join('\n');
@@ -1374,6 +1398,8 @@ export default async function AdminPage({ searchParams }) {
           </div>
         </div>
 
+        <OrdersAutoRefresh company={empresa.slug} filter={filtroPedidos} />
+
         <div className="orders-filters" aria-label="Filtrar pedidos por status">
           {filtrosPedidos.map((status) => (
             <a
@@ -2439,13 +2465,23 @@ export default async function AdminPage({ searchParams }) {
       <section className="panel new-item-panel" id="novo-item">
         <h2>Novo item</h2>
 
+        {searchParams?.produto === 'salvo' ? (
+          <p className="warning-text">Item salvo. O formulario esta pronto para o proximo cadastro.</p>
+        ) : null}
+
         {searchParams?.erro === 'preco' ? (
          <p className="error-text">
            Informe o preço quando o tipo de preço for Preço fixo ou A partir de.
          </p>
         ) : null}
 
-          <form action="/admin/products" method="post" className="admin-form product-form" encType="multipart/form-data">
+        {searchParams?.erro === 'produto' ? (
+          <p className="error-text">
+            Nao foi possivel salvar o item agora. Confira os dados e tente novamente.
+          </p>
+        ) : null}
+
+          <form id="new-product-form" action="/admin/products" method="post" className="admin-form product-form" encType="multipart/form-data">
           <input type="hidden" name="empresa_id" value={empresa.id} />
 
           <label>
@@ -2536,6 +2572,7 @@ export default async function AdminPage({ searchParams }) {
           </div>
           <div className="full-span photo-editor">
             <span className="field-title">Foto do item</span>
+            <small className="media-hint">Dimensao recomendada: 1080 x 1080 px. Formatos aceitos: JPG, PNG e WebP.</small>
           
           <div className="photo-actions">
             <label className="photo-primary-button photo-button">
@@ -2562,6 +2599,9 @@ export default async function AdminPage({ searchParams }) {
             />
             <small className="media-hint">
               Uma variação por linha. Exemplo: Cor: Vermelho, Azul, Dourado
+            </small>
+            <small className="media-hint">
+              Para preco e estoque por combinacao: Combinacao: Cor=Vermelho; Tamanho=9; Preco=18; Estoque=10; SKU=BAL-VM-9
             </small>
           </label>
 
@@ -2593,9 +2633,15 @@ export default async function AdminPage({ searchParams }) {
             </select>
           </label>
 
-          <button className="primary-button" type="submit">
-            Salvar item
-          </button>
+          <div className="product-save-actions full-span">
+            <button className="primary-button" type="submit" name="apos_salvar" value="continuar">
+              Salvar item
+            </button>
+
+            <button className="secondary-button" type="submit" name="apos_salvar" value="visualizar">
+              Salvar e visualizar
+            </button>
+          </div>
         </form>
       </section>
 
@@ -2607,7 +2653,7 @@ export default async function AdminPage({ searchParams }) {
         ) : (
           <div className="admin-products editable-products">
             {produtos.map((produto) => (
-              <div key={produto.id} className="admin-product-edit-wrap">
+              <div key={produto.id} id={`produto-${produto.id}`} className="admin-product-edit-wrap">
                 <span
                   className={`stock-card-dot stock-${produto.stock_status || 'SEM_CONTROLE'}`}
                   title={`Estoque: ${rotuloEstoque(produto.stock_status)}`}
@@ -2857,6 +2903,9 @@ export default async function AdminPage({ searchParams }) {
                       <small className="media-hint">
                         Uma variação por linha. Exemplo: Cor: Vermelho, Azul, Dourado
                       </small>
+                      <small className="media-hint">
+                        Para preco e estoque por combinacao: Combinacao: Cor=Vermelho; Tamanho=9; Preco=18; Estoque=10; SKU=BAL-VM-9
+                      </small>
                     </label>
       
                     <label className="full-span">
@@ -2969,6 +3018,31 @@ export default async function AdminPage({ searchParams }) {
 
               atualizarObrigatorio();
             });
+
+            document.querySelectorAll('form[action="/admin/products"]').forEach(function (form) {
+              form.addEventListener('submit', function () {
+                if (form.id === 'new-product-form') {
+                  sessionStorage.removeItem('nexoraAdminScroll');
+                  return;
+                }
+
+                sessionStorage.setItem('nexoraAdminScroll', String(window.scrollY || 0));
+              });
+            });
+
+            var scrollSalvo = sessionStorage.getItem('nexoraAdminScroll');
+            if (scrollSalvo) {
+              sessionStorage.removeItem('nexoraAdminScroll');
+              requestAnimationFrame(function () {
+                window.scrollTo(0, Number(scrollSalvo) || 0);
+              });
+            }
+
+            var novoForm = document.getElementById('new-product-form');
+            if (novoForm && new URLSearchParams(window.location.search).get('produto') === 'salvo') {
+              var primeiroCampo = novoForm.querySelector('[name="codigo"]');
+              if (primeiroCampo) primeiroCampo.focus();
+            }
 
             document.querySelectorAll('.photo-auto-submit').forEach(function (input) {
               input.addEventListener('change', function () {
