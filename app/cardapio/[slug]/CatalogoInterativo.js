@@ -1079,6 +1079,12 @@ function WhatsAppIcon() {
                       return;
                     }
 
+                    event.preventDefault();
+                    const janelaWhatsApp = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                    if (!janelaWhatsApp) {
+                      window.location.href = whatsappUrl;
+                    }
+
                     setPedidoEnviado(true);
                     window.setTimeout(() => {
                       setCarrinho([]);
