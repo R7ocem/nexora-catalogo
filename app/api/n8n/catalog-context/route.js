@@ -59,6 +59,10 @@ function normalizarIdentificador(value) {
     .replace(/[^a-z0-9_-]/g, '');
 }
 
+function normalizarIdentificadorFlexivel(value) {
+  return normalizarIdentificador(value).replace(/[^a-z0-9]/g, '');
+}
+
 function aliasesProduto(produto) {
   const apelidos = String(produto.apelidos || '')
     .split(/[\n,;]/)
@@ -106,6 +110,9 @@ export async function GET(request) {
   const company = normalizarIdentificador(url.searchParams.get('company'));
   const instance = normalizarIdentificador(url.searchParams.get('instance'));
   const identificadores = Array.from(new Set([slug, company, instance].filter(Boolean)));
+  const identificadoresFlexiveis = Array.from(new Set(
+    identificadores.map(normalizarIdentificadorFlexivel).filter(Boolean)
+  ));
 
   if (identificadores.length === 0) {
     return Response.json(
@@ -141,15 +148,22 @@ export async function GET(request) {
      FROM catalogo_empresas
      WHERE slug = ANY($1::text[])
         OR LOWER(COALESCE(n8n_instance, '')) = ANY($1::text[])
+        OR REGEXP_REPLACE(LOWER(slug), '[^a-z0-9]', '', 'g') = ANY($5::text[])
+        OR REGEXP_REPLACE(LOWER(COALESCE(n8n_instance, '')), '[^a-z0-9]', '', 'g') = ANY($5::text[])
      ORDER BY
        CASE
          WHEN $2 <> '' AND slug = $2 THEN 0
          WHEN $3 <> '' AND LOWER(COALESCE(n8n_instance, '')) = $3 THEN 1
          WHEN $4 <> '' AND (slug = $4 OR LOWER(COALESCE(n8n_instance, '')) = $4) THEN 2
-         ELSE 3
+         WHEN $3 <> '' AND REGEXP_REPLACE(LOWER(COALESCE(n8n_instance, '')), '[^a-z0-9]', '', 'g') = REGEXP_REPLACE($3, '[^a-z0-9]', '', 'g') THEN 3
+         WHEN $4 <> '' AND (
+           REGEXP_REPLACE(LOWER(slug), '[^a-z0-9]', '', 'g') = REGEXP_REPLACE($4, '[^a-z0-9]', '', 'g')
+           OR REGEXP_REPLACE(LOWER(COALESCE(n8n_instance, '')), '[^a-z0-9]', '', 'g') = REGEXP_REPLACE($4, '[^a-z0-9]', '', 'g')
+         ) THEN 4
+         ELSE 5
        END
      LIMIT 1`,
-    [identificadores, slug, instance, company]
+    [identificadores, slug, instance, company, identificadoresFlexiveis]
   );
 
   const empresa = empresas.rows[0];
