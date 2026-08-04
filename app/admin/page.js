@@ -1256,7 +1256,7 @@ export default async function AdminPage({ searchParams }) {
       ) : null}
 
       {painelAutomacaoAberto ? (
-        <section className="panel" id="automacao">
+        <section className="panel automation-panel" id="automacao">
           <div className="section-title-row">
             <div>
               <h2>Atendimento automatico</h2>
@@ -1276,7 +1276,7 @@ export default async function AdminPage({ searchParams }) {
             <p className="warning-text">Configuracao de atendimento salva.</p>
           ) : null}
 
-          <form action="/admin/automation" method="post" className="admin-form">
+          <form action="/admin/automation" method="post" className="admin-form automation-form">
             <input type="hidden" name="empresa_id" value={empresa.id} />
 
             <label>
@@ -1290,21 +1290,21 @@ export default async function AdminPage({ searchParams }) {
             </label>
 
             <label>
-              Mensagem de boas-vindas
-              <textarea
-                name="n8n_greeting"
-                defaultValue={empresa.n8n_greeting || ''}
-                placeholder="Ex: Ola! Seja bem-vindo(a) a nossa loja. Como podemos ajudar?"
-              />
-            </label>
-
-            <label>
               WhatsApp que recebe os pedidos
               <input
                 name="n8n_kitchen_whatsapp"
                 defaultValue={empresa.n8n_kitchen_whatsapp || ''}
                 inputMode="numeric"
                 placeholder="DDD + numero. Ex: 61999999999"
+              />
+            </label>
+
+            <label className="full-span">
+              Mensagem de boas-vindas
+              <textarea
+                name="n8n_greeting"
+                defaultValue={empresa.n8n_greeting || ''}
+                placeholder="Ex: Ola! Seja bem-vindo(a) a nossa loja. Como podemos ajudar?"
               />
             </label>
 
@@ -1335,7 +1335,7 @@ export default async function AdminPage({ searchParams }) {
                 const item = menuAutomacao[chave] || {};
 
                 return (
-                  <div className="theme-grid" key={numero}>
+                  <div className="automation-menu-row" key={numero}>
                     <label>
                       Opcao {numero}
                       <input
@@ -1358,7 +1358,7 @@ export default async function AdminPage({ searchParams }) {
               })}
             </div>
 
-            <button className="primary-button" type="submit">
+            <button className="primary-button automation-submit" type="submit">
               Salvar atendimento
             </button>
           </form>
