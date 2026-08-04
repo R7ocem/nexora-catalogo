@@ -38,7 +38,7 @@ Se aparecer `ERROR`, pare e revise antes do deploy.
 ## Vendedor n8n multiempresa
 
 O arquivo `016_n8n_multiempresa_base.sql` prepara cada empresa para ter seu proprio
-atendimento no WhatsApp: instancia, mensagem inicial, menu, Pix, numero da loja e
+atendimento no WhatsApp: Instancia Evolution, mensagem inicial, menu, Pix, numero da loja e
 numeracao sequencial de pedidos a partir de 77.
 
 Ele tambem cria a base de solicitacoes de orcamento para itens marcados como "sob consulta".

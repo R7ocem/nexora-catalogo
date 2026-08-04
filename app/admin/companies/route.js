@@ -38,6 +38,14 @@ function normalizarSlug(valor) {
     .replace(/^-+|-+$/g, '');
 }
 
+function normalizarInstancia(valor) {
+  return texto(valor)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9_-]/g, '');
+}
+
 function salvarRascunhoEmpresa(dados) {
   cookies().set('nexora_company_draft', JSON.stringify(dados), {
     httpOnly: true,
@@ -76,6 +84,7 @@ export async function POST(request) {
 
   const nome = texto(formData.get('nome'));
   const slug = normalizarSlug(formData.get('slug') || nome);
+  const instanciaEvolution = normalizarInstancia(formData.get('n8n_instance')) || slug;
   const whatsapp = normalizarWhatsapp(formData.get('whatsapp'));
   const segmento = texto(formData.get('segmento'));
   const tipoOferta = texto(formData.get('tipo_oferta'));
@@ -97,6 +106,7 @@ export async function POST(request) {
     cidade,
     estado,
     whatsapp: texto(formData.get('whatsapp')),
+    n8n_instance: instanciaEvolution,
     usuario_email: usuarioEmail,
     usuario_senha: usuarioSenha
   };
@@ -135,6 +145,18 @@ export async function POST(request) {
     redirecionarComErro('slug', rascunho);
   }
 
+  const instanciaExistente = await query(
+    `SELECT id
+     FROM catalogo_empresas
+     WHERE LOWER(COALESCE(n8n_instance, '')) = $1 OR slug = $1
+     LIMIT 1`,
+    [instanciaEvolution]
+  );
+
+  if (instanciaExistente.rows.length > 0) {
+    redirecionarComErro('instancia', rascunho);
+  }
+
   const segmentoFinal = segmentosPermitidos.includes(segmento)
     ? segmento
     : 'outros';
@@ -158,6 +180,7 @@ export async function POST(request) {
        tipo_oferta,
        titulo_publico,
        subtitulo_publico,
+       n8n_instance,
        tema_cor,
        tema_cor_secundaria,
        usar_gradiente,
@@ -180,6 +203,7 @@ export async function POST(request) {
        $5,
        $1,
        $7,
+       $13,
        '#0f766e',
        '#14b8a6',
        true,
@@ -201,7 +225,8 @@ export async function POST(request) {
       cpfCnpj,
       endereco,
       cidade,
-      estado
+      estado,
+      instanciaEvolution
     ]
   );
 

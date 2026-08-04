@@ -68,9 +68,7 @@ export async function POST(request) {
   }
 
   const instanciaInformada = normalizarInstancia(formData.get('n8n_instance'));
-  const instancia = user.papel === 'nexora_admin'
-    ? (instanciaInformada || empresa.slug)
-    : (empresa.n8n_instance || empresa.slug);
+  const instancia = instanciaInformada || empresa.n8n_instance || empresa.slug;
 
   const numeroLojaOriginal = texto(formData.get('n8n_kitchen_whatsapp'));
   const numeroLoja = numeroLojaOriginal
@@ -84,7 +82,7 @@ export async function POST(request) {
   const conflito = await query(
     `SELECT id
      FROM catalogo_empresas
-     WHERE n8n_instance = $1
+     WHERE (LOWER(COALESCE(n8n_instance, '')) = $1 OR slug = $1)
        AND id <> $2
      LIMIT 1`,
     [instancia, empresaId]
