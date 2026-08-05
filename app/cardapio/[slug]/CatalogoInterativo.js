@@ -195,6 +195,8 @@ function montarMensagem(empresa, itens, detalhesPedido) {
     'Meu pedido:',
     ...linhas,
     '',
+    detalhesPedido?.nomeCliente ? `Cliente: ${detalhesPedido.nomeCliente}` : null,
+    detalhesPedido?.telefoneCliente ? `WhatsApp: ${detalhesPedido.telefoneCliente}` : null,
     detalhesPedido?.tipoEntrega ? `Forma de recebimento: ${detalhesPedido.tipoEntrega}` : null,
     detalhesPedido?.pagamento ? `Pagamento: ${detalhesPedido.pagamento}` : null,
     '',
@@ -278,6 +280,22 @@ function zoomImagem(valor) {
   return Math.min(2, Math.max(1, numero));
 }
 
+function gerarClientOrderKey() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `pedido-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function storagePedidosKey(slug) {
+  return `nexoraPedidos:${slug}`;
+}
+
+function storageCarrinhoKey(slug) {
+  return `nexoraCarrinho:${slug}`;
+}
+
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -316,11 +334,20 @@ function WhatsAppIcon() {
   const [quantidadeProdutoAberto, setQuantidadeProdutoAberto] = useState(1);
   const [tipoEntrega, setTipoEntrega] = useState('');
   const [pagamento, setPagamento] = useState('');
+  const [nomeCliente, setNomeCliente] = useState('');
+  const [telefoneCliente, setTelefoneCliente] = useState('');
   const [boasVindasAberta, setBoasVindasAberta] = useState(true);
   const [avisoCarrinho, setAvisoCarrinho] = useState('');
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
+  const [pedidoSalvando, setPedidoSalvando] = useState(false);
+  const [pedidoErro, setPedidoErro] = useState('');
+  const [pedidoConfirmado, setPedidoConfirmado] = useState(null);
+  const [whatsappConfirmacaoUrl, setWhatsappConfirmacaoUrl] = useState('');
+  const [pedidosCliente, setPedidosCliente] = useState([]);
+  const [pedidosAberto, setPedidosAberto] = useState(false);
   const categoriasRef = useRef(null);
   const destaquesRef = useRef(null);
+  const clientOrderKeyRef = useRef('');
 
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
   const corPrincipal = empresa.tema_cor || '#0f766e';
@@ -397,6 +424,52 @@ function WhatsAppIcon() {
     setQuantidadeProdutoAberto(1);
     setAvisoCarrinho('');
   }, [produtoAberto?.id]);
+
+  useEffect(() => {
+    clientOrderKeyRef.current = gerarClientOrderKey();
+
+    try {
+      const pedidosSalvos = JSON.parse(localStorage.getItem(storagePedidosKey(empresa.slug)) || '[]');
+      if (Array.isArray(pedidosSalvos)) {
+        setPedidosCliente(pedidosSalvos);
+      }
+    } catch {
+      setPedidosCliente([]);
+    }
+  }, [empresa.slug]);
+
+  useEffect(() => {
+    const ids = pedidosCliente.map((pedido) => pedido?.pedido_id).filter(Boolean);
+    if (ids.length === 0) return;
+
+    let cancelado = false;
+
+    async function atualizarPedidos() {
+      try {
+        const params = new URLSearchParams({
+          company: empresa.slug,
+          ids: ids.join(',')
+        });
+        const resposta = await fetch(`/api/catalog/orders?${params.toString()}`, {
+          cache: 'no-store'
+        });
+        const dados = await resposta.json();
+
+        if (!cancelado && Array.isArray(dados.orders)) {
+          setPedidosCliente(dados.orders);
+          localStorage.setItem(storagePedidosKey(empresa.slug), JSON.stringify(dados.orders));
+        }
+      } catch {
+        // A area de pedidos recentes continua exibindo o ultimo snapshot local.
+      }
+    }
+
+    atualizarPedidos();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [empresa.slug, pedidosCliente.length]);
 
   function adicionar(produto, escolhas = {}, quantidade = 1) {
     if (produtoEsgotado(produto)) return;
@@ -497,12 +570,19 @@ function WhatsAppIcon() {
 
   const quantidadeItens = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
   const whatsapp = String(empresa.whatsapp || '').replace(/\D/g, '');
+  const telefoneClienteLimpo = String(telefoneCliente || '').replace(/\D/g, '');
   const precisaTipoEntrega = opcoesPedido.tiposEntrega.length > 0;
   const precisaPagamento = opcoesPedido.pagamentos.length > 0;
   const pedidoPodeEnviar = carrinho.length > 0
+    && telefoneClienteLimpo.length >= 10
     && (!precisaTipoEntrega || tipoEntrega)
     && (!precisaPagamento || pagamento);
-  const mensagem = encodeURIComponent(montarMensagem(empresa, carrinho, { tipoEntrega, pagamento }));
+  const mensagem = encodeURIComponent(montarMensagem(empresa, carrinho, {
+    tipoEntrega,
+    pagamento,
+    nomeCliente,
+    telefoneCliente: telefoneClienteLimpo
+  }));
   const whatsappUrl = whatsapp && carrinho.length > 0
     ? `https://wa.me/${whatsapp}?text=${mensagem}`
     : '#';
@@ -512,6 +592,87 @@ function WhatsAppIcon() {
   const whatsappAjudaUrl = whatsapp
     ? `https://wa.me/${whatsapp}?text=${mensagemAjuda}`
     : '#';
+
+  function limparCarrinho() {
+    setCarrinho([]);
+    setTipoEntrega('');
+    setPagamento('');
+    setPedidoAberto(false);
+    setAvisoCarrinho('');
+
+    try {
+      localStorage.removeItem(storageCarrinhoKey(empresa.slug));
+      sessionStorage.removeItem(storageCarrinhoKey(empresa.slug));
+    } catch {
+      // O carrinho atual nao usa persistencia, mas limpamos chaves antigas se existirem.
+    }
+  }
+
+  async function finalizarPedido(event) {
+    event.preventDefault();
+
+    if (!pedidoPodeEnviar || pedidoSalvando || pedidoEnviado) {
+      return;
+    }
+
+    setPedidoSalvando(true);
+    setPedidoErro('');
+
+    try {
+      if (!clientOrderKeyRef.current) {
+        clientOrderKeyRef.current = gerarClientOrderKey();
+      }
+
+      const resposta = await fetch('/api/catalog/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          company: empresa.slug,
+          client_order_key: clientOrderKeyRef.current,
+          customer_name: nomeCliente,
+          customer_phone: telefoneClienteLimpo,
+          delivery_type: tipoEntrega,
+          payment: pagamento,
+          items: carrinho.map((item) => ({
+            product_id: item.id,
+            quantity: item.quantidade,
+            selected_options: item.variacoes_escolhidas || {}
+          }))
+        })
+      });
+      const dados = await resposta.json().catch(() => ({}));
+
+      if (!resposta.ok || !dados.success || !dados.order) {
+        throw new Error(dados.message || 'Nao foi possivel criar o pedido agora. Tente novamente.');
+      }
+
+      const pedidoCriado = dados.order;
+      const whatsappEnvioUrl = whatsappUrl;
+      const pedidosAtualizados = [
+        pedidoCriado,
+        ...pedidosCliente.filter((pedido) => pedido?.pedido_id !== pedidoCriado.pedido_id)
+      ].slice(0, 10);
+
+      setPedidoEnviado(true);
+      setPedidoConfirmado(pedidoCriado);
+      setWhatsappConfirmacaoUrl(whatsappEnvioUrl);
+      setPedidosCliente(pedidosAtualizados);
+      localStorage.setItem(storagePedidosKey(empresa.slug), JSON.stringify(pedidosAtualizados));
+      limparCarrinho();
+      clientOrderKeyRef.current = gerarClientOrderKey();
+
+      const janelaWhatsApp = window.open(whatsappEnvioUrl, '_blank', 'noopener,noreferrer');
+      if (!janelaWhatsApp) {
+        setPedidoErro('Pedido criado. Se o WhatsApp nao abriu, toque em Abrir WhatsApp na confirmacao.');
+      }
+    } catch (error) {
+      setPedidoErro(error.message || 'Nao foi possivel criar o pedido agora. Tente novamente.');
+    } finally {
+      setPedidoSalvando(false);
+    }
+  }
 
   function renderProduto(produto) {
     const nomesVariacoes = normalizarVariacoes(produto.variacoes).map((grupo) => grupo.nome);
@@ -722,6 +883,12 @@ function WhatsAppIcon() {
           <button type="button" onClick={() => setPedidoAberto(true)}>
             Ver pedido
           </button>
+
+          {pedidosCliente.length > 0 ? (
+            <button type="button" onClick={() => setPedidosAberto(true)}>
+              Ver pedidos
+            </button>
+          ) : null}
         </div>
       </nav>
 
@@ -1031,6 +1198,27 @@ function WhatsAppIcon() {
                   ))}
                 </div>
 
+                <div className="order-customer-fields">
+                  <label>
+                    Nome
+                    <input
+                      value={nomeCliente}
+                      onChange={(event) => setNomeCliente(event.target.value)}
+                      placeholder="Seu nome"
+                    />
+                  </label>
+
+                  <label>
+                    WhatsApp para acompanhamento
+                    <input
+                      value={telefoneCliente}
+                      onChange={(event) => setTelefoneCliente(event.target.value)}
+                      inputMode="tel"
+                      placeholder="DDD + numero"
+                    />
+                  </label>
+                </div>
+
                 {opcoesPedido.tiposEntrega.length > 0 ? (
                   <div className="order-choice-group">
                     <strong>Como quer receber?</strong>
@@ -1067,40 +1255,106 @@ function WhatsAppIcon() {
                   </div>
                 ) : null}
 
-                <a
+                {pedidoErro ? (
+                  <p className="order-error-message">{pedidoErro}</p>
+                ) : null}
+
+                {telefoneClienteLimpo.length > 0 && telefoneClienteLimpo.length < 10 ? (
+                  <p className="order-error-message">Informe um WhatsApp valido com DDD.</p>
+                ) : null}
+
+                <button
                   className={pedidoPodeEnviar && !pedidoEnviado ? 'primary-button order-whatsapp-button' : 'primary-button order-whatsapp-button disabled'}
-                  href={pedidoPodeEnviar && !pedidoEnviado ? whatsappUrl : '#'}
-                  target="_blank"
-                  rel="noreferrer"
+                  type="button"
+                  disabled={!pedidoPodeEnviar || pedidoSalvando || pedidoEnviado}
                   aria-disabled={!pedidoPodeEnviar || pedidoEnviado}
-                  onClick={(event) => {
-                    if (!pedidoPodeEnviar || pedidoEnviado) {
-                      event.preventDefault();
-                      return;
-                    }
-
-                    event.preventDefault();
-                    const janelaWhatsApp = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-                    if (!janelaWhatsApp) {
-                      window.location.href = whatsappUrl;
-                    }
-
-                    setPedidoEnviado(true);
-                    window.setTimeout(() => {
-                      setCarrinho([]);
-                      setTipoEntrega('');
-                      setPagamento('');
-                      setPedidoAberto(false);
-                      setAvisoCarrinho('');
-                    }, 400);
-                  }}
+                  onClick={finalizarPedido}
                 >
                   <span className="whatsapp-mark" aria-hidden="true">
                     <WhatsAppIcon />
                   </span>
-                  {pedidoEnviado ? 'Pedido enviado' : 'Enviar pelo WhatsApp'}
-                </a>
+                  {pedidoSalvando
+                    ? 'Criando pedido...'
+                    : pedidoEnviado
+                      ? 'Pedido enviado'
+                      : telefoneClienteLimpo.length < 10 ? 'Informe o WhatsApp' : 'Enviar pelo WhatsApp'}
+                </button>
               </>
+            )}
+          </aside>
+        </div>
+      ) : null}
+
+      {pedidoConfirmado ? (
+        <div className="order-overlay" onClick={() => setPedidoConfirmado(null)}>
+          <aside className="order-drawer order-confirmation" onClick={(event) => event.stopPropagation()}>
+            <div className="order-drawer-header">
+              <div>
+                <h2>Pedido criado</h2>
+                <p>Seu pedido ja entrou na area de acompanhamento.</p>
+              </div>
+
+              <button type="button" onClick={() => setPedidoConfirmado(null)}>
+                x
+              </button>
+            </div>
+
+            <div className="order-total-card">
+              <span>Pedido</span>
+              <strong>#{pedidoConfirmado.numero_sequencial || pedidoConfirmado.numero_dia || pedidoConfirmado.pedido_id}</strong>
+            </div>
+
+            <div className="product-save-actions">
+              <button
+                className="primary-button"
+                type="button"
+                onClick={() => {
+                  setPedidoConfirmado(null);
+                  setPedidosAberto(true);
+                }}
+              >
+                Acompanhar pedido
+              </button>
+
+              {whatsappConfirmacaoUrl ? (
+                <a className="secondary-button order-confirmation-link" href={whatsappConfirmacaoUrl} target="_blank" rel="noreferrer">
+                  Abrir WhatsApp
+                </a>
+              ) : null}
+            </div>
+          </aside>
+        </div>
+      ) : null}
+
+      {pedidosAberto ? (
+        <div className="order-overlay" onClick={() => setPedidosAberto(false)}>
+          <aside className="order-drawer" onClick={(event) => event.stopPropagation()}>
+            <div className="order-drawer-header">
+              <div>
+                <h2>Meus pedidos</h2>
+                <p>Acompanhe os pedidos feitos neste aparelho.</p>
+              </div>
+
+              <button type="button" onClick={() => setPedidosAberto(false)}>
+                x
+              </button>
+            </div>
+
+            {pedidosCliente.length === 0 ? (
+              <p className="muted">Nenhum pedido criado ainda.</p>
+            ) : (
+              <div className="customer-orders-list">
+                {pedidosCliente.map((pedido) => (
+                  <article key={pedido.pedido_id} className="customer-order-card">
+                    <div>
+                      <span>#{pedido.numero_sequencial || pedido.numero_dia || pedido.pedido_id}</span>
+                      <strong>{pedido.status_preparo || pedido.status || 'confirmado'}</strong>
+                    </div>
+                    <p>{pedido.entrega_retirada || 'Recebimento nao informado'} | {pedido.pagamento || 'Pagamento nao informado'}</p>
+                    <small>{pedido.itens?.length || 0} item{pedido.itens?.length === 1 ? '' : 's'} | {money(pedido.total || 0)}</small>
+                  </article>
+                ))}
+              </div>
             )}
           </aside>
         </div>

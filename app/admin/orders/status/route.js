@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { query } from '../../../../lib/db';
 import { getCurrentUser, isTrustedAdminRequest } from '../../../../lib/auth';
 
@@ -53,7 +53,12 @@ function textoItens(itens) {
   }
 
   return itens
-    .map((item) => `• ${item.quantidade || 1}x ${item.produto || 'Produto'} — ${moeda(item.subtotal)}`)
+    .map((item) => {
+      const nome = item.nome_produto || item.produto || 'Produto';
+      const variacao = item.variant_title ? ` (${item.variant_title})` : '';
+
+      return `- ${item.quantidade || 1}x ${nome}${variacao} - ${moeda(item.subtotal)}`;
+    })
     .join('\n');
 }
 
@@ -73,7 +78,7 @@ function mensagemCliente(acao, pedido) {
   const numero = numeroPedido(pedido);
 
   if (acao === 'aceitar') {
-    return `Pedido recebido com sucesso ✅
+    return `Pedido recebido com sucesso âœ…
 
 Resumo:
 ${textoItens(pedido.itens)}
@@ -87,24 +92,24 @@ Previsao de preparo: 15 a 50 minutos.`;
 
   if (acao === 'pronto') {
     if (pedido.entrega_retirada === 'entrega') {
-      return `Seu pedido #${numero} está pronto 😊
+      return `Seu pedido #${numero} estÃ¡ pronto ðŸ˜Š
 
 Estamos aguardando o entregador para sair com o pedido.`;
     }
 
-    return `Seu pedido #${numero} está pronto para retirada 😊
+    return `Seu pedido #${numero} estÃ¡ pronto para retirada ðŸ˜Š
 
 Pode passar na loja para buscar.`;
   }
 
   if (acao === 'saiu') {
-    return `Seu pedido #${numero} saiu para entrega 🛵
+    return `Seu pedido #${numero} saiu para entrega ðŸ›µ
 
-Daqui a pouco chega aí.`;
+Daqui a pouco chega aÃ­.`;
   }
 
   if (acao === 'finalizar') {
-    return 'Pedido finalizado. Obrigado pela preferência 😊';
+    return 'Pedido finalizado. Obrigado pela preferÃªncia ðŸ˜Š';
   }
 
   return null;
@@ -113,7 +118,7 @@ Daqui a pouco chega aí.`;
 async function enviarWhatsApp(empresa, pedido, texto) {
   const baseUrl = String(process.env.EVOLUTION_API_URL || '').replace(/\/$/, '');
   const apiKey = process.env.EVOLUTION_API_KEY;
-  const instance = process.env.EVOLUTION_INSTANCE || empresa.slug;
+  const instance = empresa.n8n_instance || process.env.EVOLUTION_INSTANCE || empresa.slug;
   const numero = String(pedido.telefone || '').replace(/\D/g, '');
 
   if (!baseUrl || !apiKey || !instance || !numero || !texto) {
@@ -160,7 +165,7 @@ export async function POST(request) {
   }
 
   const empresaResult = await query(
-    `SELECT id, slug
+    `SELECT id, slug, n8n_instance
      FROM catalogo_empresas
      WHERE id = $1
        AND ($2 = 'nexora_admin' OR id = $3)
@@ -184,6 +189,11 @@ export async function POST(request) {
          jsonb_agg(
            jsonb_build_object(
              'produto', i.produto,
+             'nome_produto', COALESCE(NULLIF(i.nome_produto, ''), i.produto),
+             'variant_id', i.variant_id,
+             'variant_title', i.variant_title,
+             'sku', i.sku,
+             'variacoes_escolhidas', COALESCE(i.variacoes_escolhidas, '{}'::jsonb),
              'quantidade', i.quantidade,
              'preco_unitario', i.preco_unitario,
              'subtotal', i.subtotal

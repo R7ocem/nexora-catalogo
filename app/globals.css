@@ -2324,10 +2324,103 @@ input[type="checkbox"] {
   line-height: 1.35;
 }
 
+.order-customer-fields {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.order-customer-fields label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.order-customer-fields input {
+  width: 100%;
+  border: 1px solid rgba(33, 31, 28, 0.14);
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+}
+
 .order-whatsapp-button {
   width: 100%;
   margin-top: 16px;
   background: #16a34a;
+}
+
+.order-whatsapp-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.order-error-message {
+  margin: 12px 0 0;
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff1f2;
+  color: #991b1b;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.order-confirmation .product-save-actions {
+  grid-template-columns: 1fr;
+  margin-top: 14px;
+}
+
+.order-confirmation-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.customer-orders-list {
+  display: grid;
+  gap: 10px;
+}
+
+.customer-order-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(33, 31, 28, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.customer-order-card div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.customer-order-card span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-order-card strong {
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #0f766e;
+}
+
+.customer-order-card p,
+.customer-order-card small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .floating-whatsapp {

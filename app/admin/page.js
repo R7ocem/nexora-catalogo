@@ -636,6 +636,11 @@ async function getAdminData(user, selectedSlug) {
          jsonb_agg(
            jsonb_build_object(
              'produto', i.produto,
+             'nome_produto', COALESCE(NULLIF(i.nome_produto, ''), i.produto),
+             'variant_id', i.variant_id,
+             'variant_title', i.variant_title,
+             'sku', i.sku,
+             'variacoes_escolhidas', COALESCE(i.variacoes_escolhidas, '{}'::jsonb),
              'quantidade', i.quantidade,
              'preco_unitario', i.preco_unitario,
              'subtotal', i.subtotal
@@ -1459,7 +1464,10 @@ export default async function AdminPage({ searchParams }) {
                       <ul>
                         {itensPedido.map((item, index) => (
                           <li key={`${pedido.pedido_id}-${index}`}>
-                            <span>{item.quantidade || 1}x {item.produto || 'Produto'}</span>
+                            <span>
+                              {item.quantidade || 1}x {item.nome_produto || item.produto || 'Produto'}
+                              {item.variant_title ? ` (${item.variant_title})` : ''}
+                            </span>
                             <strong>{money(item.subtotal || 0)}</strong>
                           </li>
                         ))}
