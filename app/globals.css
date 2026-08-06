@@ -2005,6 +2005,18 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
+.catalog-orders-shortcut {
+  min-height: 46px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: white;
+  color: var(--catalog-brand);
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(33, 31, 28, 0.12);
+  cursor: pointer;
+  white-space: nowrap;
+}
 .catalog-hero {
   width: min(1100px, calc(100% - 32px));
   height: auto;
@@ -2423,6 +2435,18 @@ input[type="checkbox"] {
   line-height: 1.35;
 }
 
+.customer-order-items {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.customer-order-items li + li {
+  margin-top: 3px;
+}
+
 .floating-whatsapp {
   position: fixed;
   right: 22px;
@@ -2430,7 +2454,7 @@ input[type="checkbox"] {
   z-index: 60;
   min-height: 50px;
   min-width: 168px;
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
@@ -2445,6 +2469,7 @@ input[type="checkbox"] {
 }
 
 .floating-whatsapp.active {
+  display: inline-flex;
   background: #16a34a;
   pointer-events: auto;
   opacity: 1;
@@ -2461,7 +2486,19 @@ input[type="checkbox"] {
   }
 
   .catalog-topbar-compact {
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    align-items: center;
     justify-content: stretch;
+  }
+
+  .catalog-orders-shortcut {
+    grid-column: 2;
+    justify-self: start;
+    min-height: 38px;
+    border-radius: 10px;
+    padding: 0 12px;
+    font-size: 14px;
   }
 
   .category-icon-button {

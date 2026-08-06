@@ -1,4 +1,4 @@
-﻿import { redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { query } from '../../../../lib/db';
 import { getCurrentUser, isTrustedAdminRequest } from '../../../../lib/auth';
 
@@ -78,7 +78,7 @@ function mensagemCliente(acao, pedido) {
   const numero = numeroPedido(pedido);
 
   if (acao === 'aceitar') {
-    return `Pedido recebido com sucesso âœ…
+    return `Pedido recebido com sucesso.
 
 Resumo:
 ${textoItens(pedido.itens)}
@@ -92,24 +92,24 @@ Previsao de preparo: 15 a 50 minutos.`;
 
   if (acao === 'pronto') {
     if (pedido.entrega_retirada === 'entrega') {
-      return `Seu pedido #${numero} estÃ¡ pronto ðŸ˜Š
+      return `Seu pedido #${numero} está pronto.
 
 Estamos aguardando o entregador para sair com o pedido.`;
     }
 
-    return `Seu pedido #${numero} estÃ¡ pronto para retirada ðŸ˜Š
+    return `Seu pedido #${numero} está pronto para retirada.
 
 Pode passar na loja para buscar.`;
   }
 
   if (acao === 'saiu') {
-    return `Seu pedido #${numero} saiu para entrega ðŸ›µ
+    return `Seu pedido #${numero} saiu para entrega.
 
-Daqui a pouco chega aÃ­.`;
+Daqui a pouco chega aí.`;
   }
 
   if (acao === 'finalizar') {
-    return 'Pedido finalizado. Obrigado pela preferÃªncia ðŸ˜Š';
+    return 'Pedido finalizado. Obrigado pela preferência.';
   }
 
   return null;
