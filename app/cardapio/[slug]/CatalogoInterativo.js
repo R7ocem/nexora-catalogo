@@ -356,6 +356,7 @@ function WhatsAppIcon() {
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
   const [pedidoSalvando, setPedidoSalvando] = useState(false);
   const [pedidoErro, setPedidoErro] = useState('');
+  const [pedidoAviso, setPedidoAviso] = useState('');
   const [pedidoConfirmado, setPedidoConfirmado] = useState(null);
   const [whatsappConfirmacaoUrl, setWhatsappConfirmacaoUrl] = useState('');
   const [pedidosCliente, setPedidosCliente] = useState([]);
@@ -545,10 +546,15 @@ function WhatsAppIcon() {
     });
 
     setAvisoCarrinho('');
+    setPedidoErro('');
+    setPedidoAviso('');
     setPedidoEnviado(false);
   }
 
   function alterarQuantidade(carrinhoKey, quantidade) {
+    setPedidoErro('');
+    setPedidoAviso('');
+
     if (quantidade <= 0) {
       setCarrinho((atual) => atual.filter((item) => item.carrinho_key !== carrinhoKey));
       return;
@@ -635,6 +641,7 @@ function WhatsAppIcon() {
 
     setPedidoSalvando(true);
     setPedidoErro('');
+    setPedidoAviso('');
 
     try {
       if (!clientOrderKeyRef.current) {
@@ -683,7 +690,7 @@ function WhatsAppIcon() {
 
       const janelaWhatsApp = window.open(whatsappEnvioUrl, '_blank', 'noopener,noreferrer');
       if (!janelaWhatsApp) {
-        setPedidoErro('Pedido criado. Se o WhatsApp nao abriu, toque em Abrir WhatsApp na confirmacao.');
+        setPedidoAviso('Pedido criado com sucesso. Se quiser enviar a mensagem tambem, toque em Abrir WhatsApp.');
       }
     } catch (error) {
       setPedidoErro(error.message || 'Nao foi possivel criar o pedido agora. Tente novamente.');
@@ -1340,6 +1347,10 @@ function WhatsAppIcon() {
                 </a>
               ) : null}
             </div>
+
+            {pedidoAviso ? (
+              <p className="order-info-message">{pedidoAviso}</p>
+            ) : null}
           </aside>
         </div>
       ) : null}
