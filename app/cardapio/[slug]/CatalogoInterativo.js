@@ -15,6 +15,69 @@ function tipoItemTexto(tipo) {
   return 'Produto';
 }
 
+function normalizarBusca(valor) {
+  return String(valor || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function textoBuscaProduto(produto) {
+  const variacoes = normalizarVariacoes(produto?.variacoes)
+    .flatMap((grupo) => [grupo.nome, ...grupo.valores])
+    .join(' ');
+
+  return [
+    produto?.nome,
+    produto?.descricao,
+    produto?.categoria_nome,
+    produto?.tipo_item,
+    produto?.codigo,
+    produto?.apelidos,
+    variacoes
+  ].filter(Boolean).join(' ');
+}
+
+function scoreBusca(produto, termo) {
+  const nome = normalizarBusca(produto?.nome);
+  const categoria = normalizarBusca(produto?.categoria_nome);
+  const apelidos = normalizarBusca(produto?.apelidos);
+  const variacoes = normalizarBusca(
+    normalizarVariacoes(produto?.variacoes)
+      .flatMap((grupo) => [grupo.nome, ...grupo.valores])
+      .join(' ')
+  );
+  const descricao = normalizarBusca(produto?.descricao);
+  const textoCompleto = normalizarBusca(textoBuscaProduto(produto));
+
+  if (!termo || !textoCompleto.includes(termo)) return 0;
+  if (nome === termo) return 100;
+  if (nome.startsWith(termo)) return 90;
+  if (nome.includes(termo)) return 80;
+  if (categoria.includes(termo)) return 65;
+  if (apelidos.includes(termo)) return 58;
+  if (variacoes.includes(termo)) return 52;
+  if (descricao.includes(termo)) return 40;
+  return 20;
+}
+
+function partesDestacadas(texto, termo) {
+  const original = String(texto || '');
+  const termoNormalizado = normalizarBusca(termo);
+
+  if (!original || !termoNormalizado) return [original];
+
+  const inicio = normalizarBusca(original).indexOf(termoNormalizado);
+  if (inicio < 0) return [original];
+
+  return [
+    original.slice(0, inicio),
+    original.slice(inicio, inicio + termoNormalizado.length),
+    original.slice(inicio + termoNormalizado.length)
+  ];
+}
 function itemTemValor(produto) {
   return produto.tipo_preco !== 'sob_consulta';
 }
@@ -331,6 +394,24 @@ function TrashIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2.4" />
+      <path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function OrdersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 4h10a2 2 0 0 1 2 2v14l-3-1.8-3 1.8-3-1.8L7 20V6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M10 8h5M10 12h5M10 16h3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function WhatsAppIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -361,8 +442,15 @@ function WhatsAppIcon() {
   const [whatsappConfirmacaoUrl, setWhatsappConfirmacaoUrl] = useState('');
   const [pedidosCliente, setPedidosCliente] = useState([]);
   const [pedidosAberto, setPedidosAberto] = useState(false);
+  const [termoBusca, setTermoBusca] = useState('');
+  const [termoBuscaDebounced, setTermoBuscaDebounced] = useState('');
+  const [sugestoesAbertas, setSugestoesAbertas] = useState(false);
+  const [buscaAtivaIndex, setBuscaAtivaIndex] = useState(-1);
+  const [termoResultados, setTermoResultados] = useState('');
   const categoriasRef = useRef(null);
   const destaquesRef = useRef(null);
+  const buscaRef = useRef(null);
+  const resultadosBuscaRef = useRef(null);
   const clientOrderKeyRef = useRef('');
 
   const nomeEmpresa = empresa.titulo_publico || empresa.nome;
@@ -390,7 +478,7 @@ function WhatsAppIcon() {
   const categoriasVisiveis = [
     ...categorias.filter((categoria) => categoria.produtos.length > 0),
     ...(semCategoria.length > 0
-      ? [{ id: 'sem-categoria', nome: 'Produtos e serviços', produtos: semCategoria }]
+      ? [{ id: 'sem-categoria', nome: 'Produtos e servicos', produtos: semCategoria }]
       : [])
   ];
 
@@ -410,6 +498,33 @@ function WhatsAppIcon() {
     ? [...produtosComPosicaoDestaque, ...produtosDestaqueRestantes]
     : todosProdutosVisiveis
   ).slice(0, 30);
+
+  const termoBuscaNormalizado = normalizarBusca(termoBuscaDebounced);
+  const termoResultadosNormalizado = normalizarBusca(termoResultados);
+  const buscaDigitando = normalizarBusca(termoBusca).length >= 2
+    && normalizarBusca(termoBusca) !== termoBuscaNormalizado;
+
+  const resultadosBusca = useMemo(() => {
+    if (termoBuscaNormalizado.length < 2) return [];
+
+    return todosProdutosVisiveis
+      .map((produto) => ({ produto, score: scoreBusca(produto, termoBuscaNormalizado) }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.produto.nome.localeCompare(b.produto.nome))
+      .map((item) => item.produto);
+  }, [termoBuscaNormalizado, todosProdutosVisiveis]);
+
+  const sugestoesBusca = resultadosBusca.slice(0, 6);
+
+  const resultadosCompletosBusca = useMemo(() => {
+    if (termoResultadosNormalizado.length < 2) return [];
+
+    return todosProdutosVisiveis
+      .map((produto) => ({ produto, score: scoreBusca(produto, termoResultadosNormalizado) }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.produto.nome.localeCompare(b.produto.nome))
+      .map((item) => item.produto);
+  }, [termoResultadosNormalizado, todosProdutosVisiveis]);
 
   useEffect(() => {
   if (!categoriasAberto) return;
@@ -434,6 +549,31 @@ function WhatsAppIcon() {
     document.removeEventListener('mousedown', fecharAoClicarFora);
   };
 }, [categoriasAberto]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setTermoBuscaDebounced(termoBusca);
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [termoBusca]);
+
+  useEffect(() => {
+    function fecharBuscaAoClicarFora(event) {
+      if (!buscaRef.current) return;
+
+      if (!buscaRef.current.contains(event.target)) {
+        setSugestoesAbertas(false);
+        setBuscaAtivaIndex(-1);
+      }
+    }
+
+    document.addEventListener('mousedown', fecharBuscaAoClicarFora);
+
+    return () => {
+      document.removeEventListener('mousedown', fecharBuscaAoClicarFora);
+    };
+  }, []);
 
   useEffect(() => {
     setVariacoesSelecionadas({});
@@ -489,6 +629,72 @@ function WhatsAppIcon() {
       window.clearInterval(intervalo);
     };
   }, [empresa.slug, pedidosCliente.map((pedido) => pedido?.pedido_id).filter(Boolean).join(',')]);
+
+  function abrirProdutoDaBusca(produto) {
+    if (!produto) return;
+
+    setProdutoAberto(produto);
+    setSugestoesAbertas(false);
+    setBuscaAtivaIndex(-1);
+  }
+
+  function mostrarTodosResultados(termo = termoBusca) {
+    const termoLimpo = String(termo || '').trim();
+    if (normalizarBusca(termoLimpo).length < 2) return;
+
+    setTermoResultados(termoLimpo);
+    setSugestoesAbertas(false);
+    setBuscaAtivaIndex(-1);
+
+    window.setTimeout(() => {
+      resultadosBuscaRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 50);
+  }
+
+  function limparBusca() {
+    setTermoBusca('');
+    setTermoBuscaDebounced('');
+    setTermoResultados('');
+    setSugestoesAbertas(false);
+    setBuscaAtivaIndex(-1);
+  }
+
+  function lidarTeclaBusca(event) {
+    const temSugestoes = sugestoesBusca.length > 0;
+
+    if (event.key === 'Escape') {
+      setSugestoesAbertas(false);
+      setBuscaAtivaIndex(-1);
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setSugestoesAbertas(true);
+      setBuscaAtivaIndex((atual) => Math.min(atual + 1, temSugestoes ? sugestoesBusca.length - 1 : 0));
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setBuscaAtivaIndex((atual) => Math.max(atual - 1, -1));
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+
+      if (temSugestoes && buscaAtivaIndex >= 0) {
+        abrirProdutoDaBusca(sugestoesBusca[buscaAtivaIndex]);
+        return;
+      }
+
+      mostrarTodosResultados();
+    }
+  }
 
   function adicionar(produto, escolhas = {}, quantidade = 1) {
     if (produtoEsgotado(produto)) return;
@@ -869,53 +1075,151 @@ function WhatsAppIcon() {
         </div>
       ) : null}
 
-      <nav className="catalog-topbar catalog-topbar-compact">
-        <div className="category-menu-wrap" ref={categoriasRef}>
+      <header className="catalog-header">
+        <div className="catalog-header-actions">
+          <div className="category-menu-wrap" ref={categoriasRef}>
+            <button
+              className="category-icon-button"
+              type="button"
+              aria-label="Abrir categorias"
+              onClick={() => setCategoriasAberto((aberto) => !aberto)}
+            >
+              <span className="category-icon-lines" />
+            </button>
+
+            {categoriasAberto ? (
+              <div className="category-popover">
+                <strong>Categorias</strong>
+
+                {categoriasVisiveis.map((categoria) => (
+                  <button
+                    key={categoria.id}
+                    type="button"
+                    onClick={() => irParaCategoria(`categoria-${categoria.id}`)}
+                  >
+                    {categoria.nome}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
           <button
-            className="category-icon-button"
+            className={quantidadeItens > 0 ? 'catalog-cart-button has-items' : 'catalog-cart-button'}
             type="button"
-            aria-label="Categorias"
-            onClick={() => setCategoriasAberto((aberto) => !aberto)}
+            aria-label={`${quantidadeItens} item${quantidadeItens === 1 ? '' : 's'} no carrinho, total ${total > 0 ? money(total) : 'R$ 0,00'}`}
+            onClick={() => setPedidoAberto(true)}
           >
-            <span className="category-icon-lines" />
+            <span className="bag-icon" aria-hidden="true" />
+            <span className="catalog-order-totals">
+              <strong>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'}</strong>
+              <span>{total > 0 ? money(total) : 'R$ 0,00'}</span>
+            </span>
+            <span className="cart-count-badge" aria-hidden="true">{quantidadeItens}</span>
           </button>
 
-          {categoriasAberto ? (
-            <div className="category-popover">
-              <strong>Categorias</strong>
+          <button
+            className="catalog-orders-shortcut"
+            type="button"
+            aria-label="Abrir meus pedidos"
+            onClick={() => setPedidosAberto(true)}
+          >
+            <span className="orders-icon" aria-hidden="true">
+              <OrdersIcon />
+            </span>
+            <span>Meus pedidos</span>
+          </button>
+        </div>
 
-              {categoriasVisiveis.map((categoria) => (
-                <button
-                  key={categoria.id}
-                  type="button"
-                  onClick={() => irParaCategoria(`categoria-${categoria.id}`)}
-                >
-                  {categoria.nome}
-                </button>
-              ))}
+        <div className="catalog-search-container" ref={buscaRef}>
+          <div className="catalog-search-field">
+            <span className="catalog-search-icon" aria-hidden="true">
+              <SearchIcon />
+            </span>
+            <input
+              value={termoBusca}
+              type="search"
+              role="combobox"
+              aria-label="Buscar no catalogo"
+              aria-autocomplete="list"
+              aria-expanded={sugestoesAbertas && normalizarBusca(termoBusca).length >= 2}
+              aria-controls="catalog-search-suggestions"
+              aria-activedescendant={buscaAtivaIndex >= 0 ? `catalog-search-option-${buscaAtivaIndex}` : undefined}
+              placeholder="Buscar produtos, categorias, marcas ou servicos..."
+              onFocus={() => {
+                if (normalizarBusca(termoBusca).length >= 2) setSugestoesAbertas(true);
+              }}
+              onChange={(event) => {
+                setTermoBusca(event.target.value);
+                setSugestoesAbertas(normalizarBusca(event.target.value).length >= 2);
+                setBuscaAtivaIndex(-1);
+              }}
+              onKeyDown={lidarTeclaBusca}
+            />
+            {termoBusca ? (
+              <button className="catalog-search-clear" type="button" aria-label="Limpar busca" onClick={limparBusca}>
+                x
+              </button>
+            ) : null}
+          </div>
+
+          {sugestoesAbertas && normalizarBusca(termoBusca).length >= 2 ? (
+            <div id="catalog-search-suggestions" className="catalog-search-suggestions" role="listbox">
+              {buscaDigitando ? (
+                <p className="catalog-search-state">Buscando...</p>
+              ) : sugestoesBusca.length > 0 ? (
+                <>
+                  {sugestoesBusca.map((produto, index) => {
+                    const partesNome = partesDestacadas(produto.nome, termoBuscaDebounced);
+                    const esgotado = produtoEsgotado(produto);
+
+                    return (
+                      <button
+                        key={produto.id}
+                        id={`catalog-search-option-${index}`}
+                        className={buscaAtivaIndex === index ? 'catalog-search-suggestion active' : 'catalog-search-suggestion'}
+                        type="button"
+                        role="option"
+                        aria-selected={buscaAtivaIndex === index}
+                        onMouseEnter={() => setBuscaAtivaIndex(index)}
+                        onClick={() => abrirProdutoDaBusca(produto)}
+                      >
+                        <span className="catalog-search-thumb">
+                          {produto.imagem_url ? (
+                            <img src={produto.imagem_url} alt="" loading="lazy" />
+                          ) : (
+                            <span>Sem foto</span>
+                          )}
+                        </span>
+                        <span className="catalog-search-copy">
+                          <strong>
+                            {partesNome.map((parte, parteIndex) =>
+                              parteIndex === 1 ? <mark key={parteIndex}>{parte}</mark> : <span key={parteIndex}>{parte}</span>
+                            )}
+                          </strong>
+                          <small>{produto.categoria_nome || tipoItemTexto(produto.tipo_item)}</small>
+                          <span>{precoTexto(produto)} - {esgotado ? 'Indisponivel' : 'Disponivel'}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  <button className="catalog-search-all" type="button" onClick={() => mostrarTodosResultados()}>
+                    Ver todos os resultados para "{termoBusca.trim()}"
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="catalog-search-state">Nenhum produto, categoria, marca ou servico encontrado.</p>
+                  <button className="catalog-search-all" type="button" onClick={() => mostrarTodosResultados()}>
+                    Ver todos os resultados para "{termoBusca.trim()}"
+                  </button>
+                </>
+              )}
             </div>
           ) : null}
         </div>
-
-        <div className="catalog-order-summary">
-          <span className="bag-icon" aria-hidden="true" />
-
-          <div className="catalog-order-totals">
-            <strong>{quantidadeItens} item{quantidadeItens === 1 ? '' : 's'}</strong>
-            <span>{total > 0 ? money(total) : 'R$ 0,00'}</span>
-          </div>
-
-          <button type="button" onClick={() => setPedidoAberto(true)}>
-            Carrinho
-          </button>
-        </div>
-
-        {pedidosCliente.length > 0 ? (
-          <button className="catalog-orders-shortcut" type="button" onClick={() => setPedidosAberto(true)}>
-            Meus pedidos
-          </button>
-        ) : null}
-      </nav>
+      </header>
 
       <section className="catalog-hero">
         {empresa.banner_url ? (
@@ -974,7 +1278,32 @@ function WhatsAppIcon() {
           </span>
         </div>
       </section>
-          
+
+      {termoResultadosNormalizado.length >= 2 ? (
+        <section ref={resultadosBuscaRef} className="catalog-search-results shell">
+          <div className="section-title-row">
+            <div>
+              <h2>Resultados para "{termoResultados}"</h2>
+              <p>
+                {resultadosCompletosBusca.length} item{resultadosCompletosBusca.length === 1 ? '' : 's'} encontrado{resultadosCompletosBusca.length === 1 ? '' : 's'}
+              </p>
+            </div>
+
+            <button className="secondary-button" type="button" onClick={limparBusca}>
+              Limpar busca
+            </button>
+          </div>
+
+          {resultadosCompletosBusca.length > 0 ? (
+            <div className="product-grid">
+              {resultadosCompletosBusca.map(renderProduto)}
+            </div>
+          ) : (
+            <p className="catalog-search-empty">Nenhum produto, categoria, marca ou servico encontrado.</p>
+          )}
+        </section>
+      ) : null}
+
       {produtosDestaque.length > 0 ? (
         <section className="catalog-highlights shell">
           <div className="section-title-row">
