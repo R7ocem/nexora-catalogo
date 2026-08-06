@@ -2811,9 +2811,27 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 720px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
   .catalog-page {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding-top: 18px;
     padding-bottom: 150px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .catalog-page *,
+  .catalog-page *::before,
+  .catalog-page *::after {
+    max-width: 100%;
   }
 
   .catalog-topbar {
