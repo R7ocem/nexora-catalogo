@@ -1036,18 +1036,23 @@
   }
 
   .highlights-wrap {
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
   }
 
   .highlights-scroll {
-    grid-auto-flow: row;
-    grid-auto-columns: unset;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
-    scroll-snap-type: none;
-    overscroll-behavior-x: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(168px, 46vw);
+    grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .highlights-scroll .highlight-card,
@@ -1055,6 +1060,6 @@
   .highlights-scroll .product-card {
     width: 100%;
     min-width: 0;
-    scroll-snap-align: none;
+    scroll-snap-align: start;
   }
 }
