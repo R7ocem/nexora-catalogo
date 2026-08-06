@@ -1266,9 +1266,19 @@ function WhatsAppIcon() {
                 title={`Instagram ${nomeEmpresa}`}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="17.5" cy="6.5" r="1.3" fill="currentColor" />
+                  <defs>
+                    <radialGradient id="instagram-mark-a" cx="30%" cy="107%" r="120%">
+                      <stop offset="0%" stopColor="#fdf497" />
+                      <stop offset="5%" stopColor="#fdf497" />
+                      <stop offset="45%" stopColor="#fd5949" />
+                      <stop offset="60%" stopColor="#d6249f" />
+                      <stop offset="90%" stopColor="#285aeb" />
+                    </radialGradient>
+                  </defs>
+                  <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#instagram-mark-a)" />
+                  <rect x="6.2" y="6.2" width="11.6" height="11.6" rx="3.6" fill="none" stroke="#fff" strokeWidth="1.8" />
+                  <circle cx="12" cy="12" r="3.2" fill="none" stroke="#fff" strokeWidth="1.8" />
+                  <circle cx="16.4" cy="7.6" r="1.15" fill="#fff" />
                 </svg>
               </a>
             ) : null}
