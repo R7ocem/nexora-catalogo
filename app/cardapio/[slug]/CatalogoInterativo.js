@@ -148,6 +148,21 @@ function produtoTemVariacoes(produto) {
   return normalizarVariacoes(produto.variacoes).length > 0;
 }
 
+function rotuloStatusCliente(pedido) {
+  const status = String(pedido?.status_preparo || pedido?.status || 'confirmado').trim();
+  const rotulos = {
+    rascunho: 'Pedido iniciado',
+    confirmado: 'Pedido recebido',
+    em_preparo: 'Em preparo',
+    pronto: pedido?.entrega_retirada === 'entrega' ? 'Pronto para entrega' : 'Pronto para retirada',
+    saiu_entrega: 'Saiu para entrega',
+    finalizado: 'Finalizado',
+    cancelado: 'Cancelado'
+  };
+
+  return rotulos[status] || 'Pedido recebido';
+}
+
 function textoVariacoes(escolhas) {
   return Object.entries(escolhas || {})
     .filter(([, valor]) => valor)
@@ -883,13 +898,13 @@ function WhatsAppIcon() {
           <button type="button" onClick={() => setPedidoAberto(true)}>
             Ver pedido
           </button>
-
-          {pedidosCliente.length > 0 ? (
-            <button type="button" onClick={() => setPedidosAberto(true)}>
-              Ver pedidos
-            </button>
-          ) : null}
         </div>
+
+        {pedidosCliente.length > 0 ? (
+          <button className="catalog-orders-shortcut" type="button" onClick={() => setPedidosAberto(true)}>
+            Meus pedidos
+          </button>
+        ) : null}
       </nav>
 
       <section className="catalog-hero">
@@ -1348,10 +1363,19 @@ function WhatsAppIcon() {
                   <article key={pedido.pedido_id} className="customer-order-card">
                     <div>
                       <span>#{pedido.numero_sequencial || pedido.numero_dia || pedido.pedido_id}</span>
-                      <strong>{pedido.status_preparo || pedido.status || 'confirmado'}</strong>
+                      <strong>{rotuloStatusCliente(pedido)}</strong>
                     </div>
-                    <p>{pedido.entrega_retirada || 'Recebimento nao informado'} | {pedido.pagamento || 'Pagamento nao informado'}</p>
+                    <p>{pedido.entrega_retirada || 'Recebimento não informado'} | {pedido.pagamento || 'Pagamento não informado'}</p>
                     <small>{pedido.itens?.length || 0} item{pedido.itens?.length === 1 ? '' : 's'} | {money(pedido.total || 0)}</small>
+                    {pedido.itens?.length ? (
+                      <ul className="customer-order-items">
+                        {pedido.itens.map((item, index) => (
+                          <li key={`${pedido.pedido_id}-${index}`}>
+                            {item.quantidade || 1}x {item.nome_produto || item.nome || 'Item'}{item.variacoes_escolhidas ? ` (${textoVariacoes(item.variacoes_escolhidas)})` : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </article>
                 ))}
               </div>
@@ -1360,16 +1384,15 @@ function WhatsAppIcon() {
         </div>
       ) : null}
 
-      <button
-        className={carrinho.length > 0 ? 'floating-whatsapp active' : 'floating-whatsapp'}
-        type="button"
-        aria-disabled={carrinho.length === 0}
-        onClick={() => {
-          if (carrinho.length > 0) setPedidoAberto(true);
-        }}
-      >
-        {total > 0 ? `Enviar pedido • ${money(total)}` : 'Enviar pedido'}
-      </button>
+      {carrinho.length > 0 ? (
+        <button
+          className="floating-whatsapp active"
+          type="button"
+          onClick={() => setPedidoAberto(true)}
+        >
+          Enviar pedido - {money(total)}
+        </button>
+      ) : null}
 
       <footer className="catalog-footer">
         {whatsapp ? (
