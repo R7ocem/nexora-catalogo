@@ -74,6 +74,16 @@ function textoEntrega(pedido) {
   return `Entrega: Entrega\nEndereco: ${pedido.endereco || 'nao informado'}${mapa}`;
 }
 
+function telefoneEvolution(valor) {
+  const numero = String(valor || '').replace(/\D/g, '');
+
+  if (numero.length === 10 || numero.length === 11) {
+    return `55${numero}`;
+  }
+
+  return numero;
+}
+
 function mensagemCliente(acao, pedido) {
   const numero = numeroPedido(pedido);
 
@@ -119,14 +129,14 @@ async function enviarWhatsApp(empresa, pedido, texto) {
   const baseUrl = String(process.env.EVOLUTION_API_URL || '').replace(/\/$/, '');
   const apiKey = process.env.EVOLUTION_API_KEY;
   const instance = empresa.n8n_instance || process.env.EVOLUTION_INSTANCE || empresa.slug;
-  const numero = String(pedido.telefone || '').replace(/\D/g, '');
+  const numero = telefoneEvolution(pedido.telefone);
 
   if (!baseUrl || !apiKey || !instance || !numero || !texto) {
     return;
   }
 
   try {
-    await fetch(`${baseUrl}/message/sendText/${instance}`, {
+    const resposta = await fetch(`${baseUrl}/message/sendText/${instance}`, {
       method: 'POST',
       headers: {
         apikey: apiKey,
@@ -137,8 +147,24 @@ async function enviarWhatsApp(empresa, pedido, texto) {
         text: texto
       })
     });
-  } catch {
-    // O status do pedido nao deve falhar se o WhatsApp estiver temporariamente indisponivel.
+
+    if (!resposta.ok) {
+      const detalhe = await resposta.text().catch(() => '');
+      console.error('Falha ao enviar WhatsApp do pedido', {
+        pedido_id: pedido.pedido_id,
+        instance,
+        numero,
+        status: resposta.status,
+        detalhe: detalhe.slice(0, 300)
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao enviar WhatsApp do pedido', {
+      pedido_id: pedido.pedido_id,
+      instance,
+      numero,
+      error: error?.message || String(error)
+    });
   }
 }
 
