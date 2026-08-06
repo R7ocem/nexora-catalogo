@@ -458,12 +458,13 @@ function WhatsAppIcon() {
     if (ids.length === 0) return;
 
     let cancelado = false;
+    const idsKey = ids.join(',');
 
     async function atualizarPedidos() {
       try {
         const params = new URLSearchParams({
           company: empresa.slug,
-          ids: ids.join(',')
+          ids: idsKey
         });
         const resposta = await fetch(`/api/catalog/orders?${params.toString()}`, {
           cache: 'no-store'
@@ -480,11 +481,13 @@ function WhatsAppIcon() {
     }
 
     atualizarPedidos();
+    const intervalo = window.setInterval(atualizarPedidos, 7000);
 
     return () => {
       cancelado = true;
+      window.clearInterval(intervalo);
     };
-  }, [empresa.slug, pedidosCliente.length]);
+  }, [empresa.slug, pedidosCliente.map((pedido) => pedido?.pedido_id).filter(Boolean).join(',')]);
 
   function adicionar(produto, escolhas = {}, quantidade = 1) {
     if (produtoEsgotado(produto)) return;
@@ -896,7 +899,7 @@ function WhatsAppIcon() {
           </div>
 
           <button type="button" onClick={() => setPedidoAberto(true)}>
-            Ver pedido
+            Carrinho
           </button>
         </div>
 
@@ -1371,7 +1374,7 @@ function WhatsAppIcon() {
                       <ul className="customer-order-items">
                         {pedido.itens.map((item, index) => (
                           <li key={`${pedido.pedido_id}-${index}`}>
-                            {item.quantidade || 1}x {item.nome_produto || item.nome || 'Item'}{item.variacoes_escolhidas ? ` (${textoVariacoes(item.variacoes_escolhidas)})` : ''}
+                            {item.quantidade || 1}x {item.nome_produto || item.nome || 'Item'}{textoVariacoes(item.variacoes_escolhidas) ? ` (${textoVariacoes(item.variacoes_escolhidas)})` : ''}
                           </li>
                         ))}
                       </ul>

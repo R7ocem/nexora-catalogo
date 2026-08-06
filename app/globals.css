@@ -1872,7 +1872,11 @@ input[type="checkbox"] {
 }
 
 .catalog-topbar-compact {
+  width: min(760px, 100%);
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
   gap: 10px;
+  align-items: center;
 }
 
 .category-menu-wrap {
@@ -1951,7 +1955,7 @@ input[type="checkbox"] {
 .catalog-order-summary {
   min-height: 52px;
   display: grid;
-  grid-template-columns: auto minmax(70px, auto) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   border-radius: 999px;
@@ -2007,7 +2011,7 @@ input[type="checkbox"] {
 
 .catalog-orders-shortcut {
   min-height: 46px;
-  border: 0;
+  border: 1px solid rgba(33, 31, 28, 0.08);
   border-radius: 999px;
   padding: 0 16px;
   background: white;
@@ -2017,6 +2021,7 @@ input[type="checkbox"] {
   cursor: pointer;
   white-space: nowrap;
 }
+
 .catalog-hero {
   width: min(1100px, calc(100% - 32px));
   height: auto;
@@ -2486,19 +2491,20 @@ input[type="checkbox"] {
   }
 
   .catalog-topbar-compact {
+    width: 100%;
     display: grid;
     grid-template-columns: 50px minmax(0, 1fr);
+    gap: 10px;
     align-items: center;
-    justify-content: stretch;
   }
 
   .catalog-orders-shortcut {
-    grid-column: 2;
-    justify-self: start;
-    min-height: 38px;
-    border-radius: 10px;
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    min-height: 42px;
+    border-radius: 12px;
     padding: 0 12px;
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .category-icon-button {
@@ -2508,7 +2514,7 @@ input[type="checkbox"] {
   }
 
   .catalog-order-summary {
-    flex: 1;
+    grid-column: 2;
     grid-template-columns: auto 1fr auto;
     border-radius: 14px;
   }
