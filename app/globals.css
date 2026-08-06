@@ -2031,7 +2031,7 @@ input[type="checkbox"] {
   width: min(1100px, calc(100% - 32px));
   display: grid;
   gap: 10px;
-  margin: 12px auto 0;
+  margin: 22px auto 0;
   border: 0;
   border-radius: 0;
   padding: 0;
@@ -2813,7 +2813,7 @@ input[type="checkbox"] {
   .catalog-header {
     width: calc(100% - 24px);
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 16px;
     padding: 0;
     background: transparent;
     box-shadow: none;
@@ -3746,6 +3746,11 @@ input[type="checkbox"] {
 }
 
 @media (min-width: 721px) {
+  .catalog-header {
+    width: min(980px, calc(100% - 120px));
+    margin-top: 22px;
+  }
+
   .catalog-hero {
     width: min(980px, calc(100% - 80px));
     height: auto;
@@ -3773,6 +3778,11 @@ input[type="checkbox"] {
 }
 
 @media (min-width: 721px) {
+  .catalog-header {
+    width: min(980px, calc(100% - 120px));
+    margin-top: 24px;
+  }
+
   .catalog-hero {
     width: min(980px, calc(100% - 120px));
     aspect-ratio: 8 / 3;
